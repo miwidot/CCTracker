@@ -132,6 +132,7 @@
   "analytics": {
     "title": "Usage Analytics",
     "subtitle": "Project-level cost breakdown and analysis (All Time Data)",
+    "dataPeriod": "Data Period",
     "dataPeriodNote": "This page shows cumulative data for all projects across your entire usage history. For date-specific analysis, use the Usage Dashboard with date range filters.",
     "totalProjects": "Total Projects",
     "mostExpensive": "Most Expensive",

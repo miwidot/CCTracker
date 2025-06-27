@@ -88,13 +88,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Sessions</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.sessions')}</p>
           <p className="text-lg font-semibold text-gray-900 dark:text-white">
             {project.session_count}
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Cost/Token</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.costPerToken')}</p>
           <p className="text-lg font-semibold text-gray-900 dark:text-white">
             {formatCurrencyDetailed(costPerToken, 6)}
           </p>
@@ -184,12 +184,11 @@ export const SimpleUsageAnalytics: React.FC = () => {
                 {t('analytics.title')}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Project-level cost breakdown and analysis (All Time Data)
+                {t('analytics.subtitle')}
               </p>
               <div className="mt-3 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  📅 <strong>Data Period:</strong> This page shows cumulative data for all projects across your entire usage history. 
-                  For date-specific analysis, use the Usage Dashboard with date range filters.
+                  📅 <strong>{t('analytics.dataPeriod')}:</strong> {t('analytics.dataPeriodNote')}
                 </p>
               </div>
             </div>
@@ -199,7 +198,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               <ArrowPathIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
+              <span>{t('common.refresh')}</span>
             </button>
           </div>
         </div>
@@ -211,7 +210,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
               <div className="flex items-center">
                 <FolderIcon className="h-8 w-8 text-blue-500" />
                 <div className="ml-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Projects</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.totalProjects')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {comparison.total_projects}
                   </p>
@@ -223,7 +222,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
               <div className="flex items-center">
                 <CurrencyDollarIcon className="h-8 w-8 text-green-500" />
                 <div className="ml-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Most Expensive</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.mostExpensive')}</p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white truncate">
                     {comparison.most_expensive_project}
                   </p>
@@ -235,7 +234,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
               <div className="flex items-center">
                 <CpuChipIcon className="h-8 w-8 text-purple-500" />
                 <div className="ml-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Most Efficient</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.mostEfficient')}</p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white truncate">
                     {comparison.most_efficient_project}
                   </p>

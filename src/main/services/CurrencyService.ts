@@ -72,6 +72,8 @@ export class CurrencyService {
       // Validate cached data structure
       if (this.isValidCacheData(cachedData)) {
         this.cache = cachedData;
+        // Always ensure TTL is correct (fix legacy cache files)
+        this.cache.ttl = this.CACHE_TTL;
         console.log('Loaded cached currency rates');
       } else {
         console.warn('Invalid cached currency data, using defaults');
@@ -177,6 +179,7 @@ export class CurrencyService {
       if (this.isValidRatesData(updatedRates)) {
         this.cache.rates = updatedRates;
         this.cache.lastUpdated = Date.now();
+        this.cache.ttl = this.CACHE_TTL; // Ensure TTL is always 24 hours
         await this.saveCachedRates();
         console.log('Currency rates updated successfully');
       } else {
@@ -190,6 +193,7 @@ export class CurrencyService {
         console.log('No cached rates available, using fallback rates');
         this.cache.rates = { ...this.FALLBACK_RATES };
         this.cache.lastUpdated = Date.now();
+        this.cache.ttl = this.CACHE_TTL; // Ensure TTL is always 24 hours
         await this.saveCachedRates();
       }
     } finally {
