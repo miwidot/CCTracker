@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const [showSettings, setShowSettings] = useState(false);
 
   const formatLastUpdated = (date: Date | null) => {
-    if (!date) return 'Never';
+    if (!date) return t('ui.never');
     return formatTime(date);
   };
 

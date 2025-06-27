@@ -208,7 +208,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 {currencyStatus ? (
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-[var(--text-secondary)]">Status:</span>
+                      <span className="text-[var(--text-secondary)]">{t('ui.status')}</span>
                       <span className={`font-medium ${currencyStatus.source === 'live' ? 'text-green-600' : currencyStatus.source === 'fallback' ? 'text-yellow-600' : 'text-orange-600'}`}>
                         {currencyStatus.source === 'live' ? t('settings.statusLive') : currencyStatus.source === 'fallback' ? t('settings.statusFallback') : t('settings.statusCached')}
                       </span>
@@ -240,7 +240,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-[var(--text-secondary)]">{t('settings.version')}:</span>
-                  <span className="text-[var(--text-primary)]">1.0.0</span>
+                  <span className="text-[var(--text-primary)]">{t('ui.version')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[var(--text-secondary)]">{t('settings.currentTheme')}:</span>

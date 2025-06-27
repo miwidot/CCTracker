@@ -7,13 +7,13 @@ interface Language {
   nativeName: string;
 }
 
-const languages: Language[] = [
-  { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'de', name: 'German', nativeName: 'Deutsch' },
-  { code: 'fr', name: 'French', nativeName: 'Français' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español' },
-  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
-  { code: 'zh', name: 'Chinese (Simplified)', nativeName: '简体中文' },
+const getLanguages = (t: any): Language[] => [
+  { code: 'en', name: t('languages.english'), nativeName: 'English' },
+  { code: 'de', name: t('languages.german'), nativeName: 'Deutsch' },
+  { code: 'fr', name: t('languages.french'), nativeName: 'Français' },
+  { code: 'es', name: t('languages.spanish'), nativeName: 'Español' },
+  { code: 'ja', name: t('languages.japanese'), nativeName: '日本語' },
+  { code: 'zh', name: t('languages.chineseSimplified'), nativeName: '简体中文' },
 ];
 
 interface LanguageSelectorProps {
@@ -21,7 +21,7 @@ interface LanguageSelectorProps {
 }
 
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ className = '' }) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newLanguage = event.target.value;
@@ -33,9 +33,9 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ className = 
       value={i18n.language}
       onChange={handleLanguageChange}
       className={`bg-transparent border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
-      aria-label="Select language"
+      aria-label={t('ui.selectLanguage')}
     >
-      {languages.map((language) => (
+      {getLanguages(t).map((language) => (
         <option
           key={language.code}
           value={language.code}

@@ -82,7 +82,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Total Tokens</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.totalTokens')}</p>
           <p className="text-xl font-bold text-gray-900 dark:text-white">
             {project.total_tokens.toLocaleString()}
           </p>
@@ -127,7 +127,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
       setComparison(comparisonData);
     } catch (err) {
       console.error('Failed to load project analytics:', err);
-      setError('Failed to load project analytics data');
+      setError(t('analytics.errorMessage'));
     } finally {
       setIsLoading(false);
     }
@@ -280,7 +280,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
                 <Tooltip 
                   formatter={(value: any, name: any) => [
                     name === 'cost' ? formatCurrencyDetailed(value, 4) : value,
-                    name === 'cost' ? 'Cost' : 'Sessions'
+                    name === 'cost' ? t('businessIntelligence.cost') : t('analytics.sessions')
                   ]}
                   labelFormatter={(label) => {
                     const item = chartData.find(d => d.name === label);
@@ -296,7 +296,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
         {/* Projects Grid */}
         <div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-            All Projects ({projects.length})
+            {t('analytics.allProjects')} ({projects.length})
           </h2>
           
           {isLoading ? (
@@ -314,10 +314,10 @@ export const SimpleUsageAnalytics: React.FC = () => {
             <div className="text-center py-12">
               <FolderIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No Projects Found
+                {t('analytics.noProjects')}
               </h3>
               <p className="text-gray-500 dark:text-gray-400">
-                Start using Claude CLI in projects to see analytics here
+                {t('analytics.noProjectsMessage')}
               </p>
             </div>
           ) : (

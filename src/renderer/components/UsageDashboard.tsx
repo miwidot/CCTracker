@@ -260,7 +260,7 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
                 {session.model}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                {Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60))} min
+                {Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60))} {t('ui.minutes')}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                 {session.message_count}
@@ -807,7 +807,7 @@ const UsageDashboard: React.FC = () => {
                     border: '1px solid var(--border-color)',
                     borderRadius: '8px',
                   }}
-                  formatter={(value: number) => [value.toLocaleString(), 'Tokens']}
+                  formatter={(value: number) => [value.toLocaleString(), t('businessIntelligence.tokens')]}
                 />
                 <Bar dataKey="tokens" fill="#10B981" radius={[4, 4, 0, 0]} />
               </BarChart>
