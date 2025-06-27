@@ -85,8 +85,9 @@ export class UsageService {
 
   /**
    * Parse a single JSONL line and convert to UsageEntry (supports both Claude CLI and legacy formats)
+   * Public method for testing and external use
    */
-  private parseJSONLLine(line: string): UsageEntry | null {
+  public parseJSONLLine(line: string): UsageEntry | null {
     try {
       const trimmedLine = line.trim();
       

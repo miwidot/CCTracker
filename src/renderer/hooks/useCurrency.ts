@@ -34,17 +34,51 @@ export const useCurrency = () => {
 
   const convertFromUSD = useCallback(
     (usdAmount: number): number => {
+      // Validate input amount
+      if (typeof usdAmount !== 'number' || !isFinite(usdAmount)) {
+        console.warn('Invalid USD amount provided to convertFromUSD:', usdAmount);
+        return 0;
+      }
+
+      // Check if rates are available
       if (!rates || !settings.currency) {
+        console.warn('Currency rates or settings not available, returning USD amount');
         return usdAmount;
       }
 
+      // No conversion needed for USD
       if (settings.currency === 'USD') {
         return usdAmount;
       }
 
-      // Convert USD to target currency
+      // Validate currency exists in rates
       const rate = rates[settings.currency as keyof CurrencyRates];
-      return usdAmount * rate;
+      
+      // Comprehensive rate validation
+      if (rate === undefined || rate === null) {
+        console.error(`Currency rate not found for ${settings.currency}, falling back to USD`);
+        return usdAmount;
+      }
+
+      if (typeof rate !== 'number' || !isFinite(rate)) {
+        console.error(`Invalid currency rate for ${settings.currency}: ${rate}, falling back to USD`);
+        return usdAmount;
+      }
+
+      if (rate <= 0) {
+        console.error(`Invalid currency rate (must be > 0) for ${settings.currency}: ${rate}, falling back to USD`);
+        return usdAmount;
+      }
+
+      // Validate conversion result
+      const convertedAmount = usdAmount * rate;
+      
+      if (!isFinite(convertedAmount)) {
+        console.error(`Currency conversion resulted in invalid number for ${settings.currency}: ${convertedAmount}, falling back to USD`);
+        return usdAmount;
+      }
+
+      return convertedAmount;
     },
     [rates, settings.currency]
   );

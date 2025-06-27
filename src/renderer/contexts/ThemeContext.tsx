@@ -31,24 +31,41 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const { settings, updateSettings } = useSettings();
-  const theme = getThemeConfig(settings.theme as keyof typeof COLOR_PALETTES);
+  
+  // Safe theme validation with fallback
+  const validateTheme = (themeValue: any): keyof typeof COLOR_PALETTES => {
+    // Check if theme value is a valid key in COLOR_PALETTES
+    if (typeof themeValue === 'string' && themeValue in COLOR_PALETTES) {
+      return themeValue as keyof typeof COLOR_PALETTES;
+    }
+    
+    console.warn(`Invalid theme value: ${themeValue}, falling back to 'light'`);
+    return 'light'; // Safe fallback
+  };
+  
+  const validatedTheme = validateTheme(settings.theme);
+  const theme = getThemeConfig(validatedTheme);
 
   const setTheme = async (themeName: ThemeConfig['name']) => {
     await updateSettings({ theme: themeName });
   };
 
-  // Enhanced theme utilities
-  const themeUtilities = useMemo(() => ({
-    getSemanticColor: (semantic: 'success' | 'warning' | 'error' | 'info') => 
-      getSemanticColor(settings.theme as keyof typeof COLOR_PALETTES, semantic),
+  // Enhanced theme utilities with safe type assertions
+  const themeUtilities = useMemo(() => {
+    const safeTheme = validateTheme(settings.theme);
     
-    getChartColors: () => 
-      getChartColors(settings.theme as keyof typeof CHART_PALETTES),
-    
-    isDark: isDarkTheme(settings.theme),
-    
-    fullPalette: COLOR_PALETTES[settings.theme as keyof typeof COLOR_PALETTES],
-  }), [settings.theme]);
+    return {
+      getSemanticColor: (semantic: 'success' | 'warning' | 'error' | 'info') => 
+        getSemanticColor(safeTheme, semantic),
+      
+      getChartColors: () => 
+        getChartColors(safeTheme as keyof typeof CHART_PALETTES),
+      
+      isDark: isDarkTheme(safeTheme),
+      
+      fullPalette: COLOR_PALETTES[safeTheme],
+    };
+  }, [settings.theme]);
 
   useEffect(() => {
     // Apply theme class to document root
