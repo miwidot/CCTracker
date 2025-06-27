@@ -35,6 +35,7 @@ import {
   Line,
 } from 'recharts';
 import { useTranslation } from '../hooks/useTranslation';
+import { useChartTheme, getChartCSSVariables } from '../hooks/useChartTheme';
 import { cleanModelName, capitalizeWords } from '@shared/utils';
 import type { BusinessIntelligence, ModelEfficiency, UsageAnomaly } from '@shared/types';
 
@@ -120,9 +121,9 @@ const ModelEfficiencyTable: React.FC<ModelEfficiencyTableProps> = ({ models }) =
             <tr key={model.model} className={index < 3 ? 'bg-[var(--bg-success)]' : ''}>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  index === 0 ? 'bg-yellow-200 text-yellow-800' : 
-                  index === 1 ? 'bg-gray-300 text-gray-800' :
-                  index === 2 ? 'bg-orange-200 text-orange-800' :
+                  index === 0 ? 'bg-[var(--bg-warning)] text-[var(--text-warning)]' : 
+                  index === 1 ? 'bg-[var(--color-active)] text-[var(--text-primary)]' :
+                  index === 2 ? 'bg-[var(--bg-warning)] text-[var(--text-warning)]' :
                   'bg-[var(--bg-tertiary)] text-[var(--text-primary)]'
                 }`}>
                   #{index + 1}
@@ -159,9 +160,9 @@ interface AnomalyAlertsProps {
 const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
   const { t } = useTranslation();
   const severityColors = {
-    high: 'bg-red-100 border-red-300 text-red-700',
-    medium: 'bg-yellow-100 border-yellow-300 text-yellow-700',
-    low: 'bg-blue-100 border-blue-300 text-blue-700',
+    high: 'bg-[var(--bg-error)] border-[var(--text-error)] text-[var(--text-error)]',
+    medium: 'bg-[var(--bg-warning)] border-[var(--text-warning)] text-[var(--text-warning)]',
+    low: 'bg-[var(--bg-info)] border-[var(--text-accent)] text-[var(--text-accent)]',
   };
 
   return (
@@ -209,6 +210,8 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
 
 export const BusinessIntelligenceDashboard: React.FC = () => {
   const { t } = useTranslation();
+  const chartTheme = useChartTheme();
+  const chartCSSVars = getChartCSSVariables();
   const [biData, setBiData] = useState<BusinessIntelligence | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -405,14 +408,36 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={trendsChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip formatter={(value, name) => [
-                  name === 'cost' ? `$${Number(value).toFixed(4)}` : `${Number(value).toFixed(0)}K`,
-                  name === 'cost' ? t('businessIntelligence.cost') : t('businessIntelligence.tokens')
-                ]} />
-                <Area type="monotone" dataKey="cost" stackId="1" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                <XAxis 
+                  dataKey="date" 
+                  stroke={chartTheme.axis}
+                  fontSize={12}
+                />
+                <YAxis 
+                  stroke={chartTheme.axis}
+                  fontSize={12}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: chartTheme.tooltipBackground,
+                    border: `1px solid ${chartTheme.tooltipBorder}`,
+                    borderRadius: '8px',
+                    color: chartTheme.text,
+                  }}
+                  formatter={(value, name) => [
+                    name === 'cost' ? `$${Number(value).toFixed(4)}` : `${Number(value).toFixed(0)}K`,
+                    name === 'cost' ? t('businessIntelligence.cost') : t('businessIntelligence.tokens')
+                  ]} 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="cost" 
+                  stackId="1" 
+                  stroke={chartTheme.primary} 
+                  fill={chartTheme.primary} 
+                  fillOpacity={0.6} 
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -425,11 +450,26 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={usagePatternData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" />
-                <YAxis />
-                <Tooltip formatter={(value) => [`${value} ${t('businessIntelligence.sessions')}`, t('businessIntelligence.usage')]} />
-                <Bar dataKey="usage" fill="#10B981" />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                <XAxis 
+                  dataKey="time" 
+                  stroke={chartTheme.axis}
+                  fontSize={12}
+                />
+                <YAxis 
+                  stroke={chartTheme.axis}
+                  fontSize={12}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: chartTheme.tooltipBackground,
+                    border: `1px solid ${chartTheme.tooltipBorder}`,
+                    borderRadius: '8px',
+                    color: chartTheme.text,
+                  }}
+                  formatter={(value) => [`${value} ${t('businessIntelligence.sessions')}`, t('businessIntelligence.usage')]} 
+                />
+                <Bar dataKey="usage" fill={chartTheme.success} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -34,10 +34,10 @@ export const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="h-screen flex items-center justify-center bg-[var(--bg-primary)] text-[var(--text-primary)]">
         <div className="text-center">
           <div className="animate-pulse mb-4">
-            <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto" />
+            <div className="w-12 h-12 bg-[var(--text-accent)] rounded-full mx-auto" />
           </div>
           <p className="text-lg">{t('app.loading')}</p>
         </div>
@@ -47,7 +47,7 @@ export const App: React.FC = () => {
 
   if (!settings) {
     return (
-      <div className="h-screen flex items-center justify-center bg-red-900 text-white">
+      <div className="h-screen flex items-center justify-center bg-[var(--bg-error)] text-[var(--text-error)]">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">{t('app.error')}</h1>
           <p>{t('app.errorMessage')}</p>

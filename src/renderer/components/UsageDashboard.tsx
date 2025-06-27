@@ -31,6 +31,7 @@ import { useUsageData } from '../contexts/UsageDataContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTranslation } from '../hooks/useTranslation';
+import { useChartTheme, getChartCSSVariables } from '../hooks/useChartTheme';
 import type { UsageEntry, SessionStats } from '@shared/types';
 
 // Sub-components
@@ -133,7 +134,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 onDateRangeChange(start, end);
               }
             }}
-            className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="px-3 py-1 text-sm bg-[var(--bg-tertiary)] text-[var(--text-secondary)] rounded-md hover:bg-[var(--color-hover)] transition-colors"
           >
             {range.label}
           </button>
@@ -144,14 +145,14 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           type="date"
           value={format(startDate, 'yyyy-MM-dd')}
           onChange={(e) => onDateRangeChange(startOfDay(new Date(e.target.value)), endDate)}
-          className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          className="px-3 py-1 text-sm border border-[var(--border-color)] rounded-md bg-[var(--bg-primary)] text-[var(--text-primary)]"
         />
-        <span className="text-gray-500">{t('dateRange.to')}</span>
+        <span className="text-[var(--text-secondary)]">{t('dateRange.to')}</span>
         <input
           type="date"
           value={format(endDate, 'yyyy-MM-dd')}
           onChange={(e) => onDateRangeChange(startDate, endOfDay(new Date(e.target.value)))}
-          className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          className="px-3 py-1 text-sm border border-[var(--border-color)] rounded-md bg-[var(--bg-primary)] text-[var(--text-primary)]"
         />
       </div>
     </div>
@@ -171,7 +172,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ data, onExport, isExporti
       <button
         onClick={() => onExport('csv')}
         disabled={isExporting || data.length === 0}
-        className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--text-success)] text-white rounded-md hover:bg-[var(--text-success)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed transition-colors"
       >
         <DocumentArrowDownIcon className="h-4 w-4" />
         {t('export.csv')}
@@ -179,7 +180,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ data, onExport, isExporti
       <button
         onClick={() => onExport('json')}
         disabled={isExporting || data.length === 0}
-        className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--text-accent)] text-white rounded-md hover:bg-[var(--text-accent)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed transition-colors"
       >
         <DocumentArrowDownIcon className="h-4 w-4" />
         {t('export.json')}
@@ -201,7 +202,7 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
     return (
       <div className="space-y-2">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div key={i} className="h-12 bg-[var(--bg-skeleton)] rounded animate-pulse" />
         ))}
       </div>
     );
@@ -209,8 +210,8 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
 
   if (sessions.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-        <TableCellsIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
+      <div className="text-center py-8 text-[var(--text-secondary)]">
+        <TableCellsIcon className="h-12 w-12 mx-auto mb-2 opacity-50 text-[var(--text-muted)]" />
         <p>{t('warnings.noSessionsFound')}</p>
       </div>
     );
@@ -218,48 +219,48 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-800">
+      <table className="min-w-full divide-y divide-[var(--border-color)]">
+        <thead className="bg-[var(--bg-secondary)]">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
               {t('sessions.sessionId')}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
               {t('sessions.model')}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
               {t('sessions.duration')}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
               {t('sessions.messages')}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
               {t('sessions.tokens')}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
               {t('sessions.cost')}
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        <tbody className="bg-[var(--bg-primary)] divide-y divide-[var(--border-color)]">
           {sessions.slice(0, 10).map((session) => (
-            <tr key={session.session_id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-white">
+            <tr key={session.session_id} className="hover:bg-[var(--color-hover)]">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-[var(--text-primary)]">
                 {session.session_id.substring(0, 8)}...
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                 {session.model}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                 {Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60))} {t('ui.minutes')}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                 {session.message_count}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                 {session.total_tokens.toLocaleString()}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                 {formatCurrency(session.total_cost)}
               </td>
             </tr>
@@ -276,6 +277,8 @@ const UsageDashboard: React.FC = () => {
   const { usageData, sessionStats, isLoading, lastUpdated, refreshData } = useUsageData();
   const { settings } = useSettings();
   const { convertFromUSD, formatCurrency, formatCurrencyDetailed, getCurrencySymbol } = useCurrency();
+  const chartTheme = useChartTheme();
+  const chartCSSVars = getChartCSSVariables();
   
   // State for centralized project costs
   const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
@@ -509,16 +512,16 @@ const UsageDashboard: React.FC = () => {
     }
   }, [refreshData]);
 
-  // Chart colors
-  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
+  // Chart colors from theme
+  const COLORS = chartTheme.dataColors;
 
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('dashboard.title')}</h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
             {lastUpdated && `${t('common.lastUpdated')}: ${format(lastUpdated, 'MMM dd, yyyy HH:mm:ss')}`}
           </p>
         </div>
@@ -526,7 +529,7 @@ const UsageDashboard: React.FC = () => {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--text-secondary)] text-white rounded-md hover:bg-[var(--text-secondary)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed transition-colors"
           >
             <ArrowPathIcon className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             {t('common.refresh')}
@@ -727,23 +730,24 @@ const UsageDashboard: React.FC = () => {
           ) : chartData.costOverTime.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData.costOverTime}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                 <XAxis 
                   dataKey="date" 
-                  stroke="#6B7280"
+                  stroke={chartTheme.axis}
                   fontSize={12}
                   tickFormatter={(value) => format(new Date(value), 'MMM dd')}
                 />
                 <YAxis 
-                  stroke="#6B7280"
+                  stroke={chartTheme.axis}
                   fontSize={12}
                   tickFormatter={(value) => formatCurrency(value)}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border-color)',
+                    backgroundColor: chartTheme.tooltipBackground,
+                    border: `1px solid ${chartTheme.tooltipBorder}`,
                     borderRadius: '8px',
+                    color: chartTheme.text,
                   }}
                   formatter={(value: number) => [formatCurrencyDetailed(value, 4), 'Cost']}
                   labelFormatter={(label) => format(new Date(label), 'MMM dd, yyyy')}
@@ -751,10 +755,10 @@ const UsageDashboard: React.FC = () => {
                 <Line
                   type="monotone"
                   dataKey="cost"
-                  stroke="#3B82F6"
+                  stroke={chartTheme.primary}
                   strokeWidth={2}
-                  dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: '#3B82F6', strokeWidth: 2 }}
+                  dot={{ fill: chartTheme.primary, strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: chartTheme.primary, strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -778,29 +782,30 @@ const UsageDashboard: React.FC = () => {
           ) : chartData.tokensByModel.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData.tokensByModel}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                 <XAxis 
                   dataKey="model" 
-                  stroke="#6B7280"
+                  stroke={chartTheme.axis}
                   fontSize={12}
                   angle={-45}
                   textAnchor="end"
                   height={60}
                 />
                 <YAxis 
-                  stroke="#6B7280"
+                  stroke={chartTheme.axis}
                   fontSize={12}
                   tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border-color)',
+                    backgroundColor: chartTheme.tooltipBackground,
+                    border: `1px solid ${chartTheme.tooltipBorder}`,
                     borderRadius: '8px',
+                    color: chartTheme.text,
                   }}
                   formatter={(value: number) => [value.toLocaleString(), t('businessIntelligence.tokens')]}
                 />
-                <Bar dataKey="tokens" fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="tokens" fill={chartTheme.success} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -830,18 +835,19 @@ const UsageDashboard: React.FC = () => {
                   labelLine={false}
                   label={({ name, percent }) => `${name} (${(percent * 100).toFixed(1)}%)`}
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill={chartTheme.primary}
                   dataKey="value"
                 >
                   {chartData.costByModel.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={chartTheme.getDataColor(index)} />
                   ))}
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border-color)',
+                    backgroundColor: chartTheme.tooltipBackground,
+                    border: `1px solid ${chartTheme.tooltipBorder}`,
                     borderRadius: '8px',
+                    color: chartTheme.text,
                   }}
                   formatter={(value: number) => [formatCurrencyDetailed(value, 4), 'Cost']}
                 />

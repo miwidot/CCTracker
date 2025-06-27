@@ -21,6 +21,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTimeFormat } from '../hooks/useTimeFormat';
 import { useTranslation } from '../hooks/useTranslation';
+import { useChartTheme, getChartCSSVariables } from '../hooks/useChartTheme';
 import type { ProjectAnalytics, ProjectComparison } from '@shared/types';
 
 interface ProjectCardProps {
@@ -39,12 +40,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const { t } = useTranslation();
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 animate-pulse">
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4" />
+      <div className="bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] p-6 animate-pulse">
+        <div className="h-4 bg-[var(--bg-skeleton)] rounded w-3/4 mb-4" />
         <div className="space-y-3">
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/6" />
+          <div className="h-3 bg-[var(--bg-skeleton)] rounded" />
+          <div className="h-3 bg-[var(--bg-skeleton)] rounded w-5/6" />
+          <div className="h-3 bg-[var(--bg-skeleton)] rounded w-4/6" />
         </div>
       </div>
     );
@@ -53,22 +54,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const costPerToken = project.total_tokens > 0 ? project.total_cost / project.total_tokens : 0;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow p-6">
+    <div className="bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow p-6 border border-[var(--border-color)]">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <FolderIcon className="h-8 w-8 text-blue-500" />
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">
               {project.project_name}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+            <p className="text-sm text-[var(--text-secondary)] truncate max-w-xs">
               {project.project_path}
             </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('analytics.lastUsed')}</p>
-          <p className="text-sm text-gray-900 dark:text-white">
+          <p className="text-xs text-[var(--text-secondary)]">{t('analytics.lastUsed')}</p>
+          <p className="text-sm text-[var(--text-primary)]">
             {formatDate(project.last_used)}
           </p>
         </div>
@@ -76,26 +77,26 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.totalCost')}</p>
-          <p className="text-xl font-bold text-gray-900 dark:text-white">
+          <p className="text-sm text-[var(--text-secondary)]">{t('analytics.totalCost')}</p>
+          <p className="text-xl font-bold text-[var(--text-primary)]">
             {formatCurrencyDetailed(project.total_cost, 4)}
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.totalTokens')}</p>
-          <p className="text-xl font-bold text-gray-900 dark:text-white">
+          <p className="text-sm text-[var(--text-secondary)]">{t('analytics.totalTokens')}</p>
+          <p className="text-xl font-bold text-[var(--text-primary)]">
             {project.total_tokens.toLocaleString()}
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.sessions')}</p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-white">
+          <p className="text-sm text-[var(--text-secondary)]">{t('analytics.sessions')}</p>
+          <p className="text-lg font-semibold text-[var(--text-primary)]">
             {project.session_count}
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.costPerToken')}</p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-white">
+          <p className="text-sm text-[var(--text-secondary)]">{t('analytics.costPerToken')}</p>
+          <p className="text-lg font-semibold text-[var(--text-primary)]">
             {formatCurrencyDetailed(costPerToken, 6)}
           </p>
         </div>
@@ -108,6 +109,8 @@ export const SimpleUsageAnalytics: React.FC = () => {
   const { settings } = useSettings();
   const { convertFromUSD, formatCurrency, formatCurrencyDetailed } = useCurrency();
   const { t } = useTranslation();
+  const chartTheme = useChartTheme();
+  const chartCSSVars = getChartCSSVariables();
   const [projects, setProjects] = useState<ProjectAnalytics[]>([]);
   const [comparison, setComparison] = useState<ProjectComparison | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -153,17 +156,17 @@ export const SimpleUsageAnalytics: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+      <div className="min-h-screen bg-[var(--bg-secondary)] p-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
-            <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <ExclamationTriangleIcon className="h-12 w-12 text-[var(--text-error)] mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
               {t('analytics.errorLoading')}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <p className="text-[var(--text-secondary)] mb-4">{error}</p>
             <button
               onClick={loadProjectData}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-[var(--text-accent)] text-white rounded-md hover:bg-[var(--text-accent)]/80 transition-colors"
             >
               {t('analytics.retry')}
             </button>
@@ -174,20 +177,20 @@ export const SimpleUsageAnalytics: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-[var(--bg-secondary)] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-[var(--text-primary)]">
                 {t('analytics.title')}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-[var(--text-secondary)] mt-2">
                 {t('analytics.subtitle')}
               </p>
-              <div className="mt-3 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
+              <div className="mt-3 px-3 py-2 bg-[var(--bg-info)] border border-[var(--border-color)] rounded-lg">
+                <p className="text-sm text-[var(--text-accent)]">
                   📅 <strong>{t('analytics.dataPeriod')}:</strong> {t('analytics.dataPeriodNote')}
                 </p>
               </div>
@@ -195,7 +198,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
             <button
               onClick={loadProjectData}
               disabled={isLoading}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 bg-[var(--text-accent)] text-white rounded-md hover:bg-[var(--text-accent)]/80 disabled:opacity-50 transition-colors"
             >
               <ArrowPathIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               <span>{t('common.refresh')}</span>
@@ -206,48 +209,48 @@ export const SimpleUsageAnalytics: React.FC = () => {
         {/* Overview Stats */}
         {comparison && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] p-6 border border-[var(--border-color)]">
               <div className="flex items-center">
-                <FolderIcon className="h-8 w-8 text-blue-500" />
+                <FolderIcon className="h-8 w-8 text-[var(--text-accent)]" />
                 <div className="ml-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.totalProjects')}</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-sm text-[var(--text-secondary)]">{t('analytics.totalProjects')}</p>
+                  <p className="text-2xl font-bold text-[var(--text-primary)]">
                     {comparison.total_projects}
                   </p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] p-6 border border-[var(--border-color)]">
               <div className="flex items-center">
-                <CurrencyDollarIcon className="h-8 w-8 text-green-500" />
+                <CurrencyDollarIcon className="h-8 w-8 text-[var(--text-success)]" />
                 <div className="ml-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.mostExpensive')}</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                  <p className="text-sm text-[var(--text-secondary)]">{t('analytics.mostExpensive')}</p>
+                  <p className="text-lg font-bold text-[var(--text-primary)] truncate">
                     {comparison.most_expensive_project}
                   </p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] p-6 border border-[var(--border-color)]">
               <div className="flex items-center">
-                <CpuChipIcon className="h-8 w-8 text-purple-500" />
+                <CpuChipIcon className="h-8 w-8 text-[var(--text-accent)]" />
                 <div className="ml-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.mostEfficient')}</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                  <p className="text-sm text-[var(--text-secondary)]">{t('analytics.mostEfficient')}</p>
+                  <p className="text-lg font-bold text-[var(--text-primary)] truncate">
                     {comparison.most_efficient_project}
                   </p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] p-6 border border-[var(--border-color)]">
               <div className="flex items-center">
-                <ClockIcon className="h-8 w-8 text-orange-500" />
+                <ClockIcon className="h-8 w-8 text-[var(--text-warning)]" />
                 <div className="ml-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.totalCost')}</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-sm text-[var(--text-secondary)]">{t('analytics.totalCost')}</p>
+                  <p className="text-2xl font-bold text-[var(--text-primary)]">
                     {formatCurrency(projects.reduce((sum, p) => sum + p.total_cost, 0))}
                   </p>
                 </div>
@@ -257,27 +260,37 @@ export const SimpleUsageAnalytics: React.FC = () => {
         )}
 
         {/* Project Cost Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] p-6 mb-8 border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {t('analytics.projectCostBreakdown')}
           </h3>
           {isLoading ? (
             <div className="h-64 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--text-accent)]" />
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                 <XAxis 
                   dataKey="name" 
+                  stroke={chartTheme.axis}
                   tick={{ fontSize: 12 }}
                   angle={-45}
                   textAnchor="end"
                   height={60}
                 />
-                <YAxis tick={{ fontSize: 12 }} />
+                <YAxis 
+                  stroke={chartTheme.axis}
+                  tick={{ fontSize: 12 }} 
+                />
                 <Tooltip 
+                  contentStyle={{
+                    backgroundColor: chartTheme.tooltipBackground,
+                    border: `1px solid ${chartTheme.tooltipBorder}`,
+                    borderRadius: '8px',
+                    color: chartTheme.text,
+                  }}
                   formatter={(value: any, name: any) => [
                     name === 'cost' ? formatCurrencyDetailed(value, 4) : value,
                     name === 'cost' ? t('businessIntelligence.cost') : t('analytics.sessions')
@@ -287,7 +300,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
                     return item?.fullName || label;
                   }}
                 />
-                <Bar dataKey="cost" fill="#3b82f6" name="cost" />
+                <Bar dataKey="cost" fill={chartTheme.primary} name="cost" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -295,7 +308,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
 
         {/* Projects Grid */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+          <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">
             {t('analytics.allProjects')} ({projects.length})
           </h2>
           
@@ -312,11 +325,11 @@ export const SimpleUsageAnalytics: React.FC = () => {
             </div>
           ) : projects.length === 0 ? (
             <div className="text-center py-12">
-              <FolderIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <FolderIcon className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">
                 {t('analytics.noProjects')}
               </h3>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-[var(--text-secondary)]">
                 {t('analytics.noProjectsMessage')}
               </p>
             </div>
