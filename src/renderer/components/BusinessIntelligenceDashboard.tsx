@@ -103,28 +103,28 @@ interface ModelEfficiencyTableProps {
 const ModelEfficiencyTable: React.FC<ModelEfficiencyTableProps> = ({ models }) => {
   const { t } = useTranslation();
   return (
-  <div className="bg-white rounded-lg shadow-sm border">
-    <div className="p-6 border-b">
-      <h3 className="text-lg font-semibold flex items-center">
-        <CpuChipIcon className="h-5 w-5 mr-2" />
+  <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)]">
+    <div className="p-6 border-b border-[var(--border-color)]">
+      <h3 className="text-lg font-semibold flex items-center text-[var(--text-primary)]">
+        <CpuChipIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
         {t('businessIntelligence.modelEfficiencyRanking')}
       </h3>
     </div>
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+      <table className="min-w-full divide-y divide-[var(--border-color)]">
+        <thead className="bg-[var(--bg-tertiary)]">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('businessIntelligence.rank')}</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('businessIntelligence.model')}</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('businessIntelligence.costPerToken')}</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('businessIntelligence.totalCost')}</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('businessIntelligence.usageCount')}</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('businessIntelligence.efficiencyScore')}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">{t('businessIntelligence.rank')}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">{t('businessIntelligence.model')}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">{t('businessIntelligence.costPerToken')}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">{t('businessIntelligence.totalCost')}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">{t('businessIntelligence.usageCount')}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">{t('businessIntelligence.efficiencyScore')}</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
           {models.slice(0, 10).map((model, index) => (
-            <tr key={model.model} className={index < 3 ? 'bg-green-50' : ''}>
+            <tr key={model.model} className={index < 3 ? 'bg-[var(--bg-success)]' : ''}>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                   index === 0 ? 'bg-gold text-yellow-800' : 
@@ -135,19 +135,19 @@ const ModelEfficiencyTable: React.FC<ModelEfficiencyTableProps> = ({ models }) =
                   #{index + 1}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--text-primary)]">
                 {model.model}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                 ${(model.costPerToken * 1000000).toFixed(2)}/M
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                 ${model.totalCost.toFixed(4)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                 {model.usageCount.toLocaleString()}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                 {model.efficiency_score.toFixed(2)}
               </td>
             </tr>
@@ -172,16 +172,16 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
-      <div className="p-6 border-b">
-        <h3 className="text-lg font-semibold flex items-center">
+    <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)]">
+      <div className="p-6 border-b border-[var(--border-color)]">
+        <h3 className="text-lg font-semibold flex items-center text-[var(--text-primary)]">
           <ExclamationTriangleIcon className="h-5 w-5 mr-2 text-red-500" />
           {t('businessIntelligence.recentAnomalies')} ({anomalies.length})
         </h3>
       </div>
       <div className="p-6">
         {anomalies.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">{t('businessIntelligence.noAnomalies')}</p>
+          <p className="text-[var(--text-secondary)] text-center py-8">{t('businessIntelligence.noAnomalies')}</p>
         ) : (
           <div className="space-y-3">
             {anomalies.slice(0, 5).map((anomaly, index) => (
@@ -195,12 +195,12 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
                       <span className="text-xs font-semibold uppercase">
                         {anomaly.severity} • {anomaly.type.replace('_', ' ')}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-[var(--text-secondary)]">
                         {new Date(anomaly.timestamp).toLocaleDateString()}
                       </span>
                     </div>
                     <p className="text-sm mt-1">{anomaly.description}</p>
-                    <p className="text-xs mt-1 text-gray-600">
+                    <p className="text-xs mt-1 text-[var(--text-secondary)]">
                       {t('businessIntelligence.deviation')}: {anomaly.deviation_percentage.toFixed(1)}%
                     </p>
                   </div>
@@ -252,10 +252,10 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">{t('businessIntelligence.generatingData')}</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--text-accent)] mx-auto"></div>
+          <p className="mt-4 text-[var(--text-secondary)]">{t('businessIntelligence.generatingData')}</p>
         </div>
       </div>
     );
@@ -263,13 +263,13 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <div className="text-center">
           <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto" />
           <p className="mt-4 text-red-600">{error}</p>
           <button
             onClick={loadBusinessIntelligence}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-[var(--text-accent)] text-white rounded-lg hover:bg-opacity-90"
           >
             {t('analytics.retry')}
           </button>
@@ -303,31 +303,31 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-[var(--bg-secondary)] shadow-sm border-b border-[var(--border-color)]">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <BoltIcon className="h-8 w-8 mr-3 text-blue-600" />
+              <h1 className="text-3xl font-bold text-[var(--text-primary)] flex items-center">
+                <BoltIcon className="h-8 w-8 mr-3 text-[var(--text-accent)]" />
                 {t('businessIntelligence.title')}
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-[var(--text-secondary)] mt-1">
                 {t('businessIntelligence.subtitle')}
               </p>
             </div>
             <div className="flex space-x-3">
               <button
                 onClick={loadBusinessIntelligence}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center"
+                className="px-4 py-2 border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] flex items-center text-[var(--text-primary)]"
               >
                 <BoltIcon className="h-4 w-4 mr-2" />
                 {t('common.refresh')}
               </button>
               <button
                 onClick={exportBusinessReport}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+                className="px-4 py-2 bg-[var(--text-accent)] text-white rounded-lg hover:bg-opacity-90 flex items-center"
               >
                 <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
                 {t('businessIntelligence.exportReport')}
@@ -405,9 +405,9 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Cost Trends Chart */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <ArrowTrendingUpIcon className="h-5 w-5 mr-2" />
+          <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
+              <ArrowTrendingUpIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
               {t('businessIntelligence.costTrends')}
             </h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -425,9 +425,9 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
           </div>
 
           {/* Usage Patterns */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <ClockIcon className="h-5 w-5 mr-2" />
+          <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
+              <ClockIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
               {t('businessIntelligence.usagePatternsByTime')}
             </h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -449,15 +449,15 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
         </div>
 
         {/* Usage Insights */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <BoltIcon className="h-5 w-5 mr-2" />
+        <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
+            <BoltIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
             {t('businessIntelligence.insightsRecommendations')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">{t('businessIntelligence.usagePatterns')}</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <h4 className="font-medium text-[var(--text-primary)] mb-3">{t('businessIntelligence.usagePatterns')}</h4>
+              <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
                 <li>• {t('businessIntelligence.mostEfficientModel')}: <strong>{biData.most_efficient_model}</strong></li>
                 <li>• {t('businessIntelligence.peakUsageHours')}: <strong>{biData.peak_usage_hours.join(', ')}</strong></li>
                 <li>• {t('businessIntelligence.busiestDay')}: <strong>{biData.busiest_day_of_week}</strong></li>
@@ -465,8 +465,8 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">{t('businessIntelligence.performanceMetrics')}</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <h4 className="font-medium text-[var(--text-primary)] mb-3">{t('businessIntelligence.performanceMetrics')}</h4>
+              <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
                 <li>• {t('businessIntelligence.processingSpeed')}: <strong>{biData.tokens_per_hour.toFixed(0)} {t('businessIntelligence.tokensPerHour')}</strong></li>
                 <li>• {t('businessIntelligence.dataAnalyzed')}: <strong>{biData.data_points_analyzed.toLocaleString()} {t('businessIntelligence.entries')}</strong></li>
                 <li>• {t('businessIntelligence.analysisTime')}: <strong>{biData.calculation_time_ms.toFixed(0)}ms</strong></li>
