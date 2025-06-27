@@ -1,7 +1,7 @@
 {
   "theme": "dark",
   "language": "en",
-  "currency": "EUR",
+  "currency": "MYR",
   "monitoring_enabled": true,
   "refresh_interval": 1000,
   "data_retention_days": 90,
