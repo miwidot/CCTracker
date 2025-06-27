@@ -11,6 +11,11 @@ import type { AppSettings } from '@shared/types';
 
 type CurrentPage = 'dashboard' | 'analytics' | 'business-intelligence';
 
+// Type guard function to validate if a page is a valid CurrentPage
+const isValidCurrentPage = (page: string): page is CurrentPage => {
+  return page === 'dashboard' || page === 'analytics' || page === 'business-intelligence';
+};
+
 export const App: React.FC = () => {
   const { t } = useTranslation();
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -73,7 +78,14 @@ export const App: React.FC = () => {
     <SettingsProvider initialSettings={settings}>
       <ThemeProvider>
         <UsageDataProvider>
-          <Layout onNavigate={(page: string) => setCurrentPage(page as CurrentPage)} currentPage={currentPage}>
+          <Layout onNavigate={(page: string) => {
+            if (isValidCurrentPage(page)) {
+              setCurrentPage(page);
+            } else {
+              console.warn(`Invalid page navigation attempt: ${page}. Defaulting to dashboard.`);
+              setCurrentPage('dashboard');
+            }
+          }} currentPage={currentPage}>
             {renderCurrentPage()}
           </Layout>
         </UsageDataProvider>

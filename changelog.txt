@@ -1,3 +1,29 @@
+2025-06-28 04:17:19 +08 - CODE QUALITY IMPROVEMENTS: Fixed medium priority bugs for better maintainability
+- BUG FIXES IMPLEMENTED:
+  * BUG #7: Extracted duplicated date validation logic from useTimeFormat.ts into shared utility
+    - Created new shared utility function validateAndConvertDate() for consistent date handling
+    - Replaced duplicated validation code in formatDateTime, formatTime, and formatDate functions
+    - Applied DRY principle to reduce maintenance overhead and improve code consistency
+  * BUG #11: Replaced unsafe useState<any> in SettingsModal.tsx with proper TypeScript interface
+    - Created CurrencyStatus interface with proper typing for source, lastUpdated, and nextUpdate
+    - Improved type safety for currency status management
+  * BUG #15: Converted CommonJS require to ES6 import in FileMonitorService.ts
+    - Replaced require('os') with proper ES6 import statement
+    - Moved import to top of file with other imports for consistency
+  * BUG #12: Fixed unsafe type casting in ipcHandlers.ts currency conversion
+    - Added proper validation for currency codes before conversion
+    - Created CurrencyCode type and isValidCurrencyCode validation function
+    - Removed 'as any' casts with proper type validation and error handling
+- TECHNICAL IMPROVEMENTS:
+  * Added shared utility directory structure at src/shared/utils/
+  * Better error handling with descriptive error messages
+  * Consistent import patterns throughout codebase
+  * Type safety improvements across currency handling
+- BUILD VERIFICATION: 
+  * Both main and renderer processes build successfully
+  * TypeScript type checking passes for currency-related fixes
+  * Webpack compilation successful with new shared utilities
+
 2025-06-28 03:27:53 +08 - SETTINGS UI REORGANIZATION: Consolidated language and theme selection into dropdown menus
 - USER REQUEST: Move theme selection to dropdown like language selection and move language to settings modal
 - SETTINGS MODAL IMPROVEMENTS:

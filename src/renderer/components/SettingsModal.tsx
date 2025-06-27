@@ -12,6 +12,12 @@ interface Language {
   nativeName: string;
 }
 
+interface CurrencyStatus {
+  source: 'live' | 'fallback' | 'cached';
+  lastUpdated: string | null;
+  nextUpdate: string | null;
+}
+
 const getLanguages = (t: any): Language[] => [
   { code: 'en', name: t('languages.english'), nativeName: 'English' },
   { code: 'de', name: t('languages.german'), nativeName: 'Deutsch' },
@@ -31,7 +37,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const { settings, updateSettings } = useSettings();
   const { formatDateTime } = useTimeFormat();
   const { t, i18n } = useTranslation();
-  const [currencyStatus, setCurrencyStatus] = useState<any>(null);
+  const [currencyStatus, setCurrencyStatus] = useState<CurrencyStatus | null>(null);
   const [isUpdatingCurrency, setIsUpdatingCurrency] = useState(false);
 
   const getThemeInfo = (themeName: string) => {

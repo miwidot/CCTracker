@@ -1,14 +1,15 @@
 import { useSettings } from '../contexts/SettingsContext';
 import { useTranslation } from './useTranslation';
+import { validateAndConvertDate } from '@shared/utils/dateValidation';
 
 export const useTimeFormat = () => {
   const { settings } = useSettings();
   const { t } = useTranslation();
 
   const formatDateTime = (date: Date | string | number): string => {
-    const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
+    const dateObj = validateAndConvertDate(date);
     
-    if (isNaN(dateObj.getTime())) {
+    if (!dateObj) {
       return t('ui.invalidDate');
     }
 
@@ -27,9 +28,9 @@ export const useTimeFormat = () => {
   };
 
   const formatTime = (date: Date | string | number): string => {
-    const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
+    const dateObj = validateAndConvertDate(date);
     
-    if (isNaN(dateObj.getTime())) {
+    if (!dateObj) {
       return t('ui.invalidDate');
     }
 
@@ -45,9 +46,9 @@ export const useTimeFormat = () => {
   };
 
   const formatDate = (date: Date | string | number): string => {
-    const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
+    const dateObj = validateAndConvertDate(date);
     
-    if (isNaN(dateObj.getTime())) {
+    if (!dateObj) {
       return t('ui.invalidDate');
     }
 

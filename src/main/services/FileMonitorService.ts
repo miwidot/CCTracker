@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as chokidar from 'chokidar';
+import * as os from 'os';
 import { EventEmitter } from 'events';
 import type { FileSystemEvent } from '@shared/types';
 
@@ -398,7 +399,6 @@ export class FileMonitorService extends EventEmitter {
    */
   async startClaudeCliMonitoring(): Promise<void> {
     try {
-      const os = require('os');
       const claudeProjectsPath = path.join(os.homedir(), '.claude', 'projects');
       
       // Check if Claude CLI directory exists
