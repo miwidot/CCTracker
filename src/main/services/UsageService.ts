@@ -908,7 +908,7 @@ export class UsageService {
       const modelDiversity = new Set(allEntries.map(entry => entry.model)).size;
       
       // Time analysis
-      const timeSpanMs = new Date(allEntries[0].timestamp).getTime() - new Date(allEntries[allEntries.length - 1].timestamp).getTime();
+      const timeSpanMs = new Date(allEntries[allEntries.length - 1].timestamp).getTime() - new Date(allEntries[0].timestamp).getTime();
       const timeSpanHours = Math.max(1, timeSpanMs / (1000 * 60 * 60));
       const tokensPerHour = totalTokens / timeSpanHours;
       const costBurnRate = totalCost / timeSpanHours;
