@@ -20,6 +20,7 @@ import {
 import { useSettings } from '../contexts/SettingsContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTimeFormat } from '../hooks/useTimeFormat';
+import { useTranslation } from '../hooks/useTranslation';
 import type { ProjectAnalytics, ProjectComparison } from '@shared/types';
 
 interface ProjectCardProps {
@@ -35,6 +36,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 }) => {
   const { convertFromUSD, formatCurrency, formatCurrencyDetailed } = useCurrency();
   const { formatDate } = useTimeFormat();
+  const { t } = useTranslation();
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 animate-pulse">
@@ -65,7 +67,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Last Used</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t('analytics.lastUsed')}</p>
           <p className="text-sm text-gray-900 dark:text-white">
             {formatDate(project.last_used)}
           </p>
@@ -74,7 +76,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Total Cost</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.totalCost')}</p>
           <p className="text-xl font-bold text-gray-900 dark:text-white">
             {formatCurrencyDetailed(project.total_cost, 4)}
           </p>
@@ -105,6 +107,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 export const SimpleUsageAnalytics: React.FC = () => {
   const { settings } = useSettings();
   const { convertFromUSD, formatCurrency, formatCurrencyDetailed } = useCurrency();
+  const { t } = useTranslation();
   const [projects, setProjects] = useState<ProjectAnalytics[]>([]);
   const [comparison, setComparison] = useState<ProjectComparison | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -155,14 +158,14 @@ export const SimpleUsageAnalytics: React.FC = () => {
           <div className="text-center py-12">
             <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Error Loading Analytics
+              {t('analytics.errorLoading')}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
             <button
               onClick={loadProjectData}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              Retry
+              {t('analytics.retry')}
             </button>
           </div>
         </div>
@@ -178,7 +181,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Usage Analytics
+                {t('analytics.title')}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
                 Project-level cost breakdown and analysis (All Time Data)
@@ -244,7 +247,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
               <div className="flex items-center">
                 <ClockIcon className="h-8 w-8 text-orange-500" />
                 <div className="ml-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Cost</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics.totalCost')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {formatCurrency(projects.reduce((sum, p) => sum + p.total_cost, 0))}
                   </p>
@@ -257,7 +260,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
         {/* Project Cost Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Project Cost Breakdown
+            {t('analytics.projectCostBreakdown')}
           </h3>
           {isLoading ? (
             <div className="h-64 flex items-center justify-center">

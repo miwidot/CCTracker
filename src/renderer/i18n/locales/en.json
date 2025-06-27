@@ -128,5 +128,25 @@
   "warnings": {
     "noDataFound": "No usage data found for the selected date range. Try adjusting the date range or check if monitoring is enabled.",
     "noSessionsFound": "No sessions found for the selected date range"
+  },
+  "analytics": {
+    "title": "Usage Analytics",
+    "subtitle": "Project-level cost breakdown and analysis (All Time Data)",
+    "dataPeriodNote": "This page shows cumulative data for all projects across your entire usage history. For date-specific analysis, use the Usage Dashboard with date range filters.",
+    "totalProjects": "Total Projects",
+    "mostExpensive": "Most Expensive",
+    "mostEfficient": "Most Efficient",
+    "projectCostBreakdown": "Project Cost Breakdown",
+    "allProjects": "All Projects",
+    "noProjects": "No Projects Found",
+    "noProjectsMessage": "Start using Claude CLI in projects to see analytics here",
+    "lastUsed": "Last Used",
+    "totalCost": "Total Cost",
+    "totalTokens": "Total Tokens",
+    "sessions": "Sessions",
+    "costPerToken": "Cost/Token",
+    "errorLoading": "Error Loading Analytics",
+    "errorMessage": "Failed to load project analytics data",
+    "retry": "Retry"
   }
 }
