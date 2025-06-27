@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { MODEL_PRICING } from '../../shared/constants';
+import CostCalculatorService from './CostCalculatorService';
 import { 
   UsageEntry, 
   SessionStats, 
@@ -363,15 +364,10 @@ export class UsageService {
 
   /**
    * Calculate cost for given token usage
+   * @deprecated Use CostCalculatorService.calculateCost() for consistency
    */
   calculateCost(model: string, inputTokens: number, outputTokens: number): number {
-    const pricing = MODEL_PRICING[model];
-    if (!pricing) {
-      console.warn(`Unknown model for cost calculation: ${model}`);
-      return 0;
-    }
-
-    return (inputTokens * pricing.input) + (outputTokens * pricing.output);
+    return CostCalculatorService.calculateCost(model, inputTokens, outputTokens);
   }
 
   /**
@@ -636,48 +632,8 @@ export class UsageService {
         return [];
       }
 
-      const modelStats = new Map<string, {
-        totalCost: number;
-        totalTokens: number;
-        usageCount: number;
-        totalMessages: number;
-      }>();
-
-      // Aggregate data by model
-      allEntries.forEach(entry => {
-        const existing = modelStats.get(entry.model) || {
-          totalCost: 0,
-          totalTokens: 0,
-          usageCount: 0,
-          totalMessages: 0
-        };
-
-        modelStats.set(entry.model, {
-          totalCost: existing.totalCost + entry.cost_usd,
-          totalTokens: existing.totalTokens + entry.total_tokens,
-          usageCount: existing.usageCount + 1,
-          totalMessages: existing.totalMessages + 1
-        });
-      });
-
-      // Calculate efficiency metrics
-      const efficiency: ModelEfficiency[] = Array.from(modelStats.entries()).map(([model, stats]) => {
-        const costPerToken = stats.totalTokens > 0 ? stats.totalCost / stats.totalTokens : 0;
-        const averageTokensPerMessage = stats.totalMessages > 0 ? stats.totalTokens / stats.totalMessages : 0;
-        
-        // Efficiency score (lower is better): weighted cost per token + usage frequency factor
-        const efficiencyScore = costPerToken * 1000000 + (1 / stats.usageCount) * 0.1;
-
-        return {
-          model,
-          costPerToken,
-          averageTokensPerMessage,
-          totalCost: stats.totalCost,
-          totalTokens: stats.totalTokens,
-          usageCount: stats.usageCount,
-          efficiency_score: efficiencyScore
-        };
-      }).sort((a, b) => a.efficiency_score - b.efficiency_score); // Sort by efficiency (best first)
+      // Use centralized calculator for consistent model efficiency calculation
+      const efficiency = CostCalculatorService.calculateModelEfficiency(allEntries);
 
       console.log(`Calculated efficiency for ${efficiency.length} models`);
       return efficiency;
@@ -689,150 +645,18 @@ export class UsageService {
 
   /**
    * Generate usage trends by time period
+   * @deprecated Use CostCalculatorService.calculateUsageTrends() for consistency
    */
   async generateUsageTrends(granularity: 'daily' | 'weekly' | 'monthly'): Promise<UsageTrend[]> {
     try {
       const allEntries = await this.getAllUsageEntries();
+      const trends = CostCalculatorService.calculateUsageTrends(allEntries, granularity);
       
-      if (allEntries.length === 0) {
-        return [];
-      }
-
-      // Group entries by time period
-      const periodGroups = new Map<string, UsageEntry[]>();
-      
-      allEntries.forEach(entry => {
-        const date = new Date(entry.timestamp);
-        let periodKey: string;
-
-        switch (granularity) {
-          case 'daily':
-            periodKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-            break;
-          case 'weekly':
-            const weekStart = new Date(date);
-            weekStart.setDate(date.getDate() - date.getDay()); // Start of week
-            periodKey = weekStart.toISOString().split('T')[0];
-            break;
-          case 'monthly':
-            periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            break;
-          default:
-            periodKey = date.toISOString().split('T')[0];
-        }
-
-        if (!periodGroups.has(periodKey)) {
-          periodGroups.set(periodKey, []);
-        }
-        periodGroups.get(periodKey)!.push(entry);
-      });
-
-      // Calculate trends with growth rates
-      const sortedPeriods = Array.from(periodGroups.keys()).sort();
-      const trends: UsageTrend[] = [];
-
-      sortedPeriods.forEach((period, index) => {
-        const entries = periodGroups.get(period)!;
-        const cost = entries.reduce((sum, entry) => sum + entry.cost_usd, 0);
-        const tokens = entries.reduce((sum, entry) => sum + entry.total_tokens, 0);
-        const sessions = new Set(entries.map(e => e.session_id).filter(Boolean)).size;
-
-        // Calculate growth rate compared to previous period
-        let growthRate = 0;
-        if (index > 0) {
-          const prevPeriod = trends[index - 1];
-          if (prevPeriod.cost > 0) {
-            growthRate = ((cost - prevPeriod.cost) / prevPeriod.cost) * 100;
-          }
-        }
-
-        trends.push({
-          period,
-          cost,
-          tokens,
-          sessions,
-          growth_rate: growthRate
-        });
-      });
-
       console.log(`Generated ${trends.length} ${granularity} trend points`);
       return trends;
     } catch (error) {
       console.error('Failed to generate usage trends:', error);
       throw new Error(`Failed to generate usage trends: ${error}`);
-    }
-  }
-
-  /**
-   * Generate usage trends from specific entries (for predictions)
-   */
-  private generateUsageTrendsFromEntries(entries: UsageEntry[], granularity: 'daily' | 'weekly' | 'monthly'): UsageTrend[] {
-    try {
-      if (entries.length === 0) {
-        return [];
-      }
-
-      // Group entries by time period
-      const periodGroups = new Map<string, UsageEntry[]>();
-      
-      entries.forEach(entry => {
-        const date = new Date(entry.timestamp);
-        let periodKey: string;
-
-        switch (granularity) {
-          case 'daily':
-            periodKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-            break;
-          case 'weekly':
-            const weekStart = new Date(date);
-            weekStart.setDate(date.getDate() - date.getDay()); // Start of week
-            periodKey = weekStart.toISOString().split('T')[0];
-            break;
-          case 'monthly':
-            periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            break;
-          default:
-            periodKey = date.toISOString().split('T')[0];
-        }
-
-        if (!periodGroups.has(periodKey)) {
-          periodGroups.set(periodKey, []);
-        }
-        periodGroups.get(periodKey)!.push(entry);
-      });
-
-      // Calculate trends with growth rates
-      const sortedPeriods = Array.from(periodGroups.keys()).sort();
-      const trends: UsageTrend[] = [];
-
-      sortedPeriods.forEach((period, index) => {
-        const periodEntries = periodGroups.get(period)!;
-        const cost = periodEntries.reduce((sum, entry) => sum + entry.cost_usd, 0);
-        const tokens = periodEntries.reduce((sum, entry) => sum + entry.total_tokens, 0);
-        const sessions = new Set(periodEntries.map(e => e.session_id).filter(Boolean)).size;
-
-        // Calculate growth rate compared to previous period
-        let growthRate = 0;
-        if (index > 0) {
-          const prevPeriod = trends[index - 1];
-          if (prevPeriod.cost > 0) {
-            growthRate = ((cost - prevPeriod.cost) / prevPeriod.cost) * 100;
-          }
-        }
-
-        trends.push({
-          period,
-          cost,
-          tokens,
-          sessions,
-          growth_rate: growthRate
-        });
-      });
-
-      return trends;
-    } catch (error) {
-      console.error('Failed to generate usage trends from entries:', error);
-      return [];
     }
   }
 
@@ -949,8 +773,8 @@ export class UsageService {
       
       console.log(`Using ${entriesForAnalysis.length} entries from last 30 days for predictions (filtered from ${allEntries.length} total)`);
       
-      // Generate trends only from recent data
-      const dailyTrends = this.generateUsageTrendsFromEntries(entriesForAnalysis, 'daily');
+      // Generate trends only from recent data using centralized calculator
+      const dailyTrends = CostCalculatorService.calculateUsageTrends(entriesForAnalysis, 'daily');
       
       // Calculate daily averages
       const dailyCosts = dailyTrends.map((t: UsageTrend) => t.cost);
@@ -1266,63 +1090,9 @@ export class UsageService {
       const projectAnalytics: ProjectAnalytics[] = [];
 
       for (const [projectName, entries] of projectGroups.entries()) {
-        // Calculate project metrics
-        const totalCost = entries.reduce((sum, entry) => sum + entry.cost_usd, 0);
-        const totalTokens = entries.reduce((sum, entry) => sum + entry.total_tokens, 0);
-        const uniqueSessions = new Set(entries.map(e => e.session_id).filter(Boolean)).size;
-        const averageCostPerSession = uniqueSessions > 0 ? totalCost / uniqueSessions : 0;
-
-        // Find most used model
-        const modelCounts = new Map<string, number>();
-        entries.forEach(entry => {
-          modelCounts.set(entry.model, (modelCounts.get(entry.model) || 0) + 1);
-        });
-        const mostUsedModel = Array.from(modelCounts.entries())
-          .sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
-
-        // Time range
-        const timestamps = entries.map(e => new Date(e.timestamp).getTime()).sort();
-        const firstActivity = new Date(timestamps[0]).toISOString();
-        const lastActivity = new Date(timestamps[timestamps.length - 1]).toISOString();
-
-        // Calculate cost trend (simple last 7 days vs previous 7 days)
-        const now = Date.now();
-        const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
-        const fourteenDaysAgo = now - (14 * 24 * 60 * 60 * 1000);
-
-        const recentEntries = entries.filter(e => new Date(e.timestamp).getTime() > sevenDaysAgo);
-        const previousEntries = entries.filter(e => {
-          const time = new Date(e.timestamp).getTime();
-          return time > fourteenDaysAgo && time <= sevenDaysAgo;
-        });
-
-        const recentCost = recentEntries.reduce((sum, e) => sum + e.cost_usd, 0);
-        const previousCost = previousEntries.reduce((sum, e) => sum + e.cost_usd, 0);
-
-        let costTrend: 'increasing' | 'decreasing' | 'stable' = 'stable';
-        if (previousCost > 0) {
-          const change = (recentCost - previousCost) / previousCost;
-          if (change > 0.1) costTrend = 'increasing';
-          else if (change < -0.1) costTrend = 'decreasing';
-        }
-
-        // Efficiency score (cost per token, lower is better)
-        const efficiencyScore = totalTokens > 0 ? (totalCost / totalTokens) * 1000000 : 0;
-
-        projectAnalytics.push({
-          project_name: projectName,
-          project_path: entries[0].project_path || '',
-          total_cost: totalCost,
-          total_tokens: totalTokens,
-          total_sessions: uniqueSessions,
-          session_count: uniqueSessions,
-          average_cost_per_session: averageCostPerSession,
-          most_used_model: mostUsedModel,
-          first_activity: firstActivity,
-          last_activity: lastActivity,
-          cost_trend: costTrend,
-          efficiency_score: efficiencyScore
-        });
+        // Use centralized calculator for consistent project analytics
+        const analytics = CostCalculatorService.calculateProjectAnalytics(projectName, entries);
+        projectAnalytics.push(analytics);
       }
 
       // Sort by total cost (highest first)
