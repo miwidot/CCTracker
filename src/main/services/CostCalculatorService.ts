@@ -4,18 +4,9 @@ import type {
   ProjectAnalytics, 
   ModelEfficiency, 
   SessionStats,
-  UsageTrend
+  UsageTrend,
+  CurrencyRates
 } from '../../shared/types';
-
-// Currency exchange rates interface
-interface CurrencyRates {
-  USD: number;
-  EUR: number;
-  GBP: number;
-  JPY: number;
-  CNY: number;
-  MYR: number;
-}
 
 // Currency symbols mapping
 const CURRENCY_SYMBOLS: Record<string, string> = {
