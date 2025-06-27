@@ -43,6 +43,7 @@ export interface CurrencyRates {
   JPY: number;
   CNY: number;
   MYR: number;
+  monthlyBudget?: number; // Optional configurable monthly budget in USD
 }
 
 export interface ThemeConfig {

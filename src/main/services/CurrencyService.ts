@@ -292,8 +292,8 @@ export class CurrencyService {
    */
   async convertCurrency(
     amount: number,
-    fromCurrency: keyof CurrencyRates,
-    toCurrency: keyof CurrencyRates
+    fromCurrency: keyof Omit<CurrencyRates, 'monthlyBudget'>,
+    toCurrency: keyof Omit<CurrencyRates, 'monthlyBudget'>
   ): Promise<number> {
     try {
       if (amount <= 0) {
@@ -321,8 +321,8 @@ export class CurrencyService {
    * Get exchange rate between two currencies
    */
   async getExchangeRate(
-    fromCurrency: keyof CurrencyRates,
-    toCurrency: keyof CurrencyRates
+    fromCurrency: keyof Omit<CurrencyRates, 'monthlyBudget'>,
+    toCurrency: keyof Omit<CurrencyRates, 'monthlyBudget'>
   ): Promise<number> {
     return this.convertCurrency(1, fromCurrency, toCurrency);
   }
@@ -330,8 +330,8 @@ export class CurrencyService {
   /**
    * Format currency amount with proper symbol and formatting
    */
-  formatCurrency(amount: number, currency: keyof CurrencyRates): string {
-    const symbols: Record<keyof CurrencyRates, string> = {
+  formatCurrency(amount: number, currency: keyof Omit<CurrencyRates, 'monthlyBudget'>): string {
+    const symbols: Record<keyof Omit<CurrencyRates, 'monthlyBudget'>, string> = {
       USD: '$',
       EUR: '€',
       GBP: '£',

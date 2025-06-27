@@ -691,8 +691,8 @@ export function calculatePredictiveAnalytics(recentEntries: UsageEntry[]): {
   const costVariance = dailyCosts.reduce((acc, val) => acc + Math.pow(val - avgDailyCost, 2), 0) / dailyCosts.length;
   const confidenceLevel = Math.max(20, Math.min(95, 90 - (costVariance / avgDailyCost) * 100));
   
-  // Budget risk assessment (assuming $100 monthly budget as baseline)
-  const budgetThreshold = 100; // Default budget threshold
+  // Budget risk assessment
+  const budgetThreshold = currencyRates?.monthlyBudget || 100; // Configurable or default
   const riskRatio = predictedMonthlyCost / budgetThreshold;
   
   let budgetRisk: 'low' | 'medium' | 'high';
