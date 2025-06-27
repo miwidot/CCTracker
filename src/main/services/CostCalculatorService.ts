@@ -238,7 +238,13 @@ export class CostCalculatorService {
       }
     }
 
-    const sessionCount = entries.length; // Following original Rust logic
+    // Count unique sessions by session_id (matching original Rust logic)
+    const uniqueSessionIds = new Set(
+      entries
+        .map(entry => entry.session_id || entry.conversation_id || entry.id)
+        .filter(Boolean)
+    );
+    const sessionCount = uniqueSessionIds.size;
 
     return {
       project_path: entries[0].project_path || '',
