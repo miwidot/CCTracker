@@ -117,7 +117,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <button
             key={range.label}
             onClick={() => {
-              console.log(`BUTTON CLICKED: ${range.label} (${range.days} days)`);
               if (range.days === null) {
                 // ALL option - will be handled by parent component
                 onDateRangeChange(null, null); // Signal to use earliest data
@@ -125,12 +124,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 // Today option - show only today's data
                 const start = startOfDay(new Date());
                 const end = endOfDay(new Date());
-                console.log(`TODAY: ${start} to ${end}`);
                 onDateRangeChange(start, end);
               } else {
                 const start = startOfDay(subDays(new Date(), range.days));
                 const end = endOfDay(new Date());
-                console.log(`${range.days} DAYS: ${start} to ${end}`);
                 onDateRangeChange(start, end);
               }
             }}
@@ -316,11 +313,6 @@ const UsageDashboard: React.FC = () => {
       return isInRange;
     });
     
-    console.log(`📊 FILTERED DATA: ${filtered.length}/${usageData.length} entries for range ${dateRange.start.toDateString()} to ${dateRange.end.toDateString()}`);
-    if (filtered.length > 0) {
-      console.log(`📅 Date span: ${new Date(filtered[0].timestamp).toDateString()} to ${new Date(filtered[filtered.length - 1].timestamp).toDateString()}`);
-    }
-    
     return filtered;
   }, [usageData, dateRange]);
 
@@ -377,9 +369,6 @@ const UsageDashboard: React.FC = () => {
           currencies
         );
         
-        console.log(`🔍 OVERVIEW METRICS (CENTRALIZED): ${filteredData.length} entries, Sessions: ${metrics.sessionsCount}`);
-        console.log(`💰 Total Cost: ${metrics.formattedTotalCost}, Avg/Session: ${metrics.formattedAvgCost}`);
-        console.log(`📅 Date Range: ${dateRange.start.toISOString()} to ${dateRange.end.toISOString()}`);
         
         setOverviewMetrics({
           totalCost: metrics.totalCost,
@@ -426,9 +415,6 @@ const UsageDashboard: React.FC = () => {
         const costs = await window.electronAPI.calculateProjectCosts(filteredData, settings.currency, currencies);
         setProjectCosts(costs);
         
-        // Debug project calculations
-        console.log(`🏗️ PROJECT COSTS (CENTRALIZED): ${Object.keys(costs).length} projects calculated`);
-        console.log(`📊 Project costs:`, costs);
       } catch (error) {
         console.error('Failed to calculate project costs:', error);
         setProjectCosts({});
@@ -493,10 +479,9 @@ const UsageDashboard: React.FC = () => {
         ? await window.electronAPI.exportCsv(filteredData)
         : await window.electronAPI.exportJson(filteredData);
       
-      // Show success message or handle result
-      console.log(`Export ${format.toUpperCase()} successful:`, result);
+      // Export completed successfully
     } catch (error) {
-      console.error(`Export ${format.toUpperCase()} failed:`, error);
+      // Export failed - error is handled by the main process
     } finally {
       setIsExporting(false);
     }
@@ -556,14 +541,11 @@ const UsageDashboard: React.FC = () => {
               // ALL option - use earliest data date
               const allStart = startOfDay(earliestDataDate);
               const allEnd = endOfDay(new Date());
-              console.log(`ALL OPTION: ${allStart} to ${allEnd}`);
               setDateRange({ start: allStart, end: allEnd });
             } else if (start && end) {
-              console.log(`onDateRangeChange called: ${start} to ${end}`);
               setDateRange({ start, end });
             }
             setForceUpdate(prev => prev + 1);
-            console.log(`State updated, forceUpdate: ${forceUpdate + 1}`);
           }}
         />
       </div>
@@ -640,13 +622,13 @@ const UsageDashboard: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-sm text-[var(--text-secondary)]">{t('metrics.cacheWrite')}</span>
                 <span className="text-sm font-medium text-[var(--text-primary)]">
-                  {formatTokens(filteredData.reduce((sum, entry) => sum + ((entry as any).cache_creation_tokens || 0), 0))}
+                  {formatTokens(filteredData.reduce((sum, entry) => sum + (entry.cache_creation_tokens || 0), 0))}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-[var(--text-secondary)]">{t('metrics.cacheRead')}</span>
                 <span className="text-sm font-medium text-[var(--text-primary)]">
-                  {formatTokens(filteredData.reduce((sum, entry) => sum + ((entry as any).cache_read_tokens || 0), 0))}
+                  {formatTokens(filteredData.reduce((sum, entry) => sum + (entry.cache_read_tokens || 0), 0))}
                 </span>
               </div>
             </div>

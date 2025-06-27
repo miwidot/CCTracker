@@ -291,8 +291,8 @@ export const SimpleUsageAnalytics: React.FC = () => {
                     borderRadius: '8px',
                     color: chartTheme.text,
                   }}
-                  formatter={(value: any, name: any) => [
-                    name === 'cost' ? formatCurrencyDetailed(value, 4) : value,
+                  formatter={(value: number, name: string) => [
+                    name === 'cost' ? formatCurrencyDetailed(value, 4) : value.toString(),
                     name === 'cost' ? t('businessIntelligence.cost') : t('analytics.sessions')
                   ]}
                   labelFormatter={(label) => {

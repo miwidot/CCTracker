@@ -234,15 +234,20 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
     }
   };
 
+  const [exportStatus, setExportStatus] = useState<{type: 'success' | 'error' | null, message: string}>({type: null, message: ''});
+
   const exportBusinessReport = async () => {
     if (!biData) return;
     
     try {
       const result = await window.electronAPI.exportBusinessReport(biData);
-      console.log('Business report exported:', result);
-      // Could add a toast notification here
+      setExportStatus({type: 'success', message: t('businessIntelligence.exportSuccess')});
+      // Clear notification after 3 seconds
+      setTimeout(() => setExportStatus({type: null, message: ''}), 3000);
     } catch (err) {
-      console.error('Failed to export business report:', err);
+      setExportStatus({type: 'error', message: t('businessIntelligence.exportError')});
+      // Clear notification after 5 seconds
+      setTimeout(() => setExportStatus({type: null, message: ''}), 5000);
     }
   };
 
@@ -334,6 +339,24 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Export Status Notification */}
+        {exportStatus.type && (
+          <div className={`mb-6 p-4 rounded-lg border-2 ${
+            exportStatus.type === 'success' 
+              ? 'bg-[var(--bg-success)] border-[var(--color-success)] text-[var(--text-success)]' 
+              : 'bg-[var(--bg-error)] border-[var(--color-error)] text-[var(--text-error)]'
+          } animate-fade-in`}>
+            <div className="flex items-center">
+              {exportStatus.type === 'success' ? (
+                <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
+              ) : (
+                <ExclamationTriangleIcon className="h-5 w-5 mr-2" />
+              )}
+              <p className="font-medium">{exportStatus.message}</p>
+            </div>
+          </div>
+        )}
+
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <BIMetricCard

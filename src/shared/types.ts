@@ -9,6 +9,8 @@ export interface UsageEntry {
   session_id?: string;
   project_path?: string;
   conversation_id?: string;
+  cache_creation_tokens?: number;
+  cache_read_tokens?: number;
 }
 
 export interface SessionStats {
