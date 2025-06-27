@@ -36,4 +36,15 @@ module.exports = {
     __dirname: false,
     __filename: false,
   },
+  externals: {
+    // Ignore fsevents on non-macOS platforms
+    fsevents: "require('fsevents')",
+  },
+  stats: {
+    // Suppress the warning for fsevents
+    warningsFilter: [
+      /Module not found: Error: Can't resolve 'fsevents'/,
+      /Critical dependency: the request of a dependency is an expression/,
+    ],
+  },
 };

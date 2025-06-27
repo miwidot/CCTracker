@@ -1,8 +1,9 @@
 {
-  "theme": "catppuccin",
+  "theme": "dark",
   "language": "en",
   "currency": "USD",
   "monitoring_enabled": true,
   "refresh_interval": 1000,
-  "data_retention_days": 90
+  "data_retention_days": 90,
+  "time_format": "24h"
 }

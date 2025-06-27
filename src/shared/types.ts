@@ -46,7 +46,7 @@ export interface CurrencyRates {
 }
 
 export interface ThemeConfig {
-  name: 'light' | 'dark' | 'catppuccin';
+  name: 'light' | 'dark' | 'catppuccin-latte' | 'catppuccin-frappe' | 'catppuccin-macchiato' | 'catppuccin-mocha';
   primary: string;
   secondary: string;
   background: string;
@@ -62,6 +62,7 @@ export interface AppSettings {
   monitoring_enabled: boolean;
   refresh_interval: number;
   data_retention_days: number;
+  time_format: '12h' | '24h';
 }
 
 export interface FileSystemEvent {
@@ -172,20 +173,14 @@ export interface AdvancedUsageStats extends BusinessIntelligence {
   dateRange: { earliest: string | null; latest: string | null };
 }
 
-// Project Analytics Types
+// Project Analytics Types (matching original Rust ProjectUsage)
 export interface ProjectAnalytics {
-  project_name: string;
   project_path: string;
+  project_name: string;
   total_cost: number;
   total_tokens: number;
-  total_sessions: number;
   session_count: number;
-  average_cost_per_session: number;
-  most_used_model: string;
-  first_activity: string;
-  last_activity: string;
-  cost_trend: 'increasing' | 'decreasing' | 'stable';
-  efficiency_score: number;
+  last_used: string;
 }
 
 export interface ProjectSession {

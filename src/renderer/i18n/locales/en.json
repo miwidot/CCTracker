@@ -18,13 +18,21 @@
     "sessionsCount": "Sessions",
     "avgCostPerSession": "Avg Cost/Session",
     "inputTokens": "Input Tokens",
-    "outputTokens": "Output Tokens"
+    "outputTokens": "Output Tokens",
+    "cacheWrite": "Cache Write",
+    "cacheRead": "Cache Read",
+    "tokenBreakdown": "Token Breakdown",
+    "perModelOverview": "Per Model Overview",
+    "topProjects": "Top 5 Projects by Cost"
   },
   "charts": {
     "costOverTime": "Cost Over Time",
     "tokenUsageByModel": "Token Usage by Model",
     "costDistribution": "Cost Distribution by Model",
     "noData": "No data available for the selected period",
+    "noCostData": "No cost data available for selected period",
+    "noTokenData": "No token data available for selected period",
+    "noCostDistribution": "No cost distribution data available",
     "loading": "Loading chart data..."
   },
   "sessions": {
@@ -47,22 +55,40 @@
     "error": "Failed to export data"
   },
   "dateRange": {
+    "title": "Date Range",
+    "today": "Today",
+    "7Days": "7 Days",
+    "30Days": "30 Days",
+    "all": "ALL",
+    "to": "to",
     "last7Days": "Last 7 Days",
     "last30Days": "Last 30 Days",
     "last90Days": "Last 90 Days",
     "custom": "Custom Range",
     "from": "From",
-    "to": "To",
     "apply": "Apply"
   },
   "theme": {
+    "title": "Theme",
     "light": "Light",
     "dark": "Dark",
-    "catppuccin": "Catppuccin"
+    "catppuccin": "Catppuccin",
+    "catppuccinLatte": "Catppuccin Latte",
+    "catppuccinFrappe": "Catppuccin Frappé",
+    "catppuccinMacchiato": "Catppuccin Macchiato",
+    "catppuccinMocha": "Catppuccin Mocha",
+    "lightDescription": "Clean and bright interface",
+    "darkDescription": "Easy on the eyes for long sessions",
+    "catppuccinLatteDescription": "Light pastel theme with warm tones",
+    "catppuccinFrappeDescription": "Muted variant with subdued colors",
+    "catppuccinMacchiatoDescription": "Medium contrast with gentle colors",
+    "catppuccinMochaDescription": "Dark variant with cozy feeling",
+    "custom": "Custom theme"
   },
   "navigation": {
     "dashboard": "Dashboard",
     "analytics": "Usage Analytics",
+    "businessIntelligence": "Business Intelligence",
     "export": "Export Data",
     "settings": "Settings"
   },
@@ -75,6 +101,32 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "lastUpdated": "Last updated"
+    "lastUpdated": "Last updated",
+    "never": "Never",
+    "done": "Done",
+    "new": "NEW"
+  },
+  "settings": {
+    "currency": "Currency",
+    "timeFormat": "Time Format",
+    "timeFormat12": "12 Hour (2:30 PM)",
+    "timeFormat24": "24 Hour (14:30)",
+    "currencyRates": "Currency Rates",
+    "updating": "Updating...",
+    "updateNow": "Update Now",
+    "about": "About",
+    "version": "Version",
+    "currentTheme": "Current Theme",
+    "loadingStatus": "Loading currency status...",
+    "statusLive": "✓ Live Data",
+    "statusFallback": "⚠ Fallback Data",
+    "statusCached": "⏳ Cached Data",
+    "lastUpdated": "Last Updated",
+    "nextUpdate": "Next Update",
+    "manual": "Manual"
+  },
+  "warnings": {
+    "noDataFound": "No usage data found for the selected date range. Try adjusting the date range or check if monitoring is enabled.",
+    "noSessionsFound": "No sessions found for the selected date range"
   }
 }

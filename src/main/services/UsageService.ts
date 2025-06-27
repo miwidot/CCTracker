@@ -81,17 +81,41 @@ export class UsageService {
    */
   private parseJSONLLine(line: string): UsageEntry | null {
     try {
-      const data = JSON.parse(line.trim());
+      const trimmedLine = line.trim();
+      
+      // Skip empty lines
+      if (!trimmedLine) {
+        return null;
+      }
+      
+      // Skip lines that are just strings (malformed entries)
+      if (!trimmedLine.startsWith('{')) {
+        console.warn('Skipping malformed JSONL line (not JSON object):', trimmedLine.substring(0, 50) + '...');
+        return null;
+      }
+      
+      const data = JSON.parse(trimmedLine);
+      
+      // Skip if data is not an object
+      if (!data || typeof data !== 'object') {
+        console.warn('Skipping invalid JSONL entry (not an object):', data);
+        return null;
+      }
       
       // Check if it's Claude CLI format
       if (data.uuid && data.sessionId && data.message) {
         return this.parseClaudeJSONLEntry(data as ClaudeJSONLEntry);
       }
       
+      // Skip Claude CLI summary entries and other non-usage entries
+      if (data.type && ['summary', 'system', 'metadata'].includes(data.type)) {
+        return null; // These are not usage entries, skip silently
+      }
+      
       // Fall back to legacy format
       return this.parseLegacyJSONLEntry(data as LegacyJSONLEntry);
     } catch (error) {
-      console.error('Failed to parse JSONL line:', line, error);
+      console.error('Failed to parse JSONL line:', line.substring(0, 100) + '...', error);
       return null;
     }
   }
@@ -100,6 +124,18 @@ export class UsageService {
    * Parse Claude CLI format JSONL entry
    */
   private parseClaudeJSONLEntry(data: ClaudeJSONLEntry): UsageEntry | null {
+    // Validate required Claude CLI fields
+    if (!data.uuid || !data.sessionId || !data.message || !data.timestamp) {
+      console.warn('Invalid Claude CLI entry - missing required fields:', {
+        hasUuid: !!data.uuid,
+        hasSessionId: !!data.sessionId,
+        hasMessage: !!data.message,
+        hasTimestamp: !!data.timestamp,
+        type: data.type
+      });
+      return null;
+    }
+    
     // Only process assistant messages with usage data
     if (data.type !== 'assistant' || !data.message.usage || !data.message.model) {
       return null;
@@ -141,7 +177,18 @@ export class UsageService {
    */
   private parseLegacyJSONLEntry(data: LegacyJSONLEntry): UsageEntry | null {
     if (!data.model || !data.usage || !data.timestamp) {
-      console.warn('Invalid legacy JSONL entry - missing required fields:', data);
+      // Only log detailed warnings for entries that might actually be usage data
+      const keys = Object.keys(data || {});
+      const isLikelyUsageEntry = keys.some(key => ['model', 'usage', 'tokens', 'cost'].includes(key));
+      
+      if (isLikelyUsageEntry) {
+        console.warn('Invalid legacy JSONL entry - missing required fields (model, usage, timestamp):', {
+          hasModel: !!data.model,
+          hasUsage: !!data.usage,
+          hasTimestamp: !!data.timestamp,
+          actualKeys: keys
+        });
+      }
       return null;
     }
 
@@ -773,75 +820,25 @@ export class UsageService {
       
       console.log(`Using ${entriesForAnalysis.length} entries from last 30 days for predictions (filtered from ${allEntries.length} total)`);
       
-      // Generate trends only from recent data using centralized calculator
-      const dailyTrends = CostCalculatorService.calculateUsageTrends(entriesForAnalysis, 'daily');
-      
-      // Calculate daily averages
-      const dailyCosts = dailyTrends.map((t: UsageTrend) => t.cost);
-      const dailyTokens = dailyTrends.map((t: UsageTrend) => t.tokens);
-      
-      const avgDailyCost = dailyCosts.reduce((a: number, b: number) => a + b, 0) / dailyCosts.length;
-      const avgDailyTokens = dailyTokens.reduce((a: number, b: number) => a + b, 0) / dailyTokens.length;
-
-      // Simple linear regression for trend detection
-      const getTrend = (values: number[]): 'increasing' | 'decreasing' | 'stable' => {
-        if (values.length < 3) return 'stable';
-        
-        const recent = values.slice(-7); // Last week
-        const older = values.slice(-14, -7); // Previous week
-        
-        const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
-        const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
-        
-        const change = (recentAvg - olderAvg) / olderAvg;
-        
-        if (change > 0.1) return 'increasing';
-        if (change < -0.1) return 'decreasing';
-        return 'stable';
-      };
-
-      const costTrend = getTrend(dailyCosts);
-      
-      // Predict monthly cost (30 days * daily average, with trend adjustment)
-      let trendMultiplier = 1;
-      if (costTrend === 'increasing') trendMultiplier = 1.2;
-      else if (costTrend === 'decreasing') trendMultiplier = 0.8;
-      
-      const predictedMonthlyCost = avgDailyCost * 30 * trendMultiplier;
-      const predictedMonthlyTokens = avgDailyTokens * 30 * trendMultiplier;
-      
-      // Next week forecast
-      const nextWeekCost = avgDailyCost * 7 * trendMultiplier;
-      const nextWeekTokens = avgDailyTokens * 7 * trendMultiplier;
-      
-      // Confidence level based on data consistency
-      const costVariance = dailyCosts.reduce((acc: number, val: number) => acc + Math.pow(val - avgDailyCost, 2), 0) / dailyCosts.length;
-      const confidenceLevel = Math.max(20, Math.min(95, 90 - (costVariance / avgDailyCost) * 100));
-      
-      // Budget risk assessment (assuming $100 monthly budget)
-      const assumedBudget = 100;
-      const projectedOverage = Math.max(0, predictedMonthlyCost - assumedBudget);
-      let riskLevel: 'low' | 'medium' | 'high' = 'low';
-      
-      if (projectedOverage > assumedBudget * 0.5) riskLevel = 'high';
-      else if (projectedOverage > assumedBudget * 0.2) riskLevel = 'medium';
+      // Use centralized predictive analytics calculation
+      const predictionResults = CostCalculatorService.calculatePredictiveAnalytics(entriesForAnalysis);
 
       const predictions: PredictiveAnalytics = {
-        predicted_monthly_cost: predictedMonthlyCost,
-        predicted_monthly_tokens: predictedMonthlyTokens,
-        cost_trend: costTrend,
-        confidence_level: confidenceLevel,
+        predicted_monthly_cost: predictionResults.predictedMonthlyCost,
+        predicted_monthly_tokens: predictionResults.predictedMonthlyTokens,
+        cost_trend: predictionResults.costTrend,
+        confidence_level: predictionResults.confidenceLevel,
         next_week_forecast: {
-          cost: nextWeekCost,
-          tokens: nextWeekTokens
+          cost: predictionResults.nextWeekCost,
+          tokens: predictionResults.nextWeekTokens
         },
         budget_risk: {
-          level: riskLevel,
-          projected_overage: projectedOverage
+          level: predictionResults.budgetRisk,
+          projected_overage: predictionResults.projectedOverage
         }
       };
 
-      console.log(`Generated predictions with ${confidenceLevel.toFixed(1)}% confidence`);
+      console.log(`Generated predictions with ${predictionResults.confidenceLevel.toFixed(1)}% confidence`);
       return predictions;
     } catch (error) {
       console.error('Failed to generate predictions:', error);
@@ -1137,9 +1134,12 @@ export class UsageService {
       const mostExpensive = projects.reduce((prev, curr) => 
         prev.total_cost > curr.total_cost ? prev : curr
       );
-      const mostEfficient = projects.reduce((prev, curr) => 
-        prev.efficiency_score < curr.efficiency_score ? prev : curr
-      );
+      const mostEfficient = projects.reduce((prev, curr) => {
+        // Calculate cost per token for efficiency comparison (lower = more efficient)
+        const prevEfficiency = prev.total_tokens > 0 ? prev.total_cost / prev.total_tokens : Infinity;
+        const currEfficiency = curr.total_tokens > 0 ? curr.total_cost / curr.total_tokens : Infinity;
+        return prevEfficiency < currEfficiency ? prev : curr;
+      });
 
       // Activity timeline (last 30 days)
       const allEntries = await this.getAllUsageEntries();

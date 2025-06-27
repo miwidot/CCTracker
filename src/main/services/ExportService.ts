@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { UsageEntry, SessionStats, DateRangeStats, CurrencyRates, BusinessIntelligence } from '../../shared/types';
+import CostCalculatorService from './CostCalculatorService';
 
 export interface ExportOptions {
   format: 'csv' | 'json' | 'excel' | 'pdf';
@@ -81,7 +82,7 @@ export class ExportService {
         error: error instanceof Error ? error.message : 'Unknown export error',
         stats: {
           totalEntries: data.length,
-          totalCost: this.calculateTotalCost(data),
+          totalCost: CostCalculatorService.calculateTotalCost(data),
           fileSize: 0,
           exportTime: Date.now() - startTime,
         },
@@ -150,7 +151,7 @@ export class ExportService {
         content: csvContent,
         stats: {
           totalEntries: data.length,
-          totalCost: this.calculateTotalCost(data),
+          totalCost: CostCalculatorService.calculateTotalCost(data),
           fileSize: stats.size,
           exportTime: 0, // Will be set by caller
         },
@@ -172,7 +173,7 @@ export class ExportService {
           timestamp: new Date().toISOString(),
           format: 'json',
           totalEntries: data.length,
-          totalCost: this.calculateTotalCost(data),
+          totalCost: CostCalculatorService.calculateTotalCost(data),
           options,
         },
       };
@@ -204,7 +205,7 @@ export class ExportService {
         content: jsonContent,
         stats: {
           totalEntries: data.length,
-          totalCost: this.calculateTotalCost(data),
+          totalCost: CostCalculatorService.calculateTotalCost(data),
           fileSize: stats.size,
           exportTime: 0,
         },
@@ -228,7 +229,7 @@ export class ExportService {
       if (options.includeSummary) {
         content += 'USAGE SUMMARY\n';
         content += `Total Entries\t${data.length}\n`;
-        content += `Total Cost\t$${this.calculateTotalCost(data).toFixed(6)}\n`;
+        content += `Total Cost\t$${CostCalculatorService.calculateTotalCost(data).toFixed(6)}\n`;
         content += `Export Date\t${new Date().toISOString()}\n`;
         content += '\n';
       }
@@ -278,7 +279,7 @@ export class ExportService {
         content,
         stats: {
           totalEntries: data.length,
-          totalCost: this.calculateTotalCost(data),
+          totalCost: CostCalculatorService.calculateTotalCost(data),
           fileSize: stats.size,
           exportTime: 0,
         },
@@ -322,7 +323,7 @@ export class ExportService {
     <div class="summary">
         <h2>Summary</h2>
         <p><strong>Total Entries:</strong> ${data.length}</p>
-        <p><strong>Total Cost:</strong> $${this.calculateTotalCost(data).toFixed(6)}</p>
+        <p><strong>Total Cost:</strong> $${CostCalculatorService.calculateTotalCost(data).toFixed(6)}</p>
         <p><strong>Export Date:</strong> ${new Date().toLocaleString()}</p>
         <p><strong>Date Range:</strong> ${this.getDateRange(data)}</p>
     </div>
@@ -380,7 +381,7 @@ export class ExportService {
         content: htmlContent,
         stats: {
           totalEntries: data.length,
-          totalCost: this.calculateTotalCost(data),
+          totalCost: CostCalculatorService.calculateTotalCost(data),
           fileSize: stats.size,
           exportTime: 0,
         },
@@ -490,7 +491,7 @@ export class ExportService {
    * Generate CSV summary
    */
   private generateCSVSummary(data: UsageEntry[]): string {
-    const totalCost = this.calculateTotalCost(data);
+    const totalCost = CostCalculatorService.calculateTotalCost(data);
     const models = [...new Set(data.map(d => d.model))];
     const dateRange = this.getDateRange(data);
     
@@ -508,7 +509,7 @@ export class ExportService {
    * Generate JSON summary
    */
   private generateJSONSummary(data: UsageEntry[]): any {
-    const totalCost = this.calculateTotalCost(data);
+    const totalCost = CostCalculatorService.calculateTotalCost(data);
     const models = [...new Set(data.map(d => d.model))];
     const sessions = [...new Set(data.map(d => d.session_id).filter(Boolean))];
     
@@ -518,11 +519,7 @@ export class ExportService {
       modelsUsed: models,
       uniqueSessions: sessions.length,
       dateRange: this.getDateRange(data),
-      costByModel: models.reduce((acc, model) => {
-        const modelData = data.filter(d => d.model === model);
-        acc[model] = this.calculateTotalCost(modelData);
-        return acc;
-      }, {} as Record<string, number>),
+      costByModel: CostCalculatorService.calculateModelBreakdown(data),
     };
   }
 
@@ -563,12 +560,6 @@ export class ExportService {
     return csv;
   }
 
-  /**
-   * Calculate total cost from usage entries
-   */
-  private calculateTotalCost(data: UsageEntry[]): number {
-    return data.reduce((sum, entry) => sum + entry.cost_usd, 0);
-  }
 
   /**
    * Get date range from data

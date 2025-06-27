@@ -5,10 +5,10 @@ import { UsageDataProvider } from './contexts/UsageDataContext';
 import { Layout } from './components/Layout';
 import UsageDashboard from './components/UsageDashboard';
 import { BusinessIntelligenceDashboard } from './components/BusinessIntelligenceDashboard';
-import { UsageAnalyticsDashboard } from './components/UsageAnalyticsDashboard';
+import { SimpleUsageAnalytics } from './components/SimpleUsageAnalytics';
 import type { AppSettings } from '@shared/types';
 
-type CurrentPage = 'dashboard' | 'business-intelligence' | 'analytics' | 'export' | 'settings';
+type CurrentPage = 'dashboard' | 'analytics' | 'business-intelligence';
 
 export const App: React.FC = () => {
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -58,14 +58,10 @@ export const App: React.FC = () => {
     switch (currentPage) {
       case 'dashboard':
         return <UsageDashboard />;
+      case 'analytics':
+        return <SimpleUsageAnalytics />;
       case 'business-intelligence':
         return <BusinessIntelligenceDashboard />;
-      case 'analytics':
-        return <UsageAnalyticsDashboard />;
-      case 'export':
-        return <div className="p-8 text-center text-gray-500">Export Data (Coming Soon)</div>;
-      case 'settings':
-        return <div className="p-8 text-center text-gray-500">Settings (Coming Soon)</div>;
       default:
         return <UsageDashboard />;
     }

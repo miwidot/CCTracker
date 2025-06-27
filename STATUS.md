@@ -72,10 +72,10 @@ CCTracker is a comprehensive desktop application for monitoring Claude API usage
 - ✅ **Project-Level Cost Breakdown**: Complete project analytics with cost, tokens, sessions
 - ✅ **Project Comparison Dashboard**: Cross-project analysis and efficiency rankings
 - ✅ **Session Drill-down**: Detailed session-level analysis within projects
-- ✅ **Interactive Project Cards**: Visual project overview with trend indicators
-- ✅ **Cost Distribution Charts**: Bar charts and pie charts for project visualization
-- ✅ **Efficiency Scoring**: 0-10 scale project cost-effectiveness analysis
-- ✅ **Multi-model Tracking**: Projects using multiple Claude models
+- ✅ **Interactive Project Cards**: Visual project overview with cost-per-token metrics
+- ✅ **Cost Distribution Charts**: Bar charts and responsive visualizations for project analysis
+- ✅ **Centralized Cost Calculator**: Unified calculation service ensuring consistent math across all pages
+- ✅ **Simplified Analytics UI**: Clean, focused interface matching original Rust implementation
 - ✅ **Real-time Project Analytics**: Live data refresh and file monitoring integration
 
 ### **🎯 Advanced Features**

@@ -33,15 +33,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     // Apply theme class to document root
     document.documentElement.className = `theme-${theme.name} theme-transition`;
-    
-    // Apply CSS custom properties
-    const root = document.documentElement;
-    root.style.setProperty('--theme-primary', theme.primary);
-    root.style.setProperty('--theme-secondary', theme.secondary);
-    root.style.setProperty('--theme-background', theme.background);
-    root.style.setProperty('--theme-surface', theme.surface);
-    root.style.setProperty('--theme-text', theme.text);
-    root.style.setProperty('--theme-text-secondary', theme.textSecondary);
   }, [theme]);
 
   return (

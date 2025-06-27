@@ -22,6 +22,43 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* macOS window controls spacing */
+.window-controls-spacer {
+  -webkit-app-region: no-drag;
+  padding-left: env(titlebar-area-x, 0);
+  padding-top: env(titlebar-area-y, 0);
+}
+
+/* Draggable area for frameless window */
+.window-drag {
+  -webkit-app-region: drag;
+}
+
+.window-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Fix for macOS traffic lights overlap */
+.sidebar-with-controls {
+  padding-left: 78px; /* Space for traffic lights */
+}
+
+.header-with-controls {
+  padding-left: 78px; /* Space for traffic lights */
+}
+
+/* Ensure proper window controls area */
+.window-controls-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 78px;
+  height: 32px;
+  z-index: 1000;
+  -webkit-app-region: no-drag;
 }
 
 #root {
@@ -60,16 +97,52 @@ body {
   --border-hover: #475569;
 }
 
-/* Catppuccin theme */
-.theme-catppuccin {
+/* Catppuccin Latte (Light) */
+.theme-catppuccin-latte {
+  --bg-primary: #eff1f5;
+  --bg-secondary: #ccd0da;
+  --bg-tertiary: #bcc0cc;
+  --text-primary: #4c4f69;
+  --text-secondary: #6c6f85;
+  --text-accent: #8839ef;
+  --border-color: #acb0be;
+  --border-hover: #9ca0b0;
+}
+
+/* Catppuccin Frappé */
+.theme-catppuccin-frappe {
+  --bg-primary: #303446;
+  --bg-secondary: #414559;
+  --bg-tertiary: #51576d;
+  --text-primary: #c6d0f5;
+  --text-secondary: #a5adce;
+  --text-accent: #ca9ee6;
+  --border-color: #626880;
+  --border-hover: #737994;
+}
+
+/* Catppuccin Macchiato */
+.theme-catppuccin-macchiato {
+  --bg-primary: #24273a;
+  --bg-secondary: #363a4f;
+  --bg-tertiary: #494d64;
+  --text-primary: #cad3f5;
+  --text-secondary: #a5adcb;
+  --text-accent: #c6a0f6;
+  --border-color: #5b6078;
+  --border-hover: #6e738d;
+}
+
+/* Catppuccin Mocha (Dark) */
+.theme-catppuccin-mocha {
   --bg-primary: #1e1e2e;
   --bg-secondary: #313244;
   --bg-tertiary: #45475a;
   --text-primary: #cdd6f4;
   --text-secondary: #bac2de;
-  --text-accent: #89b4fa;
-  --border-color: #45475a;
-  --border-hover: #585b70;
+  --text-accent: #cba6f7;
+  --border-color: #585b70;
+  --border-hover: #6c7086;
 }
 
 /* Custom scrollbar */

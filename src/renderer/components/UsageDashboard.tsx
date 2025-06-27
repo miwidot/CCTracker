@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { format, subDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
+
+// Utility function to format tokens in M format
+const formatTokens = (tokens: number): string => {
+  if (tokens >= 1000000) {
+    return `${(tokens / 1000000).toFixed(2)}M`;
+  } else if (tokens >= 1000) {
+    return `${(tokens / 1000).toFixed(1)}K`;
+  }
+  return tokens.toString();
+};
 import {
   LineChart,
   Line,
@@ -28,6 +38,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { useUsageData } from '../contexts/UsageDataContext';
 import { useSettings } from '../contexts/SettingsContext';
+import { useCurrency } from '../hooks/useCurrency';
+import { useTranslation } from '../hooks/useTranslation';
 import type { UsageEntry, SessionStats } from '@shared/types';
 
 // Sub-components
@@ -53,24 +65,24 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 animate-pulse">
+      <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-sm border border-[var(--border-color)] animate-pulse">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-24"></div>
-            <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-32"></div>
+            <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24"></div>
+            <div className="h-8 bg-[var(--bg-tertiary)] rounded w-32"></div>
           </div>
-          <div className="h-12 w-12 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
+          <div className="h-12 w-12 bg-[var(--bg-tertiary)] rounded-lg"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+    <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-sm border border-[var(--border-color)] hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+          <p className="text-sm font-medium text-[var(--text-secondary)]">{title}</p>
+          <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">
             {typeof value === 'number' && currency ? `${currency} ${value.toFixed(2)}` : value}
           </p>
           {trend && (
@@ -79,8 +91,8 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
             </p>
           )}
         </div>
-        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+        <div className="p-3 bg-[var(--bg-tertiary)] rounded-lg">
+          <Icon className="h-6 w-6 text-[var(--text-accent)]" />
         </div>
       </div>
     </div>
@@ -90,7 +102,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
 interface DateRangePickerProps {
   startDate: Date;
   endDate: Date;
-  onDateRangeChange: (start: Date, end: Date) => void;
+  onDateRangeChange: (start: Date | null, end: Date | null) => void;
 }
 
 const DateRangePicker: React.FC<DateRangePickerProps> = ({
@@ -98,10 +110,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   endDate,
   onDateRangeChange,
 }) => {
+  const { t } = useTranslation();
   const presetRanges = [
-    { label: 'Last 7 days', days: 7 },
-    { label: 'Last 30 days', days: 30 },
-    { label: 'Last 90 days', days: 90 },
+    { label: t('dateRange.today'), days: 0 },
+    { label: t('dateRange.7Days'), days: 7 },
+    { label: t('dateRange.30Days'), days: 30 },
+    { label: t('dateRange.all'), days: null },
   ];
 
   return (
@@ -109,8 +123,25 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       <div className="flex gap-2 flex-wrap">
         {presetRanges.map((range) => (
           <button
-            key={range.days}
-            onClick={() => onDateRangeChange(subDays(new Date(), range.days), new Date())}
+            key={range.label}
+            onClick={() => {
+              console.log(`BUTTON CLICKED: ${range.label} (${range.days} days)`);
+              if (range.days === null) {
+                // ALL option - will be handled by parent component
+                onDateRangeChange(null, null); // Signal to use earliest data
+              } else if (range.days === 0) {
+                // Today option - show only today's data
+                const start = startOfDay(new Date());
+                const end = endOfDay(new Date());
+                console.log(`TODAY: ${start} to ${end}`);
+                onDateRangeChange(start, end);
+              } else {
+                const start = startOfDay(subDays(new Date(), range.days));
+                const end = endOfDay(new Date());
+                console.log(`${range.days} DAYS: ${start} to ${end}`);
+                onDateRangeChange(start, end);
+              }
+            }}
             className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           >
             {range.label}
@@ -121,14 +152,14 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         <input
           type="date"
           value={format(startDate, 'yyyy-MM-dd')}
-          onChange={(e) => onDateRangeChange(new Date(e.target.value), endDate)}
+          onChange={(e) => onDateRangeChange(startOfDay(new Date(e.target.value)), endDate)}
           className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
-        <span className="text-gray-500">to</span>
+        <span className="text-gray-500">{t('dateRange.to')}</span>
         <input
           type="date"
           value={format(endDate, 'yyyy-MM-dd')}
-          onChange={(e) => onDateRangeChange(startDate, new Date(e.target.value))}
+          onChange={(e) => onDateRangeChange(startDate, endOfDay(new Date(e.target.value)))}
           className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </div>
@@ -143,6 +174,7 @@ interface ExportButtonsProps {
 }
 
 const ExportButtons: React.FC<ExportButtonsProps> = ({ data, onExport, isExporting }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex gap-2">
       <button
@@ -151,7 +183,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ data, onExport, isExporti
         className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >
         <DocumentArrowDownIcon className="h-4 w-4" />
-        Export CSV
+        {t('export.csv')}
       </button>
       <button
         onClick={() => onExport('json')}
@@ -159,7 +191,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ data, onExport, isExporti
         className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >
         <DocumentArrowDownIcon className="h-4 w-4" />
-        Export JSON
+        {t('export.json')}
       </button>
     </div>
   );
@@ -172,6 +204,8 @@ interface SessionTableProps {
 }
 
 const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoading }) => {
+  const { convertFromUSD, formatCurrency } = useCurrency();
+  const { t } = useTranslation();
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -186,7 +220,7 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
     return (
       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
         <TableCellsIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-        <p>No sessions found for the selected date range</p>
+        <p>{t('warnings.noSessionsFound')}</p>
       </div>
     );
   }
@@ -197,22 +231,22 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Session ID
+              {t('sessions.sessionId')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Model
+              {t('sessions.model')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Duration
+              {t('sessions.duration')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Messages
+              {t('sessions.messages')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Tokens
+              {t('sessions.tokens')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Cost
+              {t('sessions.cost')}
             </th>
           </tr>
         </thead>
@@ -235,7 +269,7 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
                 {session.total_tokens.toLocaleString()}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                {currency} {session.total_cost.toFixed(4)}
+                {formatCurrency(session.total_cost)}
               </td>
             </tr>
           ))}
@@ -247,14 +281,28 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
 
 // Main component
 const UsageDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { usageData, sessionStats, isLoading, lastUpdated, refreshData } = useUsageData();
   const { settings } = useSettings();
+  const { convertFromUSD, formatCurrency, formatCurrencyDetailed, getCurrencySymbol } = useCurrency();
+  
+  // State for centralized project costs
+  const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
   
   // State for date range filtering
   const [dateRange, setDateRange] = useState({
-    start: subDays(new Date(), 30),
-    end: new Date(),
+    start: startOfDay(subDays(new Date(), 30)),
+    end: endOfDay(new Date()),
   });
+  
+  // Force re-render when date range changes
+  const [forceUpdate, setForceUpdate] = useState(0);
+  
+  // Calculate earliest data timestamp for ALL option
+  const earliestDataDate = useMemo(() => {
+    if (usageData.length === 0) return new Date();
+    return new Date(Math.min(...usageData.map((entry: any) => new Date(entry.timestamp).getTime())));
+  }, [usageData]);
   
   // State for export functionality
   const [isExporting, setIsExporting] = useState(false);
@@ -264,16 +312,31 @@ const UsageDashboard: React.FC = () => {
 
   // Filter data based on date range
   const filteredData = useMemo(() => {
-    return usageData.filter(entry => {
+    const filtered = usageData.filter(entry => {
       const entryDate = new Date(entry.timestamp);
-      return isWithinInterval(entryDate, {
+      const isInRange = isWithinInterval(entryDate, {
         start: startOfDay(dateRange.start),
         end: endOfDay(dateRange.end),
       });
+      
+      return isInRange;
     });
+    
+    console.log(`📊 FILTERED DATA: ${filtered.length}/${usageData.length} entries for range ${dateRange.start.toDateString()} to ${dateRange.end.toDateString()}`);
+    if (filtered.length > 0) {
+      console.log(`📅 Date span: ${new Date(filtered[0].timestamp).toDateString()} to ${new Date(filtered[filtered.length - 1].timestamp).toDateString()}`);
+    }
+    
+    return filtered;
   }, [usageData, dateRange]);
 
-  // Filter sessions based on date range
+  // Calculate unique sessions from filtered usage data
+  const uniqueSessionsInRange = useMemo(() => {
+    const sessionIds = new Set(filteredData.map(entry => entry.session_id));
+    return Array.from(sessionIds);
+  }, [filteredData]);
+
+  // Filter sessions based on date range (for session table)
   const filteredSessions = useMemo(() => {
     return sessionStats.filter(session => {
       const sessionDate = new Date(session.start_time);
@@ -284,44 +347,109 @@ const UsageDashboard: React.FC = () => {
     });
   }, [sessionStats, dateRange]);
 
-  // Calculate overview metrics
-  const overviewMetrics = useMemo(() => {
-    const totalCost = filteredData.reduce((sum, entry) => sum + entry.cost_usd, 0);
-    const totalTokens = filteredData.reduce((sum, entry) => sum + entry.total_tokens, 0);
-    const sessionsCount = filteredSessions.length;
-    const avgCostPerSession = sessionsCount > 0 ? totalCost / sessionsCount : 0;
+  // Calculate overview metrics using centralized calculator
+  const [overviewMetrics, setOverviewMetrics] = useState({
+    totalCost: 0,
+    totalTokens: 0,
+    sessionsCount: 0,
+    avgCostPerSession: 0,
+    costTrend: 0,
+  });
 
-    // Calculate trends (comparison with previous period)
-    const periodDays = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24));
-    const previousPeriodStart = subDays(dateRange.start, periodDays);
-    const previousPeriodEnd = dateRange.start;
+  useEffect(() => {
+    const calculateMetrics = async () => {
+      // Calculate trends (comparison with previous period) with normalized dates
+      const normalizedStart = startOfDay(dateRange.start);
+      const normalizedEnd = endOfDay(dateRange.end);
+      const periodDays = Math.ceil((normalizedEnd.getTime() - normalizedStart.getTime()) / (1000 * 60 * 60 * 24));
+      const previousPeriodStart = startOfDay(subDays(normalizedStart, periodDays));
+      const previousPeriodEnd = normalizedStart;
 
-    const previousPeriodData = usageData.filter(entry => {
-      const entryDate = new Date(entry.timestamp);
-      return isWithinInterval(entryDate, {
-        start: previousPeriodStart,
-        end: previousPeriodEnd,
+      const previousPeriodData = usageData.filter(entry => {
+        const entryDate = new Date(entry.timestamp);
+        return isWithinInterval(entryDate, {
+          start: previousPeriodStart,
+          end: previousPeriodEnd,
+        });
       });
-    });
 
-    const previousTotalCost = previousPeriodData.reduce((sum, entry) => sum + entry.cost_usd, 0);
-    const costTrend = previousTotalCost > 0 ? ((totalCost - previousTotalCost) / previousTotalCost) * 100 : 0;
-
-    return {
-      totalCost,
-      totalTokens,
-      sessionsCount,
-      avgCostPerSession,
-      costTrend,
+      try {
+        // Use centralized cost calculator with currency support
+        const currencies = await window.electronAPI.getCurrencyRates();
+        const metrics = await window.electronAPI.calculateDashboardMetricsWithCurrency(
+          filteredData, 
+          previousPeriodData, 
+          settings.currency,
+          currencies
+        );
+        
+        console.log(`🔍 OVERVIEW METRICS (CENTRALIZED): ${filteredData.length} entries, Sessions: ${metrics.sessionsCount}`);
+        console.log(`💰 Total Cost: ${metrics.formattedTotalCost}, Avg/Session: ${metrics.formattedAvgCost}`);
+        console.log(`📅 Date Range: ${dateRange.start.toISOString()} to ${dateRange.end.toISOString()}`);
+        
+        setOverviewMetrics({
+          totalCost: metrics.totalCost,
+          totalTokens: metrics.totalTokens,
+          sessionsCount: metrics.sessionsCount,
+          avgCostPerSession: metrics.avgCostPerSession,
+          costTrend: metrics.costTrend,
+        });
+      } catch (error) {
+        console.error('Failed to calculate dashboard metrics with centralized service:', error);
+        // Fallback to basic calculations using centralized service
+        try {
+          const currencies = await window.electronAPI.getCurrencyRates();
+          const totalCostUSD = await window.electronAPI.calculateTotalCost(filteredData);
+          const totalCost = convertFromUSD(totalCostUSD);
+          const fallbackSessionsCount = uniqueSessionsInRange.length;
+          
+          setOverviewMetrics({
+            totalCost,
+            totalTokens: filteredData.reduce((sum, entry) => sum + entry.total_tokens, 0),
+            sessionsCount: fallbackSessionsCount,
+            avgCostPerSession: fallbackSessionsCount > 0 ? totalCost / fallbackSessionsCount : 0,
+            costTrend: 0,
+          });
+        } catch (fallbackError) {
+          console.error('Fallback calculation also failed:', fallbackError);
+        }
+      }
     };
-  }, [filteredData, filteredSessions, dateRange, usageData]);
+
+    calculateMetrics();
+  }, [filteredData, uniqueSessionsInRange, dateRange, usageData, forceUpdate]);
+
+  // Calculate project costs with centralized service
+  useEffect(() => {
+    const calculateProjectCosts = async () => {
+      if (filteredData.length === 0) {
+        setProjectCosts({});
+        return;
+      }
+      
+      try {
+        const currencies = await window.electronAPI.getCurrencyRates();
+        const costs = await window.electronAPI.calculateProjectCosts(filteredData, settings.currency, currencies);
+        setProjectCosts(costs);
+        
+        // Debug project calculations
+        console.log(`🏗️ PROJECT COSTS (CENTRALIZED): ${Object.keys(costs).length} projects calculated`);
+        console.log(`📊 Project costs:`, costs);
+      } catch (error) {
+        console.error('Failed to calculate project costs:', error);
+        setProjectCosts({});
+      }
+    };
+    
+    calculateProjectCosts();
+  }, [filteredData, settings.currency, formatCurrencyDetailed]);
 
   // Prepare chart data
   const chartData = useMemo(() => {
     // Cost over time (daily aggregation)
     const costOverTime = filteredData.reduce((acc, entry) => {
       const date = format(new Date(entry.timestamp), 'yyyy-MM-dd');
-      acc[date] = (acc[date] || 0) + entry.cost_usd;
+      acc[date] = (acc[date] || 0) + convertFromUSD(entry.cost_usd);
       return acc;
     }, {} as Record<string, number>);
 
@@ -341,10 +469,12 @@ const UsageDashboard: React.FC = () => {
     }));
 
     // Cost by model (for pie chart)
-    const costByModel = filteredData.reduce((acc, entry) => {
-      acc[entry.model] = (acc[entry.model] || 0) + entry.cost_usd;
-      return acc;
-    }, {} as Record<string, number>);
+    const costByModel = filteredData
+      .filter(entry => !entry.model.includes('<synthetic>'))
+      .reduce((acc, entry) => {
+        acc[entry.model] = (acc[entry.model] || 0) + convertFromUSD(entry.cost_usd);
+        return acc;
+      }, {} as Record<string, number>);
 
     const costPieData = Object.entries(costByModel).map(([model, cost]) => ({
       name: model,
@@ -356,20 +486,10 @@ const UsageDashboard: React.FC = () => {
       tokensByModel: tokenChartData,
       costByModel: costPieData,
     };
-  }, [filteredData]);
+  }, [filteredData, convertFromUSD]);
 
-  // Currency conversion
-  const currencySymbol = useMemo(() => {
-    const symbols: Record<string, string> = {
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
-      JPY: '¥',
-      CNY: '¥',
-      MYR: 'RM',
-    };
-    return symbols[settings.currency] || '$';
-  }, [settings.currency]);
+  // Get currency symbol from hook
+  const currencySymbol = getCurrencySymbol();
 
   // Export functionality
   const handleExport = useCallback(async (format: 'csv' | 'json') => {
@@ -406,9 +526,9 @@ const UsageDashboard: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Usage Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {lastUpdated && `Last updated: ${format(lastUpdated, 'MMM dd, yyyy HH:mm:ss')}`}
+            {lastUpdated && `${t('common.lastUpdated')}: ${format(lastUpdated, 'MMM dd, yyyy HH:mm:ss')}`}
           </p>
         </div>
         <div className="flex gap-2">
@@ -418,7 +538,7 @@ const UsageDashboard: React.FC = () => {
             className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowPathIcon className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('common.refresh')}
           </button>
           <ExportButtons
             data={filteredData}
@@ -432,19 +552,32 @@ const UsageDashboard: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2 mb-3">
           <CalendarDaysIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Date Range</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('dateRange.title')}</h3>
         </div>
         <DateRangePicker
           startDate={dateRange.start}
           endDate={dateRange.end}
-          onDateRangeChange={(start, end) => setDateRange({ start, end })}
+          onDateRangeChange={(start, end) => {
+            if (start === null && end === null) {
+              // ALL option - use earliest data date
+              const allStart = startOfDay(earliestDataDate);
+              const allEnd = endOfDay(new Date());
+              console.log(`ALL OPTION: ${allStart} to ${allEnd}`);
+              setDateRange({ start: allStart, end: allEnd });
+            } else if (start && end) {
+              console.log(`onDateRangeChange called: ${start} to ${end}`);
+              setDateRange({ start, end });
+            }
+            setForceUpdate(prev => prev + 1);
+            console.log(`State updated, forceUpdate: ${forceUpdate + 1}`);
+          }}
         />
       </div>
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <OverviewCard
-          title="Total Cost"
+          title={t('metrics.totalCost')}
           value={overviewMetrics.totalCost}
           icon={CurrencyDollarIcon}
           trend={{
@@ -455,19 +588,19 @@ const UsageDashboard: React.FC = () => {
           currency={currencySymbol}
         />
         <OverviewCard
-          title="Total Tokens"
-          value={overviewMetrics.totalTokens.toLocaleString()}
+          title={t('metrics.totalTokens')}
+          value={formatTokens(overviewMetrics.totalTokens)}
           icon={CpuChipIcon}
           isLoading={isLoading}
         />
         <OverviewCard
-          title="Sessions"
+          title={t('metrics.sessionsCount')}
           value={overviewMetrics.sessionsCount}
           icon={ChatBubbleLeftRightIcon}
           isLoading={isLoading}
         />
         <OverviewCard
-          title="Avg Cost/Session"
+          title={t('metrics.avgCostPerSession')}
           value={overviewMetrics.avgCostPerSession}
           icon={ChartBarIcon}
           isLoading={isLoading}
@@ -475,12 +608,128 @@ const UsageDashboard: React.FC = () => {
         />
       </div>
 
+      {/* Token Breakdown and Model Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Token Breakdown */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            {t('metrics.tokenBreakdown')}
+          </h3>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('metrics.inputTokens')}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  {formatTokens(filteredData.reduce((sum, entry) => sum + entry.input_tokens, 0))}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('metrics.outputTokens')}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  {formatTokens(filteredData.reduce((sum, entry) => sum + entry.output_tokens, 0))}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('metrics.cacheWrite')}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  {formatTokens(filteredData.reduce((sum, entry) => sum + ((entry as any).cache_creation_tokens || 0), 0))}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('metrics.cacheRead')}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  {formatTokens(filteredData.reduce((sum, entry) => sum + ((entry as any).cache_read_tokens || 0), 0))}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Per Model Overview */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            {t('metrics.perModelOverview')}
+          </h3>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {chartData.costByModel.slice(0, 3).map((modelData) => {
+                const modelTokens = filteredData
+                  .filter(entry => entry.model === modelData.name)
+                  .reduce((sum, entry) => sum + entry.total_tokens, 0);
+                return (
+                  <div key={modelData.name} className="p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {modelData.name.replace('claude-', '').replace('-20241022', '').replace('-20250514', '')}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {formatCurrencyDetailed(modelData.value, 4)}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatTokens(modelTokens)} tokens
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Top 5 Projects */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            {t('metrics.topProjects')}
+          </h3>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {Object.entries(projectCosts)
+                .sort(([, a], [, b]) => b.costConverted - a.costConverted)
+                .slice(0, 5)
+                .map(([project, data], index) => (
+                  <div key={project} className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full w-5 h-5 flex items-center justify-center mr-2">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm text-gray-900 dark:text-white truncate">
+                        {project}
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {data.formatted}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Cost Over Time Chart */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Cost Over Time
+            {t('charts.costOverTime')}
           </h3>
           {isLoading ? (
             <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -497,7 +746,7 @@ const UsageDashboard: React.FC = () => {
                 <YAxis 
                   stroke="#6B7280"
                   fontSize={12}
-                  tickFormatter={(value) => `${currencySymbol}${value.toFixed(2)}`}
+                  tickFormatter={(value) => formatCurrency(value)}
                 />
                 <Tooltip
                   contentStyle={{
@@ -505,7 +754,7 @@ const UsageDashboard: React.FC = () => {
                     border: '1px solid var(--border-color)',
                     borderRadius: '8px',
                   }}
-                  formatter={(value: number) => [`${currencySymbol}${value.toFixed(4)}`, 'Cost']}
+                  formatter={(value: number) => [formatCurrencyDetailed(value, 4), 'Cost']}
                   labelFormatter={(label) => format(new Date(label), 'MMM dd, yyyy')}
                 />
                 <Line
@@ -522,7 +771,7 @@ const UsageDashboard: React.FC = () => {
             <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
               <div className="text-center">
                 <ChartBarIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>No cost data available for selected period</p>
+                <p>{t('charts.noCostData')}</p>
               </div>
             </div>
           )}
@@ -531,7 +780,7 @@ const UsageDashboard: React.FC = () => {
         {/* Token Usage by Model Chart */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Token Usage by Model
+            {t('charts.tokenUsageByModel')}
           </h3>
           {isLoading ? (
             <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -567,7 +816,7 @@ const UsageDashboard: React.FC = () => {
             <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
               <div className="text-center">
                 <CpuChipIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>No token data available for selected period</p>
+                <p>{t('charts.noTokenData')}</p>
               </div>
             </div>
           )}
@@ -576,7 +825,7 @@ const UsageDashboard: React.FC = () => {
         {/* Cost Distribution by Model */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Cost Distribution by Model
+            {t('charts.costDistribution')}
           </h3>
           {isLoading ? (
             <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -603,7 +852,7 @@ const UsageDashboard: React.FC = () => {
                     border: '1px solid var(--border-color)',
                     borderRadius: '8px',
                   }}
-                  formatter={(value: number) => [`${currencySymbol}${value.toFixed(4)}`, 'Cost']}
+                  formatter={(value: number) => [formatCurrencyDetailed(value, 4), 'Cost']}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -611,7 +860,7 @@ const UsageDashboard: React.FC = () => {
             <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
               <div className="text-center">
                 <CurrencyDollarIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>No cost distribution data available</p>
+                <p>{t('charts.noCostDistribution')}</p>
               </div>
             </div>
           )}
@@ -620,7 +869,7 @@ const UsageDashboard: React.FC = () => {
         {/* Recent Sessions Table */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Recent Sessions
+            {t('sessions.title')}
           </h3>
           <SessionTable
             sessions={filteredSessions.sort((a, b) => 
@@ -638,7 +887,7 @@ const UsageDashboard: React.FC = () => {
           <div className="flex items-center">
             <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2" />
             <p className="text-yellow-800 dark:text-yellow-200">
-              No usage data found for the selected date range. Try adjusting the date range or check if monitoring is enabled.
+              {t('warnings.noDataFound')}
             </p>
           </div>
         </div>

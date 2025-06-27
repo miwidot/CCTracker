@@ -13,9 +13,10 @@ export class CurrencyService {
   private cacheFile: string;
   private cache: CurrencyCache;
   private updateInterval: NodeJS.Timeout | null = null;
-  private readonly CACHE_TTL = 3600000; // 1 hour in milliseconds
-  private readonly UPDATE_INTERVAL = 3600000; // Check for updates every hour
+  private readonly CACHE_TTL = 86400000; // 24 hours in milliseconds (daily updates)
+  private readonly UPDATE_INTERVAL = 86400000; // Check for updates every 24 hours
   private readonly FALLBACK_RATES = DEFAULT_CURRENCY_RATES;
+  private isUpdating = false; // Prevent concurrent updates
 
   constructor(dataDir: string = path.join(process.cwd(), 'data')) {
     this.cacheFile = path.join(dataDir, 'currency_cache.json');
@@ -159,12 +160,18 @@ export class CurrencyService {
 
   /**
    * Update exchange rates from external source
-   * Note: This is a placeholder - implement with real API when needed
    */
   private async updateRates(): Promise<void> {
+    // Prevent concurrent updates
+    if (this.isUpdating) {
+      console.log('Currency update already in progress, skipping...');
+      return;
+    }
+
+    this.isUpdating = true;
+    
     try {
-      // For now, use static rates with small variations to simulate real data
-      // In production, this would call a real exchange rate API
+      console.log('Updating currency rates...');
       const updatedRates = await this.fetchRatesFromAPI();
       
       if (this.isValidRatesData(updatedRates)) {
@@ -176,31 +183,104 @@ export class CurrencyService {
         throw new Error('Invalid rates data received from API');
       }
     } catch (error) {
-      console.error('Failed to update currency rates:', error);
+      console.error('Failed to update currency rates:', error instanceof Error ? error.message : error);
       // Don't throw - continue with cached rates
+      // If we have no cached data at all, initialize with fallback rates
+      if (this.cache.lastUpdated === 0) {
+        console.log('No cached rates available, using fallback rates');
+        this.cache.rates = { ...this.FALLBACK_RATES };
+        this.cache.lastUpdated = Date.now();
+        await this.saveCachedRates();
+      }
+    } finally {
+      this.isUpdating = false;
     }
   }
 
   /**
-   * Fetch rates from external API (placeholder implementation)
-   * In production, implement with real API like exchangerate-api.com or fixer.io
+   * Fetch rates from external API using exchangerate-api.com
+   * Free tier: 1500 requests/month, no auth required
    */
   private async fetchRatesFromAPI(): Promise<CurrencyRates> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    const APIs = [
+      // Primary API: exchangerate-api.com (free, no auth)
+      {
+        name: 'exchangerate-api.com',
+        url: 'https://api.exchangerate-api.com/v4/latest/USD',
+        parser: (data: any) => data.rates
+      },
+      // Fallback API: exchangerate.host (free, no auth)
+      {
+        name: 'exchangerate.host',
+        url: 'https://api.exchangerate.host/latest?base=USD',
+        parser: (data: any) => data.rates
+      },
+      // Another fallback: freeforexapi.com (free, no auth)
+      {
+        name: 'freeforexapi.com',
+        url: 'https://api.freeforexapi.com/v1/rates?base=USD',
+        parser: (data: any) => data.rates
+      }
+    ];
+
+    for (const api of APIs) {
+      try {
+        console.log(`Fetching currency rates from ${api.name}...`);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const response = await fetch(api.url, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'CCTracker-Currency-Service/1.0',
+            'Accept': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        const rates = api.parser(data);
+        
+        if (!rates || typeof rates !== 'object') {
+          throw new Error('Invalid API response format');
+        }
+        
+        // Convert to our currency format
+        const currencyRates: CurrencyRates = {
+          USD: 1.0, // USD is always 1.0 as base currency
+          EUR: rates.EUR || this.FALLBACK_RATES.EUR,
+          GBP: rates.GBP || this.FALLBACK_RATES.GBP,
+          JPY: rates.JPY || this.FALLBACK_RATES.JPY,
+          CNY: rates.CNY || this.FALLBACK_RATES.CNY,
+          MYR: rates.MYR || this.FALLBACK_RATES.MYR,
+        };
+        
+        // Validate rates are reasonable (not zero, not negative, not extreme)
+        for (const [currency, rate] of Object.entries(currencyRates)) {
+          if (currency === 'USD') continue;
+          if (!rate || rate <= 0 || rate > 1000) {
+            throw new Error(`Invalid rate for ${currency}: ${rate}`);
+          }
+        }
+        
+        console.log(`Successfully fetched rates from ${api.name}`);
+        return currencyRates;
+        
+      } catch (error) {
+        console.warn(`Failed to fetch from ${api.name}:`, error instanceof Error ? error.message : error);
+        // Continue to next API
+      }
+    }
     
-    // Simulate slight variations in exchange rates
-    const baseRates = { ...DEFAULT_CURRENCY_RATES };
-    const variation = 0.02; // 2% variation
-    
-    return {
-      USD: baseRates.USD, // USD is always 1.0
-      EUR: baseRates.EUR * (1 + (Math.random() - 0.5) * variation),
-      GBP: baseRates.GBP * (1 + (Math.random() - 0.5) * variation),
-      JPY: baseRates.JPY * (1 + (Math.random() - 0.5) * variation),
-      CNY: baseRates.CNY * (1 + (Math.random() - 0.5) * variation),
-      MYR: baseRates.MYR * (1 + (Math.random() - 0.5) * variation),
-    };
+    // If all APIs fail, throw error
+    throw new Error('All currency APIs failed, using cached/fallback rates');
   }
 
   /**
@@ -325,7 +405,17 @@ export class CurrencyService {
     isStale: boolean;
     ttl: number;
     nextUpdate: Date | null;
+    isUpdating: boolean;
+    source: string;
   } {
+    const timeSinceUpdate = this.cache.lastUpdated > 0 ? Date.now() - this.cache.lastUpdated : 0;
+    const hoursOld = Math.floor(timeSinceUpdate / (1000 * 60 * 60));
+    
+    let source = 'fallback';
+    if (this.cache.lastUpdated > 0) {
+      source = hoursOld < 24 ? 'live' : 'cached (stale)';
+    }
+    
     return {
       lastUpdated: this.cache.lastUpdated > 0 ? new Date(this.cache.lastUpdated) : null,
       isStale: !this.isRatesFresh(),
@@ -333,6 +423,8 @@ export class CurrencyService {
       nextUpdate: this.cache.lastUpdated > 0 
         ? new Date(this.cache.lastUpdated + this.cache.ttl)
         : null,
+      isUpdating: this.isUpdating,
+      source,
     };
   }
 

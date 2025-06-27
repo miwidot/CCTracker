@@ -1,5 +1,6 @@
 import { UsageService } from '../UsageService';
 import { MODEL_PRICING } from '@shared/constants';
+import CostCalculatorService from '../CostCalculatorService';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -23,8 +24,7 @@ describe('UsageService', () => {
       
       const cost = usageService.calculateCost(model, inputTokens, outputTokens);
       
-      const expectedCost = (inputTokens * MODEL_PRICING[model].input) + 
-                          (outputTokens * MODEL_PRICING[model].output);
+      const expectedCost = CostCalculatorService.calculateCost(model, inputTokens, outputTokens);
       
       expect(cost).toBe(expectedCost);
     });
@@ -36,8 +36,8 @@ describe('UsageService', () => {
       
       const cost = usageService.calculateCost(model, inputTokens, outputTokens);
       
-      // Should use fallback pricing
-      const expectedCost = (inputTokens * 0.003 / 1000) + (outputTokens * 0.015 / 1000);
+      // Should use fallback pricing from centralized calculator
+      const expectedCost = CostCalculatorService.calculateCost(model, inputTokens, outputTokens);
       expect(cost).toBe(expectedCost);
     });
 

@@ -1,7 +1,6 @@
 import React from 'react';
-import { XMarkIcon, ChartBarIcon, CurrencyDollarIcon, DocumentArrowDownIcon, Cog6ToothIcon, BoltIcon } from '@heroicons/react/24/outline';
-import { useTheme } from '../contexts/ThemeContext';
-import { THEMES } from '@shared/constants';
+import { XMarkIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,14 +10,12 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, currentPage }) => {
-  const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
 
   const menuItems = [
-    { icon: ChartBarIcon, label: 'Dashboard', page: 'dashboard' },
-    { icon: BoltIcon, label: 'Business Intelligence', page: 'business-intelligence', highlight: true },
-    { icon: CurrencyDollarIcon, label: 'Usage Analytics', page: 'analytics' },
-    { icon: DocumentArrowDownIcon, label: 'Export Data', page: 'export' },
-    { icon: Cog6ToothIcon, label: 'Settings', page: 'settings' },
+    { icon: ChartBarIcon, label: t('navigation.dashboard'), page: 'dashboard' },
+    { icon: CurrencyDollarIcon, label: t('navigation.analytics'), page: 'analytics' },
+    { icon: BoltIcon, label: t('navigation.businessIntelligence'), page: 'business-intelligence', highlight: true },
   ];
 
   const handleNavigation = (page: string) => {
@@ -43,13 +40,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
+          {/* Header with macOS controls spacing */}
+          <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] sidebar-with-controls">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-[var(--text-accent)] rounded-lg flex items-center justify-center">
                 <ChartBarIcon className="h-5 w-5 text-white" />
               </div>
-              <span className="font-semibold text-[var(--text-primary)]">Cost Tracker</span>
+              <span className="font-semibold text-[var(--text-primary)]">{t('app.title')}</span>
             </div>
             <button
               onClick={onClose}
@@ -75,36 +72,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
                 <span>{item.label}</span>
                 {item.highlight && (
                   <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
-                    NEW
+                    {t('common.new')}
                   </span>
                 )}
               </button>
             ))}
           </nav>
 
-          {/* Theme Selector */}
-          <div className="p-4 border-t border-[var(--border-color)]">
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Theme</h3>
-            <div className="space-y-2">
-              {Object.values(THEMES).map((themeOption) => (
-                <button
-                  key={themeOption.name}
-                  onClick={() => setTheme(themeOption.name)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors ${
-                    theme.name === themeOption.name
-                      ? 'bg-[var(--text-accent)] text-white'
-                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  <div
-                    className="w-4 h-4 rounded-full border border-current"
-                    style={{ backgroundColor: themeOption.primary }}
-                  />
-                  <span className="capitalize">{themeOption.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </>

@@ -40,6 +40,20 @@ const api = {
   getCurrencyRates: () => ipcRenderer.invoke('currency:get-rates'),
   convertCurrency: (amount: number, from: string, to: string) => 
     ipcRenderer.invoke('currency:convert', amount, from, to),
+  getCurrencyStatus: () => ipcRenderer.invoke('currency:get-status'),
+  forceUpdateCurrency: () => ipcRenderer.invoke('currency:force-update'),
+
+  // Centralized cost calculation methods with currency support
+  calculateDashboardMetrics: (currentPeriodData: any[], previousPeriodData: any[]) => 
+    ipcRenderer.invoke('cost-calculator:dashboard-metrics', currentPeriodData, previousPeriodData),
+  calculateDashboardMetricsWithCurrency: (currentPeriodData: any[], previousPeriodData: any[], targetCurrency: string, rates: any) => 
+    ipcRenderer.invoke('cost-calculator:dashboard-metrics-with-currency', currentPeriodData, previousPeriodData, targetCurrency, rates),
+  calculateProjectCosts: (entries: any[], targetCurrency: string, rates: any) => 
+    ipcRenderer.invoke('cost-calculator:project-costs', entries, targetCurrency, rates),
+  calculateTotalCost: (entries: any[], targetCurrency?: string) => 
+    ipcRenderer.invoke('cost-calculator:total-cost', entries, targetCurrency),
+  calculateModelBreakdown: (entries: any[]) => 
+    ipcRenderer.invoke('cost-calculator:model-breakdown', entries),
 
   // Event listeners
   onUsageUpdate: (callback: (data: any) => void) => {
