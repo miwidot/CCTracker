@@ -57,38 +57,30 @@ const BIMetricCard: React.FC<BIMetricCardProps> = ({
   subtitle, 
   color = 'blue' 
 }) => {
-  const colorClasses = {
-    blue: 'text-blue-600 bg-blue-50 border-blue-200',
-    green: 'text-green-600 bg-green-50 border-green-200',
-    red: 'text-red-600 bg-red-50 border-red-200',
-    yellow: 'text-yellow-600 bg-yellow-50 border-yellow-200',
-    purple: 'text-purple-600 bg-purple-50 border-purple-200',
-  };
-
   const getTrendIcon = () => {
     if (!trend) return null;
     switch (trend.direction) {
       case 'up': return <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />;
       case 'down': return <ArrowTrendingDownIcon className="h-4 w-4 text-red-500" />;
-      case 'stable': return <MinusIcon className="h-4 w-4 text-gray-500" />;
+      case 'stable': return <MinusIcon className="h-4 w-4 text-[var(--text-secondary)]" />;
     }
   };
 
   return (
-    <div className={`p-6 rounded-lg border-2 ${colorClasses[color]} transition-all hover:scale-105`}>
+    <div className="p-6 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-secondary)] transition-all hover:scale-105">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <Icon className="h-8 w-8" />
+          <Icon className="h-8 w-8 text-[var(--text-accent)]" />
           <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
-            {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{title}</p>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">{value}</p>
+            {subtitle && <p className="text-xs text-[var(--text-secondary)]">{subtitle}</p>}
           </div>
         </div>
         {trend && (
           <div className="flex items-center space-x-1">
             {getTrendIcon()}
-            <span className="text-sm font-medium">{trend.value.toFixed(1)}%</span>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{trend.value.toFixed(1)}%</span>
           </div>
         )}
       </div>
@@ -127,10 +119,10 @@ const ModelEfficiencyTable: React.FC<ModelEfficiencyTableProps> = ({ models }) =
             <tr key={model.model} className={index < 3 ? 'bg-[var(--bg-success)]' : ''}>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  index === 0 ? 'bg-gold text-yellow-800' : 
-                  index === 1 ? 'bg-gray-200 text-gray-800' :
+                  index === 0 ? 'bg-yellow-200 text-yellow-800' : 
+                  index === 1 ? 'bg-gray-300 text-gray-800' :
                   index === 2 ? 'bg-orange-200 text-orange-800' :
-                  'bg-gray-100 text-gray-800'
+                  'bg-[var(--bg-tertiary)] text-[var(--text-primary)]'
                 }`}>
                   #{index + 1}
                 </span>
@@ -166,9 +158,9 @@ interface AnomalyAlertsProps {
 const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
   const { t } = useTranslation();
   const severityColors = {
-    high: 'bg-red-50 border-red-200 text-red-800',
-    medium: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-    low: 'bg-blue-50 border-blue-200 text-blue-800',
+    high: 'bg-red-100 border-red-300 text-red-700',
+    medium: 'bg-yellow-100 border-yellow-300 text-yellow-700',
+    low: 'bg-blue-100 border-blue-300 text-blue-700',
   };
 
   return (
