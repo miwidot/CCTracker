@@ -3,7 +3,8 @@
     "title": "Suivi des Coûts",
     "subtitle": "Moniteur d'Usage API Claude",
     "loading": "Chargement du Suivi des Coûts...",
-    "error": "Échec du Chargement"
+    "error": "Échec du Chargement",
+    "errorMessage": "Impossible d'initialiser les paramètres de l'application"
   },
   "dashboard": {
     "title": "Tableau de Bord d'Usage",
@@ -201,7 +202,8 @@
     "status": "Statut :",
     "selectLanguage": "Sélectionner la langue",
     "minutes": "min",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "invalidDate": "Date Invalide"
   },
   "languages": {
     "english": "Anglais",
@@ -210,5 +212,9 @@
     "spanish": "Espagnol",
     "japanese": "Japonais",
     "chineseSimplified": "Chinois (Simplifié)"
+  },
+  "errors": {
+    "useUsageDataContext": "useUsageData doit être utilisé dans un UsageDataProvider",
+    "useSettingsContext": "useSettings doit être utilisé dans un SettingsProvider"
   }
 }

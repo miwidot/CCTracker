@@ -1,13 +1,15 @@
 import { useSettings } from '../contexts/SettingsContext';
+import { useTranslation } from './useTranslation';
 
 export const useTimeFormat = () => {
   const { settings } = useSettings();
+  const { t } = useTranslation();
 
   const formatDateTime = (date: Date | string | number): string => {
     const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
     
     if (isNaN(dateObj.getTime())) {
-      return 'Invalid Date';
+      return t('ui.invalidDate');
     }
 
     const use24Hour = settings.time_format === '24h';
@@ -28,7 +30,7 @@ export const useTimeFormat = () => {
     const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
     
     if (isNaN(dateObj.getTime())) {
-      return 'Invalid Date';
+      return t('ui.invalidDate');
     }
 
     const use24Hour = settings.time_format === '24h';
@@ -46,7 +48,7 @@ export const useTimeFormat = () => {
     const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
     
     if (isNaN(dateObj.getTime())) {
-      return 'Invalid Date';
+      return t('ui.invalidDate');
     }
 
     const options: Intl.DateTimeFormatOptions = {

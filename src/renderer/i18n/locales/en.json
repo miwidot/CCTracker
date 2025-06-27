@@ -3,7 +3,8 @@
     "title": "Cost Tracker",
     "subtitle": "Claude API Usage Monitor",
     "loading": "Loading Cost Tracker...",
-    "error": "Failed to Load"
+    "error": "Failed to Load",
+    "errorMessage": "Unable to initialize application settings"
   },
   "dashboard": {
     "title": "Usage Dashboard",
@@ -201,7 +202,8 @@
     "status": "Status:",
     "selectLanguage": "Select language",
     "minutes": "min",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "invalidDate": "Invalid Date"
   },
   "languages": {
     "english": "English",
@@ -210,5 +212,9 @@
     "spanish": "Spanish",
     "japanese": "Japanese",
     "chineseSimplified": "Chinese (Simplified)"
+  },
+  "errors": {
+    "useUsageDataContext": "useUsageData must be used within a UsageDataProvider",
+    "useSettingsContext": "useSettings must be used within a SettingsProvider"
   }
 }

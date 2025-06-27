@@ -6,11 +6,13 @@ import { Layout } from './components/Layout';
 import UsageDashboard from './components/UsageDashboard';
 import { BusinessIntelligenceDashboard } from './components/BusinessIntelligenceDashboard';
 import { SimpleUsageAnalytics } from './components/SimpleUsageAnalytics';
+import { useTranslation } from './hooks/useTranslation';
 import type { AppSettings } from '@shared/types';
 
 type CurrentPage = 'dashboard' | 'analytics' | 'business-intelligence';
 
 export const App: React.FC = () => {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState<CurrentPage>('dashboard');
@@ -37,7 +39,7 @@ export const App: React.FC = () => {
           <div className="animate-pulse mb-4">
             <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto"></div>
           </div>
-          <p className="text-lg">Loading Cost Tracker...</p>
+          <p className="text-lg">{t('app.loading')}</p>
         </div>
       </div>
     );
@@ -47,8 +49,8 @@ export const App: React.FC = () => {
     return (
       <div className="h-screen flex items-center justify-center bg-red-900 text-white">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Failed to Load</h1>
-          <p>Unable to initialize application settings</p>
+          <h1 className="text-2xl font-bold mb-2">{t('app.error')}</h1>
+          <p>{t('app.errorMessage')}</p>
         </div>
       </div>
     );

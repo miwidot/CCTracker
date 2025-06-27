@@ -3,7 +3,8 @@
     "title": "Rastreador de Costos",
     "subtitle": "Monitor de Uso de API Claude",
     "loading": "Cargando Rastreador de Costos...",
-    "error": "Error al Cargar"
+    "error": "Error al Cargar",
+    "errorMessage": "No se pudieron inicializar las configuraciones de la aplicación"
   },
   "dashboard": {
     "title": "Panel de Uso",
@@ -201,7 +202,8 @@
     "status": "Estado:",
     "selectLanguage": "Seleccionar idioma",
     "minutes": "min",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "invalidDate": "Fecha Inválida"
   },
   "languages": {
     "english": "Inglés",
@@ -210,5 +212,9 @@
     "spanish": "Español",
     "japanese": "Japonés",
     "chineseSimplified": "Chino (Simplificado)"
+  },
+  "errors": {
+    "useUsageDataContext": "useUsageData debe usarse dentro de un UsageDataProvider",
+    "useSettingsContext": "useSettings debe usarse dentro de un SettingsProvider"
   }
 }
