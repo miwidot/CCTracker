@@ -1,0 +1,96 @@
+import { app, BrowserWindow, ipcMain } from 'electron';
+import * as path from 'path';
+import { UsageService } from './services/UsageService';
+import { FileMonitorService } from './services/FileMonitorService';
+import { SettingsService } from './services/SettingsService';
+import { CurrencyService } from './services/CurrencyService';
+import { ExportService } from './services/ExportService';
+import { setupIpcHandlers } from './ipc/ipcHandlers';
+
+class Application {
+  private mainWindow: BrowserWindow | null = null;
+  private usageService: UsageService;
+  private fileMonitorService: FileMonitorService;
+  private settingsService: SettingsService;
+  private currencyService: CurrencyService;
+  private exportService: ExportService;
+
+  constructor() {
+    this.usageService = new UsageService();
+    this.fileMonitorService = new FileMonitorService();
+    this.settingsService = new SettingsService();
+    this.currencyService = new CurrencyService();
+    this.exportService = new ExportService();
+  }
+
+  private createWindow(): void {
+    this.mainWindow = new BrowserWindow({
+      width: 1200,
+      height: 800,
+      minWidth: 800,
+      minHeight: 600,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'preload.js'),
+      },
+      titleBarStyle: 'hiddenInset',
+      show: false,
+    });
+
+    const isDev = process.env.NODE_ENV === 'development';
+    
+    if (isDev) {
+      this.mainWindow.loadURL('http://localhost:3000');
+      this.mainWindow.webContents.openDevTools();
+    } else {
+      this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
+    }
+
+    this.mainWindow.once('ready-to-show', () => {
+      this.mainWindow?.show();
+    });
+
+    this.mainWindow.on('closed', () => {
+      this.mainWindow = null;
+    });
+  }
+
+  private async setupServices(): Promise<void> {
+    // Services are initialized in their constructors
+    // No additional initialization needed
+    
+    setupIpcHandlers({
+      usageService: this.usageService,
+      fileMonitorService: this.fileMonitorService,
+      settingsService: this.settingsService,
+      currencyService: this.currencyService,
+      exportService: this.exportService,
+    });
+  }
+
+  public async initialize(): Promise<void> {
+    await app.whenReady();
+    await this.setupServices();
+    this.createWindow();
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        this.createWindow();
+      }
+    });
+
+    app.on('window-all-closed', () => {
+      if (process.platform !== 'darwin') {
+        app.quit();
+      }
+    });
+
+    app.on('before-quit', async () => {
+      await this.fileMonitorService.stopMonitoring();
+    });
+  }
+}
+
+const application = new Application();
+application.initialize().catch(console.error);
