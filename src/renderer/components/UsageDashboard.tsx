@@ -543,10 +543,10 @@ const UsageDashboard: React.FC = () => {
       </div>
 
       {/* Date Range Picker */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
         <div className="flex items-center gap-2 mb-3">
-          <CalendarDaysIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('dateRange.title')}</h3>
+          <CalendarDaysIcon className="h-5 w-5 text-[var(--text-secondary)]" />
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">{t('dateRange.title')}</h3>
         </div>
         <DateRangePicker
           startDate={dateRange.start}
@@ -605,39 +605,39 @@ const UsageDashboard: React.FC = () => {
       {/* Token Breakdown and Model Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Token Breakdown */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {t('metrics.tokenBreakdown')}
           </h3>
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div key={i} className="h-4 bg-[var(--bg-skeleton)] rounded animate-pulse" />
               ))}
             </div>
           ) : (
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">{t('metrics.inputTokens')}</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-sm text-[var(--text-secondary)]">{t('metrics.inputTokens')}</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {formatTokens(filteredData.reduce((sum, entry) => sum + entry.input_tokens, 0))}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">{t('metrics.outputTokens')}</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-sm text-[var(--text-secondary)]">{t('metrics.outputTokens')}</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {formatTokens(filteredData.reduce((sum, entry) => sum + entry.output_tokens, 0))}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">{t('metrics.cacheWrite')}</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-sm text-[var(--text-secondary)]">{t('metrics.cacheWrite')}</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {formatTokens(filteredData.reduce((sum, entry) => sum + ((entry as any).cache_creation_tokens || 0), 0))}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">{t('metrics.cacheRead')}</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-sm text-[var(--text-secondary)]">{t('metrics.cacheRead')}</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {formatTokens(filteredData.reduce((sum, entry) => sum + ((entry as any).cache_read_tokens || 0), 0))}
                 </span>
               </div>
@@ -646,14 +646,14 @@ const UsageDashboard: React.FC = () => {
         </div>
 
         {/* Per Model Overview */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {t('metrics.perModelOverview')}
           </h3>
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div key={i} className="h-12 bg-[var(--bg-skeleton)] rounded animate-pulse" />
               ))}
             </div>
           ) : (
@@ -665,14 +665,14 @@ const UsageDashboard: React.FC = () => {
                 return (
                   <div key={modelData.name} className="p-3 bg-gray-50 dark:bg-gray-700 rounded">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      <span className="text-sm font-medium text-[var(--text-primary)] truncate">
                         {cleanModelName(modelData.name)}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs text-[var(--text-secondary)]">
                         {formatCurrencyDetailed(modelData.value, 4)}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs text-[var(--text-secondary)]">
                       {formatTokens(modelTokens)} tokens
                     </div>
                   </div>
@@ -683,14 +683,14 @@ const UsageDashboard: React.FC = () => {
         </div>
 
         {/* Top 5 Projects */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {t('metrics.topProjects')}
           </h3>
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div key={i} className="h-8 bg-[var(--bg-skeleton)] rounded animate-pulse" />
               ))}
             </div>
           ) : (
@@ -704,11 +704,11 @@ const UsageDashboard: React.FC = () => {
                       <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full w-5 h-5 flex items-center justify-center mr-2">
                         {index + 1}
                       </span>
-                      <span className="text-sm text-gray-900 dark:text-white truncate">
+                      <span className="text-sm text-[var(--text-primary)] truncate">
                         {project}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-[var(--text-secondary)]">
                       {data.formatted}
                     </span>
                   </div>
@@ -721,12 +721,12 @@ const UsageDashboard: React.FC = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Cost Over Time Chart */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {t('charts.costOverTime')}
           </h3>
           {isLoading ? (
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-64 bg-[var(--bg-skeleton)] rounded animate-pulse" />
           ) : chartData.costOverTime.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData.costOverTime}>
@@ -763,7 +763,7 @@ const UsageDashboard: React.FC = () => {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+            <div className="h-64 flex items-center justify-center text-[var(--text-secondary)]">
               <div className="text-center">
                 <ChartBarIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
                 <p>{t('charts.noCostData')}</p>
@@ -773,12 +773,12 @@ const UsageDashboard: React.FC = () => {
         </div>
 
         {/* Token Usage by Model Chart */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {t('charts.tokenUsageByModel')}
           </h3>
           {isLoading ? (
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-64 bg-[var(--bg-skeleton)] rounded animate-pulse" />
           ) : chartData.tokensByModel.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData.tokensByModel}>
@@ -809,7 +809,7 @@ const UsageDashboard: React.FC = () => {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+            <div className="h-64 flex items-center justify-center text-[var(--text-secondary)]">
               <div className="text-center">
                 <CpuChipIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
                 <p>{t('charts.noTokenData')}</p>
@@ -819,12 +819,12 @@ const UsageDashboard: React.FC = () => {
         </div>
 
         {/* Cost Distribution by Model */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {t('charts.costDistribution')}
           </h3>
           {isLoading ? (
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-64 bg-[var(--bg-skeleton)] rounded animate-pulse" />
           ) : chartData.costByModel.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -854,7 +854,7 @@ const UsageDashboard: React.FC = () => {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+            <div className="h-64 flex items-center justify-center text-[var(--text-secondary)]">
               <div className="text-center">
                 <CurrencyDollarIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
                 <p>{t('charts.noCostDistribution')}</p>
@@ -864,8 +864,8 @@ const UsageDashboard: React.FC = () => {
         </div>
 
         {/* Recent Sessions Table */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {t('sessions.title')}
           </h3>
           <SessionTable
