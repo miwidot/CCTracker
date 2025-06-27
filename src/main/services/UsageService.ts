@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as os from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { MODEL_PRICING } from '../../shared/constants';
 import { 
@@ -552,7 +553,6 @@ export class UsageService {
    * Auto-detect Claude CLI projects directory
    */
   private getClaudeProjectsPath(): string {
-    const os = require('os');
     return path.join(os.homedir(), '.claude', 'projects');
   }
 
