@@ -616,7 +616,6 @@ export class ExportService {
         return date.toLocaleString();
       case 'short':
         return date.toLocaleDateString();
-      case 'iso':
       default:
         return date.toISOString();
     }

@@ -3,6 +3,8 @@ import * as path from 'path';
 import type { AppSettings } from '@shared/types';
 import { DEFAULT_SETTINGS, THEMES, SUPPORTED_LANGUAGES } from '@shared/constants';
 
+const VALID_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'];
+
 export class SettingsService {
   private readonly settingsFile: string;
   private settings: AppSettings;
@@ -12,8 +14,6 @@ export class SettingsService {
   constructor(configDir: string = path.join(process.cwd(), 'config')) {
     this.settingsFile = path.join(configDir, 'settings.json');
     this.settings = { ...DEFAULT_SETTINGS };
-    this.ensureConfigDirectory();
-    this.loadSettings();
   }
 
   private async ensureConfigDirectory(): Promise<void> {
@@ -22,7 +22,7 @@ export class SettingsService {
       await fs.mkdir(configDir, { recursive: true });
     } catch (error) {
       console.error('Failed to create config directory:', error);
-      throw new Error(`Failed to create config directory: ${error}`);
+      throw new Error(`Failed to create config directory: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -30,6 +30,7 @@ export class SettingsService {
    * Public initialize method for external use
    */
   async initialize(): Promise<void> {
+    await this.ensureConfigDirectory();
     await this.loadSettings();
   }
 
@@ -74,7 +75,7 @@ export class SettingsService {
       console.log('Settings saved successfully');
     } catch (error) {
       console.error('Failed to save settings:', error);
-      throw new Error(`Failed to save settings: ${error}`);
+      throw new Error(`Failed to save settings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -110,8 +111,7 @@ export class SettingsService {
     }
 
     // Validate currency
-    const validCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'];
-    if (!validCurrencies.includes(this.settings.currency)) {
+    if (!VALID_CURRENCIES.includes(this.settings.currency)) {
       console.warn(`Invalid currency: ${this.settings.currency}, using default`);
       this.settings.currency = DEFAULT_SETTINGS.currency;
     }
@@ -181,7 +181,7 @@ export class SettingsService {
       }
     } catch (error) {
       console.error('Failed to update settings:', error);
-      throw new Error(`Failed to update settings: ${error}`);
+      throw new Error(`Failed to update settings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -206,7 +206,7 @@ export class SettingsService {
       this.notifySettingsChange(oldSettings, this.settings);
     } catch (error) {
       console.error('Failed to reset settings:', error);
-      throw new Error(`Failed to reset settings: ${error}`);
+      throw new Error(`Failed to reset settings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -278,7 +278,7 @@ export class SettingsService {
       console.log('Settings imported successfully');
     } catch (error) {
       console.error('Failed to import settings:', error);
-      throw new Error(`Failed to import settings: ${error}`);
+      throw new Error(`Failed to import settings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -299,7 +299,7 @@ export class SettingsService {
         key,
         name,
       })),
-      currencies: ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'],
+      currencies: VALID_CURRENCIES,
     };
   }
 

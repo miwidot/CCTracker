@@ -25,8 +25,6 @@ export class CurrencyService {
       lastUpdated: 0,
       ttl: this.CACHE_TTL,
     };
-    
-    this.initializeService();
   }
 
   /**
@@ -313,7 +311,7 @@ export class CurrencyService {
       return Math.round(convertedAmount * 100) / 100; // Round to 2 decimal places
     } catch (error) {
       console.error('Failed to convert currency:', error);
-      throw new Error(`Failed to convert currency: ${error}`);
+      throw new Error(`Failed to convert currency: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
