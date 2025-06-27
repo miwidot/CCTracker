@@ -1,3 +1,11 @@
+2025-06-27 16:42:36 +08 - REFACTOR: Created centralized CostCalculatorService to fix calculation inconsistencies
+- PROBLEM: Multiple calculation inconsistencies (efficiency scores as cost per million vs 0-10 scale expected by UI)
+- SOLUTION: Single source of truth CostCalculatorService with standardized 0-10 efficiency scoring algorithm
+- REPLACED: Project analytics calculation (40+ lines → 2 lines), model efficiency calculation (25+ lines → 1 line)
+- STANDARDIZED: All cost calculations, efficiency scoring, trend analysis, and project analytics use same methods
+- DOCUMENTED: Comprehensive docs/CostCalculatorService.md with methodology and examples
+- RESULT: Consistent metrics across all pages, proper efficiency bars/percentages in Usage Analytics
+
 2025-06-27 16:33:27 +08 - BUGFIX: Fixed cost calculation predictions preventing 53K USD anomaly
 - IDENTIFIED: Cost predictions were using ALL historical data instead of recent data, causing extrapolation errors
 - ROOT CAUSE: generatePredictions() loaded entire usage history (~10,000+ entries), daily averages included months of costs
