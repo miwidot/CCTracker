@@ -764,6 +764,79 @@ export class UsageService {
   }
 
   /**
+   * Generate usage trends from specific entries (for predictions)
+   */
+  private generateUsageTrendsFromEntries(entries: UsageEntry[], granularity: 'daily' | 'weekly' | 'monthly'): UsageTrend[] {
+    try {
+      if (entries.length === 0) {
+        return [];
+      }
+
+      // Group entries by time period
+      const periodGroups = new Map<string, UsageEntry[]>();
+      
+      entries.forEach(entry => {
+        const date = new Date(entry.timestamp);
+        let periodKey: string;
+
+        switch (granularity) {
+          case 'daily':
+            periodKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+            break;
+          case 'weekly':
+            const weekStart = new Date(date);
+            weekStart.setDate(date.getDate() - date.getDay()); // Start of week
+            periodKey = weekStart.toISOString().split('T')[0];
+            break;
+          case 'monthly':
+            periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            break;
+          default:
+            periodKey = date.toISOString().split('T')[0];
+        }
+
+        if (!periodGroups.has(periodKey)) {
+          periodGroups.set(periodKey, []);
+        }
+        periodGroups.get(periodKey)!.push(entry);
+      });
+
+      // Calculate trends with growth rates
+      const sortedPeriods = Array.from(periodGroups.keys()).sort();
+      const trends: UsageTrend[] = [];
+
+      sortedPeriods.forEach((period, index) => {
+        const periodEntries = periodGroups.get(period)!;
+        const cost = periodEntries.reduce((sum, entry) => sum + entry.cost_usd, 0);
+        const tokens = periodEntries.reduce((sum, entry) => sum + entry.total_tokens, 0);
+        const sessions = new Set(periodEntries.map(e => e.session_id).filter(Boolean)).size;
+
+        // Calculate growth rate compared to previous period
+        let growthRate = 0;
+        if (index > 0) {
+          const prevPeriod = trends[index - 1];
+          if (prevPeriod.cost > 0) {
+            growthRate = ((cost - prevPeriod.cost) / prevPeriod.cost) * 100;
+          }
+        }
+
+        trends.push({
+          period,
+          cost,
+          tokens,
+          sessions,
+          growth_rate: growthRate
+        });
+      });
+
+      return trends;
+    } catch (error) {
+      console.error('Failed to generate usage trends from entries:', error);
+      return [];
+    }
+  }
+
+  /**
    * Detect usage anomalies
    */
   async detectAnomalies(): Promise<UsageAnomaly[]> {
@@ -863,16 +936,28 @@ export class UsageService {
         };
       }
 
-      // Get recent data for trend analysis
-      const recentEntries = allEntries.slice(0, 30); // Last 30 entries
-      const dailyTrends = await this.generateUsageTrends('daily');
+      // FIXED: Only use recent data (last 30 days) for predictions
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const recentEntries = allEntries.filter(entry => 
+        new Date(entry.timestamp) >= thirtyDaysAgo
+      );
+      
+      // If not enough recent data, fall back to last 30 entries but warn
+      const entriesForAnalysis = recentEntries.length >= 7 ? recentEntries : allEntries.slice(0, 30);
+      
+      console.log(`Using ${entriesForAnalysis.length} entries from last 30 days for predictions (filtered from ${allEntries.length} total)`);
+      
+      // Generate trends only from recent data
+      const dailyTrends = this.generateUsageTrendsFromEntries(entriesForAnalysis, 'daily');
       
       // Calculate daily averages
-      const dailyCosts = dailyTrends.map(t => t.cost);
-      const dailyTokens = dailyTrends.map(t => t.tokens);
+      const dailyCosts = dailyTrends.map((t: UsageTrend) => t.cost);
+      const dailyTokens = dailyTrends.map((t: UsageTrend) => t.tokens);
       
-      const avgDailyCost = dailyCosts.reduce((a, b) => a + b, 0) / dailyCosts.length;
-      const avgDailyTokens = dailyTokens.reduce((a, b) => a + b, 0) / dailyTokens.length;
+      const avgDailyCost = dailyCosts.reduce((a: number, b: number) => a + b, 0) / dailyCosts.length;
+      const avgDailyTokens = dailyTokens.reduce((a: number, b: number) => a + b, 0) / dailyTokens.length;
 
       // Simple linear regression for trend detection
       const getTrend = (values: number[]): 'increasing' | 'decreasing' | 'stable' => {
@@ -906,7 +991,7 @@ export class UsageService {
       const nextWeekTokens = avgDailyTokens * 7 * trendMultiplier;
       
       // Confidence level based on data consistency
-      const costVariance = dailyCosts.reduce((acc, val) => acc + Math.pow(val - avgDailyCost, 2), 0) / dailyCosts.length;
+      const costVariance = dailyCosts.reduce((acc: number, val: number) => acc + Math.pow(val - avgDailyCost, 2), 0) / dailyCosts.length;
       const confidenceLevel = Math.max(20, Math.min(95, 90 - (costVariance / avgDailyCost) * 100));
       
       // Budget risk assessment (assuming $100 monthly budget)
