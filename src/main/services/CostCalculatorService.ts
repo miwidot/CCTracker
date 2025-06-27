@@ -359,11 +359,12 @@ export class CostCalculatorService {
         case 'daily':
           periodKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
           break;
-        case 'weekly':
+        case 'weekly': {
           const weekStart = new Date(date);
           weekStart.setDate(date.getDate() - date.getDay()); // Start of week
           periodKey = weekStart.toISOString().split('T')[0];
           break;
+        }
         case 'monthly':
           periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
           break;
