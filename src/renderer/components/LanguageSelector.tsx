@@ -32,14 +32,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ className = 
     <select
       value={i18n.language}
       onChange={handleLanguageChange}
-      className={`bg-transparent border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
+      className={`bg-transparent border border-[var(--border-color)] rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--text-accent)] ${className}`}
       aria-label={t('ui.selectLanguage')}
     >
       {getLanguages(t).map((language) => (
         <option
           key={language.code}
           value={language.code}
-          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          className="bg-[var(--bg-primary)] text-[var(--text-primary)]"
         >
           {language.nativeName}
         </option>

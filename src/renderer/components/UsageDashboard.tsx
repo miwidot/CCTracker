@@ -663,7 +663,7 @@ const UsageDashboard: React.FC = () => {
                   .filter(entry => entry.model === modelData.name)
                   .reduce((sum, entry) => sum + entry.total_tokens, 0);
                 return (
-                  <div key={modelData.name} className="p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                  <div key={modelData.name} className="p-3 bg-[var(--bg-tertiary)] rounded">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-[var(--text-primary)] truncate">
                         {cleanModelName(modelData.name)}
@@ -701,7 +701,7 @@ const UsageDashboard: React.FC = () => {
                 .map(([project, data], index) => (
                   <div key={project} className="flex justify-between items-center">
                     <div className="flex items-center">
-                      <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full w-5 h-5 flex items-center justify-center mr-2">
+                      <span className="text-xs bg-[var(--bg-info)] text-[var(--text-accent)] rounded-full w-5 h-5 flex items-center justify-center mr-2">
                         {index + 1}
                       </span>
                       <span className="text-sm text-[var(--text-primary)] truncate">
@@ -880,10 +880,10 @@ const UsageDashboard: React.FC = () => {
 
       {/* Error/Warning Messages */}
       {!isLoading && filteredData.length === 0 && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+        <div className="bg-[var(--bg-warning)] border border-[var(--text-warning)] rounded-lg p-4">
           <div className="flex items-center">
-            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2" />
-            <p className="text-yellow-800 dark:text-yellow-200">
+            <ExclamationTriangleIcon className="h-5 w-5 text-[var(--text-warning)] mr-2" />
+            <p className="text-[var(--text-warning)]">
               {t('warnings.noDataFound')}
             </p>
           </div>

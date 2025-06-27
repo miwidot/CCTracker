@@ -71,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
                 {item.highlight && (
-                  <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
+                  <span className="absolute -top-1 -right-1 bg-[var(--text-accent)] text-white text-xs px-1 py-0.5 rounded-full font-bold">
                     {t('common.new')}
                   </span>
                 )}
