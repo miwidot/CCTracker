@@ -1,3 +1,15 @@
+2025-06-27 16:15:23 +08 - FEATURE: Implemented comprehensive Usage Analytics dashboard with project-level cost breakdown
+- Built complete project analytics backend with getProjectBreakdown(), getProjectComparison(), getProjectSessions()
+- Created UsageAnalyticsDashboard component with interactive project cards, cost visualization, session drill-down
+- Added project efficiency scoring (0-10 scale), trend analysis (increasing/decreasing/stable), multi-model tracking
+- Implemented cost distribution charts (bar charts and pie charts) for project visualization
+- Added session details table with duration, message count, token usage, and efficiency metrics
+- Integrated project analytics IPC handlers and preload APIs for backend ↔ frontend communication
+- Wired up Usage Analytics navigation in App.tsx to replace "Coming Soon" placeholder
+- Built responsive design with proper loading states, error handling, and multi-currency support
+- Updated Task.md and STATUS.md to reflect completion of Usage Analytics implementation
+- The "Usage Analytics" page now provides the originally intended project-level cost breakdown functionality
+
 2025-06-27 14:44:20 +08 - FEATURE: Completed internationalization (i18n) setup for CCTracker
 - Created complete translation files for French (fr.json), Spanish (es.json), Japanese (ja.json), and Chinese Simplified (zh.json)
 - Built comprehensive translations with native language accuracy for all UI elements
