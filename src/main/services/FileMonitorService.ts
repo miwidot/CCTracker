@@ -2,13 +2,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as chokidar from 'chokidar';
 import { EventEmitter } from 'events';
-import { FileSystemEvent } from '../../shared/types';
+import type { FileSystemEvent } from '@shared/types';
 
 export class FileMonitorService extends EventEmitter {
   private watcher: chokidar.FSWatcher | null = null;
   private isMonitoring = false;
-  private watchedPaths: Set<string> = new Set();
-  private lastFileStates: Map<string, { size: number; mtime: number }> = new Map();
+  private readonly watchedPaths: Set<string> = new Set();
+  private readonly lastFileStates: Map<string, { size: number; mtime: number }> = new Map();
 
   constructor() {
     super();

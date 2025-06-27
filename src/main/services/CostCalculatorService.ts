@@ -1,4 +1,4 @@
-import { MODEL_PRICING } from '../../shared/constants';
+import { MODEL_PRICING, CURRENCY_SYMBOLS } from '@shared/constants';
 import type { 
   UsageEntry, 
   ProjectAnalytics, 
@@ -6,46 +6,8 @@ import type {
   SessionStats,
   UsageTrend,
   CurrencyRates
-} from '../../shared/types';
+} from '@shared/types';
 
-// Currency symbols mapping
-const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  JPY: '¥',
-  CNY: '¥',
-  MYR: 'RM',
-};
-
-// Claude 4 pricing constants (per million tokens) - matching original Rust implementation
-const PRICING_CONSTANTS = {
-  'claude-opus-4-20250514': {
-    input: 15.0,
-    output: 75.0,
-    cache_write: 18.75,
-    cache_read: 1.50,
-  },
-  'claude-sonnet-4-20250514': {
-    input: 3.0,
-    output: 15.0,
-    cache_write: 3.75,
-    cache_read: 0.30,
-  },
-  // Also support the model names as they appear in JSONL
-  'claude-opus-4': {
-    input: 15.0,
-    output: 75.0,
-    cache_write: 18.75,
-    cache_read: 1.50,
-  },
-  'claude-sonnet-4': {
-    input: 3.0,
-    output: 15.0,
-    cache_write: 3.75,
-    cache_read: 0.30,
-  }
-};
 
 /**
  * Centralized Cost Calculator Module
@@ -81,7 +43,7 @@ export function convertFromUSD(usdAmount: number, targetCurrency: string): numbe
 /**
  * Format currency amount with proper symbol and decimals
  */
-export function formatCurrency(amount: number, currency: string, decimals: number = 2): string {
+export function formatCurrency(amount: number, currency: string, decimals = 2): string {
   const symbol = CURRENCY_SYMBOLS[currency] || '$';
   
   // Japanese Yen and Chinese Yuan don't use decimal places
@@ -106,35 +68,30 @@ export function calculateCost(
   model: string, 
   inputTokens: number, 
   outputTokens: number,
-  cacheCreationTokens: number = 0,
-  cacheReadTokens: number = 0
+  cacheCreationTokens = 0,
+  cacheReadTokens = 0
 ): number {
-  // First try the enhanced pricing constants for Claude 4 models
-  let pricing = null;
+  // Use shared MODEL_PRICING as single source of truth
+  const pricing = MODEL_PRICING[model];
   
-  if (model.includes('opus-4') || model.includes('claude-opus-4')) {
-    pricing = PRICING_CONSTANTS['claude-opus-4'];
-  } else if (model.includes('sonnet-4') || model.includes('claude-sonnet-4')) {
-    pricing = PRICING_CONSTANTS['claude-sonnet-4'];
-  } else {
-    // Fall back to MODEL_PRICING for other models
-    const fallbackPricing = MODEL_PRICING[model];
-    if (!fallbackPricing) {
-      // Skip logging for synthetic/test models that don't have real pricing
-      if (!model.includes('<synthetic>')) {
-        console.warn(`Unknown model for cost calculation: ${model}`);
-      }
-      return 0;
+  if (!pricing) {
+    // Skip logging for synthetic/test models that don't have real pricing
+    if (!model.includes('<synthetic>')) {
+      console.warn(`Unknown model for cost calculation: ${model}`);
     }
-    // Convert to per-million pricing for consistency
-    return (inputTokens * fallbackPricing.input) + (outputTokens * fallbackPricing.output);
+    return 0;
   }
 
-  // Calculate cost (prices are per million tokens) - matching Rust implementation
-  const cost = (inputTokens * pricing.input / 1_000_000.0)
-    + (outputTokens * pricing.output / 1_000_000.0)
-    + (cacheCreationTokens * pricing.cache_write / 1_000_000.0)
-    + (cacheReadTokens * pricing.cache_read / 1_000_000.0);
+  // Calculate basic cost (prices are already per-token)
+  let cost = (inputTokens * pricing.input) + (outputTokens * pricing.output);
+  
+  // Add cache costs if available and provided
+  if (pricing.cache_write && cacheCreationTokens > 0) {
+    cost += cacheCreationTokens * pricing.cache_write;
+  }
+  if (pricing.cache_read && cacheReadTokens > 0) {
+    cost += cacheReadTokens * pricing.cache_read;
+  }
 
   return cost;
 }
@@ -191,7 +148,7 @@ export function calculateEfficiencyScore(totalCost: number, totalTokens: number)
 export function calculateCostTrend(
   recentCost: number, 
   previousCost: number, 
-  threshold: number = 0.1
+  threshold = 0.1
 ): 'increasing' | 'decreasing' | 'stable' {
   if (previousCost === 0) {
     return 'stable';
@@ -335,7 +292,7 @@ export function calculateSessionStats(sessionId: string, entries: UsageEntry[]):
     total_cost: totalCost,
     total_tokens: totalTokens,
     message_count: entries.length,
-    model: model
+    model
   };
 }
 
@@ -519,7 +476,7 @@ export function calculateTotalCost(entries: UsageEntry[], targetCurrency?: strin
 export function calculateDashboardMetricsWithCurrency(
   currentPeriodData: UsageEntry[],
   previousPeriodData: UsageEntry[],
-  targetCurrency: string = 'USD'
+  targetCurrency = 'USD'
 ): {
   totalCost: number;
   totalTokens: number;
@@ -551,7 +508,7 @@ export function calculateDashboardMetricsWithCurrency(
  */
 export function calculateProjectCostsByName(
   entries: UsageEntry[], 
-  targetCurrency: string = 'USD'
+  targetCurrency = 'USD'
 ): Record<string, { costUSD: number; costConverted: number; formatted: string }> {
   // Group by project name and calculate USD totals first
   const projectCostsUSD = entries.reduce((acc, entry) => {

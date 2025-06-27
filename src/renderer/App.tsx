@@ -37,7 +37,7 @@ export const App: React.FC = () => {
       <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
         <div className="text-center">
           <div className="animate-pulse mb-4">
-            <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto"></div>
+            <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto" />
           </div>
           <p className="text-lg">{t('app.loading')}</p>
         </div>

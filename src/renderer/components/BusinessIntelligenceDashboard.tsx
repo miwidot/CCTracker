@@ -35,6 +35,7 @@ import {
   Line,
 } from 'recharts';
 import { useTranslation } from '../hooks/useTranslation';
+import { cleanModelName, capitalizeWords } from '@shared/utils';
 import type { BusinessIntelligence, ModelEfficiency, UsageAnomaly } from '@shared/types';
 
 interface BIMetricCardProps {
@@ -185,7 +186,7 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs font-semibold uppercase">
-                        {anomaly.severity} • {anomaly.type.replace('_', ' ')}
+                        {anomaly.severity} • {capitalizeWords(anomaly.type.replace('_', ' '))}
                       </span>
                       <span className="text-xs text-[var(--text-secondary)]">
                         {new Date(anomaly.timestamp).toLocaleDateString()}
@@ -246,7 +247,7 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--text-accent)] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--text-accent)] mx-auto" />
           <p className="mt-4 text-[var(--text-secondary)]">{t('businessIntelligence.generatingData')}</p>
         </div>
       </div>
@@ -281,7 +282,7 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
   }));
 
   const modelEfficiencyChartData = biData.model_efficiency.slice(0, 6).map(model => ({
-    name: model.model.replace('claude-', '').replace('-20240229', '').replace('-20241022', ''),
+    name: cleanModelName(model.model),
     efficiency: model.efficiency_score,
     cost: model.totalCost,
     usage: model.usageCount,

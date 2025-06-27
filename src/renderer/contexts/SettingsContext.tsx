@@ -33,7 +33,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     setIsLoading(true);
     try {
       const newSettings = { ...settings, ...updates };
-      await window.electronAPI.updateSettings(updates);
+      await window.electronAPI.updateSettings(newSettings);
       setSettings(newSettings);
     } catch (error) {
       console.error('Failed to update settings:', error);

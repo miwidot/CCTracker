@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 import { v4 as uuidv4 } from 'uuid';
-import { MODEL_PRICING } from '../../shared/constants';
+import { MODEL_PRICING } from '@shared/constants';
 import { 
   calculateCost, 
   calculateModelEfficiency,
@@ -10,7 +10,7 @@ import {
   calculatePredictiveAnalytics,
   calculateProjectAnalytics
 } from './CostCalculatorService';
-import { 
+import type { 
   UsageEntry, 
   SessionStats, 
   DateRangeStats, 
@@ -23,7 +23,7 @@ import {
   ProjectAnalytics,
   ProjectSession,
   ProjectComparison
-} from '../../shared/types';
+} from '@shared/types';
 
 // Real Claude CLI JSONL format
 interface ClaudeJSONLEntry {
@@ -63,10 +63,10 @@ interface LegacyJSONLEntry {
 }
 
 export class UsageService {
-  private dataDir: string;
-  private usageFile: string;
-  private cache: Map<string, UsageEntry> = new Map();
-  private sessionCache: Map<string, SessionStats> = new Map();
+  private readonly dataDir: string;
+  private readonly usageFile: string;
+  private readonly cache: Map<string, UsageEntry> = new Map();
+  private readonly sessionCache: Map<string, SessionStats> = new Map();
 
   constructor(dataDir: string = path.join(process.cwd(), 'data')) {
     this.dataDir = dataDir;
@@ -97,7 +97,7 @@ export class UsageService {
       
       // Skip lines that are just strings (malformed entries)
       if (!trimmedLine.startsWith('{')) {
-        console.warn('Skipping malformed JSONL line (not JSON object):', trimmedLine.substring(0, 50) + '...');
+        console.warn('Skipping malformed JSONL line (not JSON object):', `${trimmedLine.substring(0, 50)  }...`);
         return null;
       }
       
@@ -122,7 +122,7 @@ export class UsageService {
       // Fall back to legacy format
       return this.parseLegacyJSONLEntry(data as LegacyJSONLEntry);
     } catch (error) {
-      console.error('Failed to parse JSONL line:', line.substring(0, 100) + '...', error);
+      console.error('Failed to parse JSONL line:', `${line.substring(0, 100)  }...`, error);
       return null;
     }
   }
@@ -160,13 +160,13 @@ export class UsageService {
     const totalInputTokens = inputTokens + cacheCreationTokens + cacheReadTokens;
     const totalTokens = totalInputTokens + outputTokens;
 
-    // Calculate cost using our pricing model
-    const costUsd = this.calculateCost(model, totalInputTokens, outputTokens);
+    // Calculate cost using centralized pricing model
+    const costUsd = calculateCost(model, totalInputTokens, outputTokens);
 
     const entry: UsageEntry = {
       id: data.uuid, // Use Claude's UUID instead of generating new one
       timestamp: data.timestamp,
-      model: model,
+      model,
       input_tokens: totalInputTokens,
       output_tokens: outputTokens,
       total_tokens: totalTokens,
@@ -203,7 +203,7 @@ export class UsageService {
     const outputTokens = data.usage.output_tokens || 0;
     const totalTokens = data.usage.total_tokens || (inputTokens + outputTokens);
 
-    const costUsd = this.calculateCost(data.model, inputTokens, outputTokens);
+    const costUsd = calculateCost(data.model, inputTokens, outputTokens);
 
     const entry: UsageEntry = {
       id: uuidv4(),
@@ -260,7 +260,7 @@ export class UsageService {
       this.cache.set(entry.id, entry);
 
       // Append to JSONL file
-      const jsonlLine = JSON.stringify({
+      const jsonlLine = `${JSON.stringify({
         id: entry.id,
         timestamp: entry.timestamp,
         model: entry.model,
@@ -273,7 +273,7 @@ export class UsageService {
         session_id: entry.session_id,
         project_path: entry.project_path,
         conversation_id: entry.conversation_id,
-      }) + '\n';
+      })  }\n`;
 
       await fs.appendFile(this.usageFile, jsonlLine, 'utf-8');
       console.log('Added usage entry:', entry.id);
@@ -416,13 +416,6 @@ export class UsageService {
     }
   }
 
-  /**
-   * Calculate cost for given token usage
-   * @deprecated Use calculateCost() from CostCalculatorService module for consistency
-   */
-  calculateCost(model: string, inputTokens: number, outputTokens: number): number {
-    return calculateCost(model, inputTokens, outputTokens);
-  }
 
   /**
    * Process and store usage data from Claude CLI output
@@ -469,7 +462,7 @@ export class UsageService {
         await fs.copyFile(this.usageFile, backupFile);
         
         // Rewrite file with recent entries
-        const jsonlContent = recentEntries.map(entry => JSON.stringify({
+        const jsonlContent = `${recentEntries.map(entry => JSON.stringify({
           id: entry.id,
           timestamp: entry.timestamp,
           model: entry.model,
@@ -482,7 +475,7 @@ export class UsageService {
           session_id: entry.session_id,
           project_path: entry.project_path,
           conversation_id: entry.conversation_id,
-        })).join('\n') + '\n';
+        })).join('\n')  }\n`;
 
         await fs.writeFile(this.usageFile, jsonlContent, 'utf-8');
         
@@ -1247,7 +1240,7 @@ export class UsageService {
           total_tokens: totalTokens,
           message_count: messageCount,
           models_used: modelsUsed,
-          efficiency: efficiency
+          efficiency
         });
       }
 
@@ -1265,7 +1258,7 @@ export class UsageService {
   }
 
   // Add session to file mapping for better project extraction
-  private sessionToFileMap = new Map<string, string[]>();
+  private readonly sessionToFileMap = new Map<string, string[]>();
 
   /**
    * Enhanced initialize method to build session-to-file mapping

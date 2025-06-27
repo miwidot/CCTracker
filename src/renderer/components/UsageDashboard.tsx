@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { format, subDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
-
-// Utility function to format tokens in M format
-const formatTokens = (tokens: number): string => {
-  if (tokens >= 1000000) {
-    return `${(tokens / 1000000).toFixed(2)}M`;
-  } else if (tokens >= 1000) {
-    return `${(tokens / 1000).toFixed(1)}K`;
-  }
-  return tokens.toString();
-};
+import { formatTokens, cleanModelName } from '@shared/utils';
 import {
   LineChart,
   Line,
@@ -68,10 +59,10 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
       <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-sm border border-[var(--border-color)] animate-pulse">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24"></div>
-            <div className="h-8 bg-[var(--bg-tertiary)] rounded w-32"></div>
+            <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24" />
+            <div className="h-8 bg-[var(--bg-tertiary)] rounded w-32" />
           </div>
-          <div className="h-12 w-12 bg-[var(--bg-tertiary)] rounded-lg"></div>
+          <div className="h-12 w-12 bg-[var(--bg-tertiary)] rounded-lg" />
         </div>
       </div>
     );
@@ -210,7 +201,7 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoadi
     return (
       <div className="space-y-2">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
         ))}
       </div>
     );
@@ -301,7 +292,7 @@ const UsageDashboard: React.FC = () => {
   // Calculate earliest data timestamp for ALL option
   const earliestDataDate = useMemo(() => {
     if (usageData.length === 0) return new Date();
-    return new Date(Math.min(...usageData.map((entry: any) => new Date(entry.timestamp).getTime())));
+    return new Date(Math.min(...usageData.map((entry: UsageEntry) => new Date(entry.timestamp).getTime())));
   }, [usageData]);
   
   // State for export functionality
@@ -618,7 +609,7 @@ const UsageDashboard: React.FC = () => {
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div key={i} className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               ))}
             </div>
           ) : (
@@ -659,7 +650,7 @@ const UsageDashboard: React.FC = () => {
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               ))}
             </div>
           ) : (
@@ -672,7 +663,7 @@ const UsageDashboard: React.FC = () => {
                   <div key={modelData.name} className="p-3 bg-gray-50 dark:bg-gray-700 rounded">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {modelData.name.replace('claude-', '').replace('-20241022', '').replace('-20250514', '')}
+                        {cleanModelName(modelData.name)}
                       </span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {formatCurrencyDetailed(modelData.value, 4)}
@@ -696,7 +687,7 @@ const UsageDashboard: React.FC = () => {
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div key={i} className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               ))}
             </div>
           ) : (
@@ -732,7 +723,7 @@ const UsageDashboard: React.FC = () => {
             {t('charts.costOverTime')}
           </h3>
           {isLoading ? (
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           ) : chartData.costOverTime.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData.costOverTime}>
@@ -783,7 +774,7 @@ const UsageDashboard: React.FC = () => {
             {t('charts.tokenUsageByModel')}
           </h3>
           {isLoading ? (
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           ) : chartData.tokensByModel.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData.tokensByModel}>
@@ -828,7 +819,7 @@ const UsageDashboard: React.FC = () => {
             {t('charts.costDistribution')}
           </h3>
           {isLoading ? (
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           ) : chartData.costByModel.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>

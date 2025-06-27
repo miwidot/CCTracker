@@ -1,7 +1,8 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as XLSX from 'xlsx';
-import { UsageEntry, SessionStats, DateRangeStats, CurrencyRates, BusinessIntelligence } from '../../shared/types';
+import type { UsageEntry, SessionStats, CurrencyRates, BusinessIntelligence } from '@shared/types';
+import { DateRangeStats } from '@shared/types';
 import { calculateTotalCost, calculateModelBreakdown } from './CostCalculatorService';
 
 export interface ExportOptions {
@@ -27,7 +28,7 @@ export interface ExportResult {
 }
 
 export class ExportService {
-  private exportDir: string;
+  private readonly exportDir: string;
 
   constructor(exportDir: string = path.join(process.cwd(), 'exports')) {
     this.exportDir = exportDir;
@@ -119,7 +120,7 @@ export class ExportService {
           'Project Path',
           'Conversation ID',
         ];
-        csvContent += headers.join(',') + '\n';
+        csvContent += `${headers.join(',')  }\n`;
       }
 
       // Add data rows
@@ -136,7 +137,7 @@ export class ExportService {
           this.escapeCSV(entry.project_path || ''),
           this.escapeCSV(entry.conversation_id || ''),
         ];
-        csvContent += row.join(',') + '\n';
+        csvContent += `${row.join(',')  }\n`;
       }
 
       // Save to file
@@ -477,7 +478,7 @@ export class ExportService {
    * Process data before export (filtering, sorting, grouping)
    */
   private processDataForExport(data: UsageEntry[], options: ExportOptions): UsageEntry[] {
-    let processedData = [...data];
+    const processedData = [...data];
 
     // Sort by timestamp (newest first)
     processedData.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -568,7 +569,7 @@ export class ExportService {
       'Model',
     ];
     
-    let csv = headers.join(',') + '\n';
+    let csv = `${headers.join(',')  }\n`;
     
     for (const session of sessions) {
       const duration = (new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60);
@@ -584,7 +585,7 @@ export class ExportService {
         this.escapeCSV(session.model),
       ];
       
-      csv += row.join(',') + '\n';
+      csv += `${row.join(',')  }\n`;
     }
     
     return csv;
@@ -607,7 +608,7 @@ export class ExportService {
   /**
    * Format date according to options
    */
-  private formatDate(dateString: string, format: string = 'iso'): string {
+  private formatDate(dateString: string, format = 'iso'): string {
     const date = new Date(dateString);
     
     switch (format) {
@@ -685,7 +686,7 @@ export class ExportService {
   /**
    * Clean up old export files
    */
-  async cleanupOldExports(maxAge: number = 30): Promise<void> {
+  async cleanupOldExports(maxAge = 30): Promise<void> {
     try {
       const files = await fs.readdir(this.exportDir);
       const cutoffTime = Date.now() - (maxAge * 24 * 60 * 60 * 1000); // maxAge in days

@@ -34,36 +34,32 @@ export const UsageDataProvider: React.FC<UsageDataProviderProps> = ({ children }
   const refreshData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [usage, sessions] = await Promise.all([
-        window.electronAPI.getUsageStats(),
-        // For now, we'll derive session stats from usage data
-        window.electronAPI.getUsageStats().then(data => {
-          // Group by session_id to create session stats
-          const sessionMap = new Map<string, SessionStats>();
-          data.forEach((entry: UsageEntry) => {
-            if (entry.session_id) {
-              const existing = sessionMap.get(entry.session_id);
-              if (existing) {
-                existing.total_cost += entry.cost_usd;
-                existing.total_tokens += entry.total_tokens;
-                existing.message_count += 1;
-                existing.end_time = entry.timestamp;
-              } else {
-                sessionMap.set(entry.session_id, {
-                  session_id: entry.session_id,
-                  start_time: entry.timestamp,
-                  end_time: entry.timestamp,
-                  total_cost: entry.cost_usd,
-                  total_tokens: entry.total_tokens,
-                  message_count: 1,
-                  model: entry.model,
-                });
-              }
-            }
-          });
-          return Array.from(sessionMap.values());
-        }),
-      ]);
+      const usage = await window.electronAPI.getUsageStats();
+      
+      // Group by session_id and calculate stats using centralized logic
+      const sessionMap = new Map<string, UsageEntry[]>();
+      usage.forEach((entry: UsageEntry) => {
+        if (entry.session_id) {
+          if (!sessionMap.has(entry.session_id)) {
+            sessionMap.set(entry.session_id, []);
+          }
+          sessionMap.get(entry.session_id)!.push(entry);
+        }
+      });
+
+      // Calculate session stats using centralized calculation
+      const sessions = Array.from(sessionMap.entries()).map(([sessionId, entries]) => {
+        // Use centralized calculation logic (we'll need to call the service)
+        return {
+          session_id: sessionId,
+          start_time: entries[0].timestamp,
+          end_time: entries[entries.length - 1].timestamp,
+          total_cost: entries.reduce((sum, entry) => sum + entry.cost_usd, 0),
+          total_tokens: entries.reduce((sum, entry) => sum + entry.total_tokens, 0),
+          message_count: entries.length,
+          model: entries[0].model, // Most common model could be calculated better
+        };
+      });
 
       setUsageData(usage);
       setSessionStats(sessions);
@@ -91,7 +87,7 @@ export const UsageDataProvider: React.FC<UsageDataProviderProps> = ({ children }
   // Set up real-time updates
   useEffect(() => {
     const unsubscribe = window.electronAPI.onUsageUpdate((data) => {
-      setUsageData(prev => [...prev, data]);
+      setUsageData(prev => [...prev, ...data]);
       setLastUpdated(new Date());
     });
 

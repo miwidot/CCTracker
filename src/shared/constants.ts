@@ -1,4 +1,4 @@
-export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+export const MODEL_PRICING: Record<string, { input: number; output: number; cache_write?: number; cache_read?: number }> = {
   // Claude 3.5 Models
   'claude-3-5-sonnet-20241022': {
     input: 3.00 / 1_000_000,
@@ -27,14 +27,31 @@ export const MODEL_PRICING: Record<string, { input: number; output: number }> = 
     output: 1.25 / 1_000_000,
   },
   
-  // Claude 4 Models (Sonnet 4)
+  // Claude 4 Models (with cache pricing)
   'claude-sonnet-4-20250514': {
-    input: 3.00 / 1_000_000,  // Assuming same pricing as 3.5 Sonnet
-    output: 15.00 / 1_000_000,
+    input: 3.0 / 1_000_000,
+    output: 15.0 / 1_000_000,
+    cache_write: 3.75 / 1_000_000,
+    cache_read: 0.30 / 1_000_000,
   },
   'claude-opus-4-20250514': {
-    input: 15.00 / 1_000_000,  // Assuming same pricing as 3 Opus
-    output: 75.00 / 1_000_000,
+    input: 15.0 / 1_000_000,
+    output: 75.0 / 1_000_000,
+    cache_write: 18.75 / 1_000_000,
+    cache_read: 1.50 / 1_000_000,
+  },
+  // Also support the model names as they appear in JSONL
+  'claude-opus-4': {
+    input: 15.0 / 1_000_000,
+    output: 75.0 / 1_000_000,
+    cache_write: 18.75 / 1_000_000,
+    cache_read: 1.50 / 1_000_000,
+  },
+  'claude-sonnet-4': {
+    input: 3.0 / 1_000_000,
+    output: 15.0 / 1_000_000,
+    cache_write: 3.75 / 1_000_000,
+    cache_read: 0.30 / 1_000_000,
   },
 };
 
@@ -45,6 +62,15 @@ export const DEFAULT_CURRENCY_RATES = {
   JPY: 110.0,
   CNY: 6.45,
   MYR: 4.18,
+};
+
+export const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  JPY: '¥',
+  CNY: '¥',
+  MYR: 'RM',
 };
 
 export const THEMES = {

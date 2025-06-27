@@ -14,7 +14,8 @@
     "start": "electron dist/main.js",
     "package": "electron-builder",
     "test": "jest",
-    "lint": "echo 'Linting skipped - TypeScript type-check provides validation'",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "type-check": "tsc --noEmit"
   },
   "keywords": [
@@ -28,6 +29,7 @@
   "author": "Cost Tracker Team",
   "license": "MIT",
   "devDependencies": {
+    "@eslint/js": "^9.29.0",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.6.1",
@@ -65,7 +67,6 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
-    "@eslint/js": "^9.29.0",
     "@heroicons/react": "^2.2.0",
     "chokidar": "^3.6.0",
     "date-fns": "^4.1.0",

@@ -40,11 +40,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 animate-pulse">
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4" />
         <div className="space-y-3">
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/6"></div>
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/6" />
         </div>
       </div>
     );
@@ -142,7 +142,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
     
     return projects.slice(0, 10).map(project => ({
       name: project.project_name.length > 15 
-        ? project.project_name.substring(0, 15) + '...' 
+        ? `${project.project_name.substring(0, 15)  }...` 
         : project.project_name,
       fullName: project.project_name,
       cost: project.total_cost,
@@ -263,7 +263,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
           </h3>
           {isLoading ? (
             <div className="h-64 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
@@ -306,7 +306,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
                   key={i}
                   project={{} as ProjectAnalytics}
                   currency={settings.currency}
-                  isLoading={true}
+                  isLoading
                 />
               ))}
             </div>

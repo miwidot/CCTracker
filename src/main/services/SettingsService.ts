@@ -1,10 +1,10 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { AppSettings } from '../../shared/types';
-import { DEFAULT_SETTINGS, THEMES, SUPPORTED_LANGUAGES } from '../../shared/constants';
+import type { AppSettings } from '@shared/types';
+import { DEFAULT_SETTINGS, THEMES, SUPPORTED_LANGUAGES } from '@shared/constants';
 
 export class SettingsService {
-  private settingsFile: string;
+  private readonly settingsFile: string;
   private settings: AppSettings;
   private isDirty = false;
   private saveTimeout: NodeJS.Timeout | null = null;

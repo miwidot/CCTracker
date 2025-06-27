@@ -9,11 +9,11 @@ import { setupIpcHandlers } from './ipc/ipcHandlers';
 
 class Application {
   private mainWindow: BrowserWindow | null = null;
-  private usageService: UsageService;
-  private fileMonitorService: FileMonitorService;
-  private settingsService: SettingsService;
-  private currencyService: CurrencyService;
-  private exportService: ExportService;
+  private readonly usageService: UsageService;
+  private readonly fileMonitorService: FileMonitorService;
+  private readonly settingsService: SettingsService;
+  private readonly currencyService: CurrencyService;
+  private readonly exportService: ExportService;
 
   constructor() {
     this.usageService = new UsageService();

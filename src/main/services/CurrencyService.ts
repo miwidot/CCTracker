@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { CurrencyRates } from '../../shared/types';
-import { DEFAULT_CURRENCY_RATES } from '../../shared/constants';
+import type { CurrencyRates } from '@shared/types';
+import { DEFAULT_CURRENCY_RATES, CURRENCY_SYMBOLS } from '@shared/constants';
 
 interface CurrencyCache {
   rates: CurrencyRates;
@@ -10,7 +10,7 @@ interface CurrencyCache {
 }
 
 export class CurrencyService {
-  private cacheFile: string;
+  private readonly cacheFile: string;
   private cache: CurrencyCache;
   private updateInterval: NodeJS.Timeout | null = null;
   private readonly CACHE_TTL = 86400000; // 24 hours in milliseconds (daily updates)
@@ -331,20 +331,11 @@ export class CurrencyService {
    * Format currency amount with proper symbol and formatting
    */
   formatCurrency(amount: number, currency: keyof Omit<CurrencyRates, 'monthlyBudget'>): string {
-    const symbols: Record<keyof Omit<CurrencyRates, 'monthlyBudget'>, string> = {
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
-      JPY: '¥',
-      CNY: '¥',
-      MYR: 'RM',
-    };
-
-    const symbol = symbols[currency] || currency;
+    const symbol = CURRENCY_SYMBOLS[currency] || currency;
     
     // Format based on currency conventions
-    if (currency === 'JPY') {
-      // Japanese Yen doesn't use decimal places
+    if (currency === 'JPY' || currency === 'CNY') {
+      // Japanese Yen and Chinese Yuan don't use decimal places
       return `${symbol}${Math.round(amount).toLocaleString()}`;
     } else {
       return `${symbol}${amount.toFixed(2)}`;
@@ -356,12 +347,12 @@ export class CurrencyService {
    */
   getSupportedCurrencies(): Array<{ code: keyof CurrencyRates; name: string; symbol: string }> {
     return [
-      { code: 'USD', name: 'US Dollar', symbol: '$' },
-      { code: 'EUR', name: 'Euro', symbol: '€' },
-      { code: 'GBP', name: 'British Pound', symbol: '£' },
-      { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
-      { code: 'CNY', name: 'Chinese Yuan', symbol: '¥' },
-      { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM' },
+      { code: 'USD', name: 'US Dollar', symbol: CURRENCY_SYMBOLS.USD },
+      { code: 'EUR', name: 'Euro', symbol: CURRENCY_SYMBOLS.EUR },
+      { code: 'GBP', name: 'British Pound', symbol: CURRENCY_SYMBOLS.GBP },
+      { code: 'JPY', name: 'Japanese Yen', symbol: CURRENCY_SYMBOLS.JPY },
+      { code: 'CNY', name: 'Chinese Yuan', symbol: CURRENCY_SYMBOLS.CNY },
+      { code: 'MYR', name: 'Malaysian Ringgit', symbol: CURRENCY_SYMBOLS.MYR },
     ];
   }
 

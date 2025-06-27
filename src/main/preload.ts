@@ -1,5 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { IPCChannels } from '@shared/types';
+import type { 
+  IPCChannels, 
+  UsageEntry, 
+  SessionStats, 
+  AppSettings, 
+  CurrencyRates,
+  FileSystemEvent,
+  BusinessIntelligence
+} from '@shared/types';
 
 const api = {
   // Usage data methods
@@ -29,12 +37,12 @@ const api = {
 
   // Settings methods
   getSettings: () => ipcRenderer.invoke('settings:get'),
-  updateSettings: (settings: any) => ipcRenderer.invoke('settings:update', settings),
+  updateSettings: (settings: AppSettings) => ipcRenderer.invoke('settings:update', settings),
 
   // Export methods
-  exportCsv: (data: any[]) => ipcRenderer.invoke('export:csv', data),
-  exportJson: (data: any[]) => ipcRenderer.invoke('export:json', data),
-  exportBusinessReport: (data: any) => ipcRenderer.invoke('export:business-report', data),
+  exportCsv: (data: UsageEntry[]) => ipcRenderer.invoke('export:csv', data),
+  exportJson: (data: UsageEntry[]) => ipcRenderer.invoke('export:json', data),
+  exportBusinessReport: (data: BusinessIntelligence) => ipcRenderer.invoke('export:business-report', data),
 
   // Currency methods
   getCurrencyRates: () => ipcRenderer.invoke('currency:get-rates'),
@@ -44,24 +52,24 @@ const api = {
   forceUpdateCurrency: () => ipcRenderer.invoke('currency:force-update'),
 
   // Centralized cost calculation methods with currency support
-  calculateDashboardMetrics: (currentPeriodData: any[], previousPeriodData: any[]) => 
+  calculateDashboardMetrics: (currentPeriodData: UsageEntry[], previousPeriodData: UsageEntry[]) => 
     ipcRenderer.invoke('cost-calculator:dashboard-metrics', currentPeriodData, previousPeriodData),
-  calculateDashboardMetricsWithCurrency: (currentPeriodData: any[], previousPeriodData: any[], targetCurrency: string, rates: any) => 
+  calculateDashboardMetricsWithCurrency: (currentPeriodData: UsageEntry[], previousPeriodData: UsageEntry[], targetCurrency: string, rates: CurrencyRates) => 
     ipcRenderer.invoke('cost-calculator:dashboard-metrics-with-currency', currentPeriodData, previousPeriodData, targetCurrency, rates),
-  calculateProjectCosts: (entries: any[], targetCurrency: string, rates: any) => 
+  calculateProjectCosts: (entries: UsageEntry[], targetCurrency: string, rates: CurrencyRates) => 
     ipcRenderer.invoke('cost-calculator:project-costs', entries, targetCurrency, rates),
-  calculateTotalCost: (entries: any[], targetCurrency?: string) => 
+  calculateTotalCost: (entries: UsageEntry[], targetCurrency?: string) => 
     ipcRenderer.invoke('cost-calculator:total-cost', entries, targetCurrency),
-  calculateModelBreakdown: (entries: any[]) => 
+  calculateModelBreakdown: (entries: UsageEntry[]) => 
     ipcRenderer.invoke('cost-calculator:model-breakdown', entries),
 
   // Event listeners
-  onUsageUpdate: (callback: (data: any) => void) => {
+  onUsageUpdate: (callback: (data: UsageEntry[]) => void) => {
     ipcRenderer.on('usage-updated', (_, data) => callback(data));
     return () => ipcRenderer.removeAllListeners('usage-updated');
   },
 
-  onFileSystemEvent: (callback: (event: any) => void) => {
+  onFileSystemEvent: (callback: (event: FileSystemEvent) => void) => {
     ipcRenderer.on('file-system-event', (_, event) => callback(event));
     return () => ipcRenderer.removeAllListeners('file-system-event');
   },

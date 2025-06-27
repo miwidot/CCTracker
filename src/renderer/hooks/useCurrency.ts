@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
+import { CURRENCY_SYMBOLS } from '@shared/constants';
 
 interface CurrencyRates {
   USD: number;
@@ -51,17 +52,7 @@ export const useCurrency = () => {
   const formatCurrency = useCallback(
     (amount: number): string => {
       const convertedAmount = convertFromUSD(amount);
-      
-      const symbols: Record<string, string> = {
-        USD: '$',
-        EUR: '€',
-        GBP: '£',
-        JPY: '¥',
-        CNY: '¥',
-        MYR: 'RM',
-      };
-
-      const symbol = symbols[settings.currency] || '$';
+      const symbol = CURRENCY_SYMBOLS[settings.currency] || '$';
       
       // Format based on currency conventions
       if (settings.currency === 'JPY' || settings.currency === 'CNY') {
@@ -75,19 +66,9 @@ export const useCurrency = () => {
   );
 
   const formatCurrencyDetailed = useCallback(
-    (amount: number, decimals: number = 4): string => {
+    (amount: number, decimals = 4): string => {
       const convertedAmount = convertFromUSD(amount);
-      
-      const symbols: Record<string, string> = {
-        USD: '$',
-        EUR: '€',
-        GBP: '£',
-        JPY: '¥',
-        CNY: '¥',
-        MYR: 'RM',
-      };
-
-      const symbol = symbols[settings.currency] || '$';
+      const symbol = CURRENCY_SYMBOLS[settings.currency] || '$';
       
       // Format based on currency conventions
       if (settings.currency === 'JPY' || settings.currency === 'CNY') {
@@ -101,15 +82,7 @@ export const useCurrency = () => {
   );
 
   const getCurrencySymbol = useCallback((): string => {
-    const symbols: Record<string, string> = {
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
-      JPY: '¥',
-      CNY: '¥',
-      MYR: 'RM',
-    };
-    return symbols[settings.currency] || '$';
+    return CURRENCY_SYMBOLS[settings.currency] || '$';
   }, [settings.currency]);
 
   return {
