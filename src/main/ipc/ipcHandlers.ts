@@ -117,29 +117,29 @@ export function setupIpcHandlers(services: Services) {
 
   // Centralized cost calculation handlers with currency support
   ipcMain.handle('cost-calculator:dashboard-metrics', async (_, currentPeriodData: any[], previousPeriodData: any[]) => {
-    const CostCalculatorService = (await import('../services/CostCalculatorService')).default;
-    return CostCalculatorService.calculateDashboardMetrics(currentPeriodData, previousPeriodData);
+    const { calculateDashboardMetrics } = await import('../services/CostCalculatorService');
+    return calculateDashboardMetrics(currentPeriodData, previousPeriodData);
   });
   
   ipcMain.handle('cost-calculator:dashboard-metrics-with-currency', async (_, currentPeriodData: any[], previousPeriodData: any[], targetCurrency: string, rates: any) => {
-    const CostCalculatorService = (await import('../services/CostCalculatorService')).default;
-    CostCalculatorService.setCurrencyRates(rates);
-    return CostCalculatorService.calculateDashboardMetricsWithCurrency(currentPeriodData, previousPeriodData, targetCurrency);
+    const { setCurrencyRates, calculateDashboardMetricsWithCurrency } = await import('../services/CostCalculatorService');
+    setCurrencyRates(rates);
+    return calculateDashboardMetricsWithCurrency(currentPeriodData, previousPeriodData, targetCurrency);
   });
   
   ipcMain.handle('cost-calculator:project-costs', async (_, entries: any[], targetCurrency: string, rates: any) => {
-    const CostCalculatorService = (await import('../services/CostCalculatorService')).default;
-    CostCalculatorService.setCurrencyRates(rates);
-    return CostCalculatorService.calculateProjectCostsByName(entries, targetCurrency);
+    const { setCurrencyRates, calculateProjectCostsByName } = await import('../services/CostCalculatorService');
+    setCurrencyRates(rates);
+    return calculateProjectCostsByName(entries, targetCurrency);
   });
 
   ipcMain.handle('cost-calculator:total-cost', async (_, entries: any[], targetCurrency?: string) => {
-    const CostCalculatorService = (await import('../services/CostCalculatorService')).default;
-    return CostCalculatorService.calculateTotalCost(entries, targetCurrency);
+    const { calculateTotalCost } = await import('../services/CostCalculatorService');
+    return calculateTotalCost(entries, targetCurrency);
   });
 
   ipcMain.handle('cost-calculator:model-breakdown', async (_, entries: any[]) => {
-    const CostCalculatorService = (await import('../services/CostCalculatorService')).default;
-    return CostCalculatorService.calculateModelBreakdown(entries);
+    const { calculateModelBreakdown } = await import('../services/CostCalculatorService');
+    return calculateModelBreakdown(entries);
   });
 }

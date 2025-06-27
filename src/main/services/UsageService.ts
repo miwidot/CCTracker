@@ -2,7 +2,13 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { MODEL_PRICING } from '../../shared/constants';
-import CostCalculatorService from './CostCalculatorService';
+import { 
+  calculateCost, 
+  calculateModelEfficiency,
+  calculateUsageTrends,
+  calculatePredictiveAnalytics,
+  calculateProjectAnalytics
+} from './CostCalculatorService';
 import { 
   UsageEntry, 
   SessionStats, 
@@ -411,10 +417,10 @@ export class UsageService {
 
   /**
    * Calculate cost for given token usage
-   * @deprecated Use CostCalculatorService.calculateCost() for consistency
+   * @deprecated Use calculateCost() from CostCalculatorService module for consistency
    */
   calculateCost(model: string, inputTokens: number, outputTokens: number): number {
-    return CostCalculatorService.calculateCost(model, inputTokens, outputTokens);
+    return calculateCost(model, inputTokens, outputTokens);
   }
 
   /**
@@ -680,7 +686,7 @@ export class UsageService {
       }
 
       // Use centralized calculator for consistent model efficiency calculation
-      const efficiency = CostCalculatorService.calculateModelEfficiency(allEntries);
+      const efficiency = calculateModelEfficiency(allEntries);
 
       console.log(`Calculated efficiency for ${efficiency.length} models`);
       return efficiency;
@@ -692,12 +698,12 @@ export class UsageService {
 
   /**
    * Generate usage trends by time period
-   * @deprecated Use CostCalculatorService.calculateUsageTrends() for consistency
+   * @deprecated Use calculateUsageTrends() from CostCalculatorService module for consistency
    */
   async generateUsageTrends(granularity: 'daily' | 'weekly' | 'monthly'): Promise<UsageTrend[]> {
     try {
       const allEntries = await this.getAllUsageEntries();
-      const trends = CostCalculatorService.calculateUsageTrends(allEntries, granularity);
+      const trends = calculateUsageTrends(allEntries, granularity);
       
       console.log(`Generated ${trends.length} ${granularity} trend points`);
       return trends;
@@ -821,7 +827,7 @@ export class UsageService {
       console.log(`Using ${entriesForAnalysis.length} entries from last 30 days for predictions (filtered from ${allEntries.length} total)`);
       
       // Use centralized predictive analytics calculation
-      const predictionResults = CostCalculatorService.calculatePredictiveAnalytics(entriesForAnalysis);
+      const predictionResults = calculatePredictiveAnalytics(entriesForAnalysis);
 
       const predictions: PredictiveAnalytics = {
         predicted_monthly_cost: predictionResults.predictedMonthlyCost,
@@ -1088,7 +1094,7 @@ export class UsageService {
 
       for (const [projectName, entries] of projectGroups.entries()) {
         // Use centralized calculator for consistent project analytics
-        const analytics = CostCalculatorService.calculateProjectAnalytics(projectName, entries);
+        const analytics = calculateProjectAnalytics(projectName, entries);
         projectAnalytics.push(analytics);
       }
 
