@@ -600,8 +600,10 @@ export function calculateModelBreakdown(entries: UsageEntry[]): Record<string, n
 
 /**
  * Calculate predictive analytics with centralized methodology
+ * @param recentEntries Usage entries for analysis (typically last 30 days)
+ * @param budgetThreshold Optional monthly budget threshold in USD for risk assessment
  */
-export function calculatePredictiveAnalytics(recentEntries: UsageEntry[]): {
+export function calculatePredictiveAnalytics(recentEntries: UsageEntry[], budgetThreshold?: number): {
   predictedMonthlyCost: number;
   predictedMonthlyTokens: number;
   costTrend: 'increasing' | 'decreasing' | 'stable';
@@ -691,16 +693,16 @@ export function calculatePredictiveAnalytics(recentEntries: UsageEntry[]): {
   const costVariance = dailyCosts.reduce((acc, val) => acc + Math.pow(val - avgDailyCost, 2), 0) / dailyCosts.length;
   const confidenceLevel = Math.max(20, Math.min(95, 90 - (costVariance / avgDailyCost) * 100));
   
-  // Budget risk assessment
-  const budgetThreshold = currencyRates?.monthlyBudget || 100; // Configurable or default
-  const riskRatio = predictedMonthlyCost / budgetThreshold;
+  // Budget risk assessment - use parameter, fallback to currency rates, or default
+  const threshold = budgetThreshold ?? currencyRates?.monthlyBudget ?? 100;
+  const riskRatio = predictedMonthlyCost / threshold;
   
   let budgetRisk: 'low' | 'medium' | 'high';
   if (riskRatio < 0.7) budgetRisk = 'low';
   else if (riskRatio < 1.0) budgetRisk = 'medium';
   else budgetRisk = 'high';
   
-  const projectedOverage = Math.max(0, predictedMonthlyCost - budgetThreshold);
+  const projectedOverage = Math.max(0, predictedMonthlyCost - threshold);
 
   return {
     predictedMonthlyCost,
