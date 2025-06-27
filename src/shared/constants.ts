@@ -73,62 +73,26 @@ export const CURRENCY_SYMBOLS: Record<string, string> = {
   MYR: 'RM',
 };
 
-export const THEMES = {
-  light: {
-    name: 'light' as const,
-    primary: '#3b82f6',
-    secondary: '#64748b',
-    background: '#ffffff',
-    surface: '#f8fafc',
-    text: '#1e293b',
-    textSecondary: '#64748b',
-  },
-  dark: {
-    name: 'dark' as const,
-    primary: '#60a5fa',
-    secondary: '#94a3b8',
-    background: '#0f172a',
-    surface: '#1e293b',
-    text: '#f1f5f9',
-    textSecondary: '#94a3b8',
-  },
-  'catppuccin-latte': {
-    name: 'catppuccin-latte' as const,
-    primary: '#8839ef',
-    secondary: '#1e66f5',
-    background: '#eff1f5',
-    surface: '#ccd0da',
-    text: '#4c4f69',
-    textSecondary: '#6c6f85',
-  },
-  'catppuccin-frappe': {
-    name: 'catppuccin-frappe' as const,
-    primary: '#ca9ee6',
-    secondary: '#8caaee',
-    background: '#303446',
-    surface: '#414559',
-    text: '#c6d0f5',
-    textSecondary: '#a5adce',
-  },
-  'catppuccin-macchiato': {
-    name: 'catppuccin-macchiato' as const,
-    primary: '#c6a0f6',
-    secondary: '#8aadf4',
-    background: '#24273a',
-    surface: '#363a4f',
-    text: '#cad3f5',
-    textSecondary: '#a5adcb',
-  },
-  'catppuccin-mocha': {
-    name: 'catppuccin-mocha' as const,
-    primary: '#cba6f7',
-    secondary: '#89b4fa',
-    background: '#1e1e2e',
-    surface: '#313244',
-    text: '#cdd6f4',
-    textSecondary: '#bac2de',
-  },
-};
+// Export design token utilities for component use
+export { COLOR_PALETTES, CHART_PALETTES, generateCSSVariables } from './design-tokens';
+import { COLOR_PALETTES } from './design-tokens';
+
+// Helper function to get theme configuration for backward compatibility
+export function getThemeConfig(themeName: keyof typeof COLOR_PALETTES) {
+  const palette = COLOR_PALETTES[themeName];
+  return {
+    name: themeName,
+    primary: palette.primary,
+    secondary: palette.secondary,
+    background: palette.background,
+    surface: palette.surface,
+    text: palette.text,
+    textSecondary: palette.textSecondary,
+  };
+}
+
+// Available theme names for settings
+export const THEME_NAMES = Object.keys(COLOR_PALETTES) as (keyof typeof COLOR_PALETTES)[];
 
 export const SUPPORTED_LANGUAGES = {
   en: 'English',

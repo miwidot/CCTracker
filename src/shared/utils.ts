@@ -68,12 +68,9 @@ export function capitalizeWords(str: string): string {
 }
 
 /**
- * Generate a random color for charts/visualization
+ * Generate a chart color by index using CSS variables
+ * This function should be used sparingly - prefer CSS variables directly
  */
 export function generateColor(index: number): string {
-  const colors = [
-    '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
-    '#06B6D4', '#F97316', '#84CC16', '#EC4899', '#6B7280'
-  ];
-  return colors[index % colors.length];
+  return `var(--chart-color-${(index % 10) + 1})`;
 }

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { getChartColors } from '@shared/design-tokens';
 
 interface ChartColors {
   // Primary chart colors
@@ -11,7 +12,7 @@ interface ChartColors {
   info: string;
   
   // Data visualization palette (10 colors for variety)
-  dataColors: string[];
+  dataColors: readonly string[];
   
   // Chart infrastructure colors
   grid: string;
@@ -51,19 +52,16 @@ export const useChartTheme = (): ChartTheme => {
       }
     }
     
-    // Fallback colors if CSS variables aren't available
-    const fallbackDataColors = [
-      '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-      '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#6b7280'
-    ];
+    // Fallback colors from design tokens if CSS variables aren't available
+    const fallbackDataColors = getChartColors(theme.name as any);
     
     return {
-      primary: getCSSVariable('--color-primary') || '#3b82f6',
-      secondary: getCSSVariable('--color-secondary') || '#64748b',
-      success: getCSSVariable('--color-success') || '#10b981',
-      warning: getCSSVariable('--color-warning') || '#f59e0b',
-      error: getCSSVariable('--color-error') || '#ef4444',
-      info: getCSSVariable('--color-info') || '#06b6d4',
+      primary: getCSSVariable('--color-primary') || fallbackDataColors[0],
+      secondary: getCSSVariable('--color-secondary') || fallbackDataColors[1],
+      success: getCSSVariable('--color-success') || fallbackDataColors[1],
+      warning: getCSSVariable('--color-warning') || fallbackDataColors[2],
+      error: getCSSVariable('--color-error') || fallbackDataColors[3],
+      info: getCSSVariable('--color-info') || fallbackDataColors[5],
       dataColors: dataColors.length === 10 ? dataColors : fallbackDataColors,
       grid: getCSSVariable('--border-color') || '#e2e8f0',
       axis: getCSSVariable('--text-secondary') || '#64748b',

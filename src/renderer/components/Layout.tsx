@@ -12,7 +12,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentPag
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="h-screen flex overflow-hidden bg-[var(--bg-primary)]">
+    <div className="h-screen flex overflow-hidden bg-[var(--bg-primary)] theme-transition">
       <Sidebar 
         isOpen={sidebarOpen} 
         onClose={() => setSidebarOpen(false)}
@@ -20,11 +20,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentPag
         currentPage={currentPage}
       />
       
-      <div className="flex-1 flex flex-col overflow-hidden bg-[var(--bg-primary)]">
+      <div className="flex-1 flex flex-col overflow-hidden bg-[var(--bg-primary)] theme-transition">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto bg-[var(--bg-primary)] p-6">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto bg-[var(--bg-primary)] p-6 theme-transition">
+          <div className="max-w-7xl mx-auto animate-fade-in">
             {children}
           </div>
         </main>

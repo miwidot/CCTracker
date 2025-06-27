@@ -57,34 +57,34 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-sm border border-[var(--border-color)] animate-pulse">
+      <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-sm border border-[var(--border-color)] card theme-transition">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24" />
-            <div className="h-8 bg-[var(--bg-tertiary)] rounded w-32" />
+            <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24 animate-skeleton" />
+            <div className="h-8 bg-[var(--bg-tertiary)] rounded w-32 animate-skeleton animate-delay-100" />
           </div>
-          <div className="h-12 w-12 bg-[var(--bg-tertiary)] rounded-lg" />
+          <div className="h-12 w-12 bg-[var(--bg-tertiary)] rounded-lg animate-skeleton animate-delay-200" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-sm border border-[var(--border-color)] hover:shadow-md transition-shadow">
+    <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-sm border border-[var(--border-color)] card interactive theme-transition animate-fade-in">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)]">{title}</p>
-          <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">
+        <div className="animate-slide-right">
+          <p className="text-sm font-medium text-[var(--text-secondary)] theme-transition">{title}</p>
+          <p className="text-2xl font-bold text-[var(--text-primary)] mt-1 theme-transition">
             {typeof value === 'number' && currency ? `${currency} ${value.toFixed(2)}` : value}
           </p>
           {trend && (
-            <p className={`text-sm mt-1 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm mt-1 font-medium animate-slide-up animate-delay-100 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
               {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value).toFixed(1)}%
             </p>
           )}
         </div>
-        <div className="p-3 bg-[var(--bg-tertiary)] rounded-lg">
-          <Icon className="h-6 w-6 text-[var(--text-accent)]" />
+        <div className="p-3 bg-[var(--bg-tertiary)] rounded-lg interactive-scale theme-transition animate-slide-left animate-delay-150">
+          <Icon className="h-6 w-6 text-[var(--text-accent)] theme-transition" />
         </div>
       </div>
     </div>
@@ -516,20 +516,20 @@ const UsageDashboard: React.FC = () => {
   const COLORS = chartTheme.dataColors;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 theme-transition">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('dashboard.title')}</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fade-in">
+        <div className="animate-slide-right">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] theme-transition">{t('dashboard.title')}</h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1 theme-transition">
             {lastUpdated && `${t('common.lastUpdated')}: ${format(lastUpdated, 'MMM dd, yyyy HH:mm:ss')}`}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 animate-slide-left animate-delay-200">
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--text-secondary)] text-white rounded-md hover:bg-[var(--text-secondary)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--text-secondary)] text-white rounded-md hover:bg-[var(--text-secondary)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed btn interactive-scale theme-transition"
           >
             <ArrowPathIcon className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             {t('common.refresh')}
@@ -543,10 +543,10 @@ const UsageDashboard: React.FC = () => {
       </div>
 
       {/* Date Range Picker */}
-      <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
-        <div className="flex items-center gap-2 mb-3">
-          <CalendarDaysIcon className="h-5 w-5 text-[var(--text-secondary)]" />
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">{t('dateRange.title')}</h3>
+      <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)] card theme-transition animate-slide-up animate-delay-100">
+        <div className="flex items-center gap-2 mb-3 animate-slide-right">
+          <CalendarDaysIcon className="h-5 w-5 text-[var(--text-secondary)] theme-transition" />
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] theme-transition">{t('dateRange.title')}</h3>
         </div>
         <DateRangePicker
           startDate={dateRange.start}
@@ -569,54 +569,62 @@ const UsageDashboard: React.FC = () => {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <OverviewCard
-          title={t('metrics.totalCost')}
-          value={overviewMetrics.totalCost}
-          icon={CurrencyDollarIcon}
-          trend={{
-            value: overviewMetrics.costTrend,
-            isPositive: overviewMetrics.costTrend >= 0,
-          }}
-          isLoading={isLoading}
-          currency={currencySymbol}
-        />
-        <OverviewCard
-          title={t('metrics.totalTokens')}
-          value={formatTokens(overviewMetrics.totalTokens)}
-          icon={CpuChipIcon}
-          isLoading={isLoading}
-        />
-        <OverviewCard
-          title={t('metrics.sessionsCount')}
-          value={overviewMetrics.sessionsCount}
-          icon={ChatBubbleLeftRightIcon}
-          isLoading={isLoading}
-        />
-        <OverviewCard
-          title={t('metrics.avgCostPerSession')}
-          value={overviewMetrics.avgCostPerSession}
-          icon={ChartBarIcon}
-          isLoading={isLoading}
-          currency={currencySymbol}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
+        <div className="animate-slide-up animate-delay-200">
+          <OverviewCard
+            title={t('metrics.totalCost')}
+            value={overviewMetrics.totalCost}
+            icon={CurrencyDollarIcon}
+            trend={{
+              value: overviewMetrics.costTrend,
+              isPositive: overviewMetrics.costTrend >= 0,
+            }}
+            isLoading={isLoading}
+            currency={currencySymbol}
+          />
+        </div>
+        <div className="animate-slide-up animate-delay-300">
+          <OverviewCard
+            title={t('metrics.totalTokens')}
+            value={formatTokens(overviewMetrics.totalTokens)}
+            icon={CpuChipIcon}
+            isLoading={isLoading}
+          />
+        </div>
+        <div className="animate-slide-up animate-delay-400">
+          <OverviewCard
+            title={t('metrics.sessionsCount')}
+            value={overviewMetrics.sessionsCount}
+            icon={ChatBubbleLeftRightIcon}
+            isLoading={isLoading}
+          />
+        </div>
+        <div className="animate-slide-up animate-delay-500">
+          <OverviewCard
+            title={t('metrics.avgCostPerSession')}
+            value={overviewMetrics.avgCostPerSession}
+            icon={ChartBarIcon}
+            isLoading={isLoading}
+            currency={currencySymbol}
+          />
+        </div>
       </div>
 
       {/* Token Breakdown and Model Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Token Breakdown */}
-        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)] card theme-transition animate-slide-up animate-delay-600">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 theme-transition animate-slide-right">
             {t('metrics.tokenBreakdown')}
           </h3>
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-4 bg-[var(--bg-skeleton)] rounded animate-pulse" />
+                <div key={i} className="h-4 bg-[var(--bg-skeleton)] rounded animate-skeleton" style={{animationDelay: `${i * 100}ms`}} />
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 stagger-children">
               <div className="flex justify-between">
                 <span className="text-sm text-[var(--text-secondary)]">{t('metrics.inputTokens')}</span>
                 <span className="text-sm font-medium text-[var(--text-primary)]">
@@ -646,33 +654,33 @@ const UsageDashboard: React.FC = () => {
         </div>
 
         {/* Per Model Overview */}
-        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)] card theme-transition animate-slide-up animate-delay-700">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 theme-transition animate-slide-right">
             {t('metrics.perModelOverview')}
           </h3>
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-12 bg-[var(--bg-skeleton)] rounded animate-pulse" />
+                <div key={i} className="h-12 bg-[var(--bg-skeleton)] rounded animate-skeleton" style={{animationDelay: `${i * 100}ms`}} />
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
-              {chartData.costByModel.slice(0, 3).map((modelData) => {
+            <div className="space-y-3 stagger-children">
+              {chartData.costByModel.slice(0, 3).map((modelData, index) => {
                 const modelTokens = filteredData
                   .filter(entry => entry.model === modelData.name)
                   .reduce((sum, entry) => sum + entry.total_tokens, 0);
                 return (
-                  <div key={modelData.name} className="p-3 bg-[var(--bg-tertiary)] rounded">
+                  <div key={modelData.name} className="p-3 bg-[var(--bg-tertiary)] rounded card interactive theme-transition animate-slide-up" style={{animationDelay: `${index * 100}ms`}}>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-[var(--text-primary)] truncate">
+                      <span className="text-sm font-medium text-[var(--text-primary)] truncate theme-transition">
                         {cleanModelName(modelData.name)}
                       </span>
-                      <span className="text-xs text-[var(--text-secondary)]">
+                      <span className="text-xs text-[var(--text-secondary)] theme-transition">
                         {formatCurrencyDetailed(modelData.value, 4)}
                       </span>
                     </div>
-                    <div className="text-xs text-[var(--text-secondary)]">
+                    <div className="text-xs text-[var(--text-secondary)] theme-transition">
                       {formatTokens(modelTokens)} tokens
                     </div>
                   </div>

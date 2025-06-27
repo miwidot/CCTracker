@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTimeFormat } from '../hooks/useTimeFormat';
 import { useTranslation } from '../hooks/useTranslation';
-import { THEMES } from '@shared/constants';
+import { THEME_NAMES, getThemeConfig } from '@shared/constants';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -103,15 +103,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 {t('theme.title')}
               </h4>
               <div className="grid grid-cols-1 gap-3">
-                {Object.values(THEMES).map((themeOption) => {
-                  const themeInfo = getThemeInfo(themeOption.name);
+                {THEME_NAMES.map((themeName) => {
+                  const themeNameStr = String(themeName);
+                  const themeOption = getThemeConfig(themeName);
+                  const themeInfo = getThemeInfo(themeNameStr);
                   const IconComponent = themeInfo.icon;
                   return (
                     <button
-                      key={themeOption.name}
-                      onClick={() => setTheme(themeOption.name)}
+                      key={themeNameStr}
+                      onClick={() => setTheme(themeName)}
                       className={`flex items-center space-x-3 rounded-lg border-2 p-4 text-left transition-all ${
-                        theme.name === themeOption.name
+                        theme.name === themeNameStr
                           ? 'border-[var(--text-accent)] bg-[var(--bg-secondary)]'
                           : 'border-[var(--border-color)] hover:border-[var(--border-hover)] hover:bg-[var(--bg-secondary)]'
                       }`}
@@ -131,7 +133,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                           {themeInfo.description}
                         </div>
                       </div>
-                      {theme.name === themeOption.name && (
+                      {theme.name === themeNameStr && (
                         <div className="ml-auto">
                           <div className="h-2 w-2 rounded-full bg-[var(--text-accent)]" />
                         </div>

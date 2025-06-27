@@ -46,8 +46,10 @@ export interface CurrencyRates {
   monthlyBudget?: number; // Optional configurable monthly budget in USD
 }
 
+import type { COLOR_PALETTES } from './design-tokens';
+
 export interface ThemeConfig {
-  name: 'light' | 'dark' | 'catppuccin-latte' | 'catppuccin-frappe' | 'catppuccin-macchiato' | 'catppuccin-mocha';
+  name: keyof typeof COLOR_PALETTES;
   primary: string;
   secondary: string;
   background: string;

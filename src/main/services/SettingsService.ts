@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { AppSettings } from '@shared/types';
-import { DEFAULT_SETTINGS, THEMES, SUPPORTED_LANGUAGES } from '@shared/constants';
+import { DEFAULT_SETTINGS, THEME_NAMES, SUPPORTED_LANGUAGES, getThemeConfig } from '@shared/constants';
 
 const VALID_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'];
 
@@ -99,7 +99,7 @@ export class SettingsService {
    */
   private validateSettings(): void {
     // Validate theme
-    if (!Object.keys(THEMES).includes(this.settings.theme)) {
+    if (!THEME_NAMES.includes(this.settings.theme as any)) {
       console.warn(`Invalid theme: ${this.settings.theme}, using default`);
       this.settings.theme = DEFAULT_SETTINGS.theme;
     }
@@ -291,9 +291,9 @@ export class SettingsService {
     currencies: string[];
   } {
     return {
-      themes: Object.entries(THEMES).map(([key, theme]) => ({
-        key,
-        name: key.charAt(0).toUpperCase() + key.slice(1),
+      themes: THEME_NAMES.map((key) => ({
+        key: String(key),
+        name: String(key).charAt(0).toUpperCase() + String(key).slice(1).replace('-', ' '),
       })),
       languages: Object.entries(SUPPORTED_LANGUAGES).map(([key, name]) => ({
         key,
@@ -314,7 +314,7 @@ export class SettingsService {
    * Get current theme configuration
    */
   getCurrentTheme() {
-    return THEMES[this.settings.theme] || THEMES.dark;
+    return getThemeConfig(this.settings.theme as any) || getThemeConfig('dark');
   }
 
   /**

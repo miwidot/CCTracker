@@ -1,11 +1,18 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useSettings } from './SettingsContext';
-import { THEMES } from '@shared/constants';
+import { getThemeConfig, COLOR_PALETTES, CHART_PALETTES } from '@shared/constants';
+import { getSemanticColor, isDarkTheme, getChartColors } from '@shared/design-tokens';
 import type { ThemeConfig } from '@shared/types';
 
 interface ThemeContextType {
   theme: ThemeConfig;
   setTheme: (theme: ThemeConfig['name']) => void;
+  // Enhanced utilities
+  getSemanticColor: (semantic: 'success' | 'warning' | 'error' | 'info') => string;
+  getChartColors: () => readonly string[];
+  isDark: boolean;
+  // Additional theme data
+  fullPalette: typeof COLOR_PALETTES[keyof typeof COLOR_PALETTES];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -24,19 +31,36 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const { settings, updateSettings } = useSettings();
-  const theme = THEMES[settings.theme];
+  const theme = getThemeConfig(settings.theme as keyof typeof COLOR_PALETTES);
 
   const setTheme = async (themeName: ThemeConfig['name']) => {
     await updateSettings({ theme: themeName });
   };
 
+  // Enhanced theme utilities
+  const themeUtilities = useMemo(() => ({
+    getSemanticColor: (semantic: 'success' | 'warning' | 'error' | 'info') => 
+      getSemanticColor(settings.theme as keyof typeof COLOR_PALETTES, semantic),
+    
+    getChartColors: () => 
+      getChartColors(settings.theme as keyof typeof CHART_PALETTES),
+    
+    isDark: isDarkTheme(settings.theme),
+    
+    fullPalette: COLOR_PALETTES[settings.theme as keyof typeof COLOR_PALETTES],
+  }), [settings.theme]);
+
   useEffect(() => {
     // Apply theme class to document root
-    document.documentElement.className = `theme-${theme.name} theme-transition`;
+    document.documentElement.className = `theme-${String(theme.name)} theme-transition`;
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ 
+      theme, 
+      setTheme,
+      ...themeUtilities
+    }}>
       {children}
     </ThemeContext.Provider>
   );
