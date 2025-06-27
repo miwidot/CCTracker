@@ -442,7 +442,7 @@ const UsageDashboard: React.FC = () => {
     };
     
     calculateProjectCosts();
-  }, [filteredData, settings.currency, formatCurrencyDetailed]);
+  }, [filteredData, settings.currency]); // Removed formatCurrencyDetailed to prevent infinite loop
 
   // Prepare chart data
   const chartData = useMemo(() => {
