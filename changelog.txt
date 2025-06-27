@@ -1,3 +1,10 @@
+2025-06-27 16:33:27 +08 - BUGFIX: Fixed cost calculation predictions preventing 53K USD anomaly
+- IDENTIFIED: Cost predictions were using ALL historical data instead of recent data, causing extrapolation errors
+- ROOT CAUSE: generatePredictions() loaded entire usage history (~10,000+ entries), daily averages included months of costs
+- SOLUTION: Modified generatePredictions() to filter last 30 days only, added generateUsageTrendsFromEntries() method
+- VALIDATION: Cost calculation logic verified correct, JSONL parsing working properly, actual costs reasonable
+- RESULT: Fixed predictions now use only recent 30-day windows for accurate monthly forecasting instead of projecting historical totals
+
 2025-06-27 16:15:23 +08 - FEATURE: Implemented comprehensive Usage Analytics dashboard with project-level cost breakdown
 - Built complete project analytics backend with getProjectBreakdown(), getProjectComparison(), getProjectSessions()
 - Created UsageAnalyticsDashboard component with interactive project cards, cost visualization, session drill-down
