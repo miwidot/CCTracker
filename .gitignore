@@ -1,0 +1,10 @@
+# Exclude CTRACKER files
+CTRACKER*
+
+# Common ignore patterns
+.DS_Store
+*.log
+*.tmp
+*~
+.env
+node_modules/
