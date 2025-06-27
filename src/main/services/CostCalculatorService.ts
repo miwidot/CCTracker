@@ -62,18 +62,18 @@ export class CostCalculatorService {
    * Set currency exchange rates for conversions
    */
   static setCurrencyRates(rates: CurrencyRates): void {
-    this.currencyRates = rates;
+    CostCalculatorService.currencyRates = rates;
   }
   
   /**
    * Convert USD amount to target currency
    */
   static convertFromUSD(usdAmount: number, targetCurrency: string): number {
-    if (!this.currencyRates || targetCurrency === 'USD') {
+    if (!CostCalculatorService.currencyRates || targetCurrency === 'USD') {
       return usdAmount;
     }
     
-    const rate = this.currencyRates[targetCurrency as keyof CurrencyRates];
+    const rate = CostCalculatorService.currencyRates[targetCurrency as keyof CurrencyRates];
     return rate ? usdAmount * rate : usdAmount;
   }
   
