@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { UsageEntry, SessionStats, DateRangeStats, CurrencyRates } from '../../shared/types';
+import { UsageEntry, SessionStats, DateRangeStats, CurrencyRates, BusinessIntelligence } from '../../shared/types';
 
 export interface ExportOptions {
   format: 'csv' | 'json' | 'excel' | 'pdf';
@@ -681,6 +681,221 @@ export class ExportService {
     } catch (error) {
       console.error('Failed to cleanup old exports:', error);
     }
+  }
+
+  /**
+   * Export comprehensive business intelligence report
+   */
+  async exportBusinessIntelligence(data: BusinessIntelligence): Promise<ExportResult> {
+    const startTime = Date.now();
+    
+    try {
+      await this.ensureExportDirectory();
+      
+      // Generate comprehensive BI report in JSON format
+      const reportData = {
+        title: "CCTracker Business Intelligence Report",
+        generated_at: new Date().toISOString(),
+        summary: {
+          total_cost: data.total_cost,
+          total_tokens: data.total_tokens,
+          total_sessions: data.total_sessions,
+          cost_per_token: data.cost_per_token,
+          data_quality_score: data.data_quality_score,
+          calculation_time_ms: data.calculation_time_ms
+        },
+        performance_metrics: {
+          tokens_per_hour: data.tokens_per_hour,
+          cost_burn_rate: data.cost_burn_rate,
+          session_efficiency: data.session_efficiency,
+          model_diversity: data.model_diversity
+        },
+        model_analysis: {
+          efficiency_ranking: data.model_efficiency,
+          most_expensive_model: data.most_expensive_model,
+          most_efficient_model: data.most_efficient_model
+        },
+        time_analysis: {
+          peak_usage_hours: data.peak_usage_hours,
+          busiest_day_of_week: data.busiest_day_of_week,
+          usage_patterns: data.usage_patterns
+        },
+        trends: {
+          daily: data.trends.daily,
+          weekly: data.trends.weekly,
+          monthly: data.trends.monthly
+        },
+        predictions: {
+          predicted_monthly_cost: data.predictions.predicted_monthly_cost,
+          predicted_monthly_tokens: data.predictions.predicted_monthly_tokens,
+          cost_trend: data.predictions.cost_trend,
+          confidence_level: data.predictions.confidence_level,
+          next_week_forecast: data.predictions.next_week_forecast,
+          budget_risk: data.predictions.budget_risk
+        },
+        anomalies: data.anomalies,
+        insights: {
+          key_findings: [
+            `Your most efficient model is ${data.most_efficient_model}`,
+            `Peak usage occurs at ${data.peak_usage_hours.join(', ')} hours`,
+            `You're most active on ${data.busiest_day_of_week}`,
+            `Current cost trend is ${data.predictions.cost_trend}`,
+            `${data.anomalies.length} anomalies detected in your usage patterns`
+          ],
+          recommendations: this.generateRecommendations(data),
+          cost_optimization: this.generateCostOptimizationSuggestions(data)
+        },
+        metadata: {
+          data_points_analyzed: data.data_points_analyzed,
+          export_timestamp: new Date().toISOString(),
+          report_version: "1.0.0"
+        }
+      };
+
+      const content = JSON.stringify(reportData, null, 2);
+      const fileName = `business_intelligence_report_${this.getTimestamp()}.json`;
+      const filePath = path.join(this.exportDir, fileName);
+      
+      await fs.writeFile(filePath, content, 'utf-8');
+      const stats = await fs.stat(filePath);
+
+      // Also generate a simplified CSV summary
+      const csvSummary = this.generateBusinessIntelligenceCSV(data);
+      const csvFileName = `bi_summary_${this.getTimestamp()}.csv`;
+      const csvFilePath = path.join(this.exportDir, csvFileName);
+      await fs.writeFile(csvFilePath, csvSummary, 'utf-8');
+
+      console.log(`Generated business intelligence report: ${fileName}`);
+
+      return {
+        success: true,
+        filePath,
+        content,
+        stats: {
+          totalEntries: data.data_points_analyzed,
+          totalCost: data.total_cost,
+          fileSize: stats.size,
+          exportTime: Date.now() - startTime,
+        },
+      };
+    } catch (error) {
+      console.error('Business intelligence export failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown export error',
+        stats: {
+          totalEntries: data.data_points_analyzed,
+          totalCost: data.total_cost,
+          fileSize: 0,
+          exportTime: Date.now() - startTime,
+        },
+      };
+    }
+  }
+
+  /**
+   * Generate business intelligence recommendations
+   */
+  private generateRecommendations(data: BusinessIntelligence): string[] {
+    const recommendations: string[] = [];
+
+    // Cost optimization recommendations
+    if (data.predictions.cost_trend === 'increasing') {
+      recommendations.push(`Cost trend is increasing. Consider monitoring usage more closely.`);
+    }
+
+    // Model efficiency recommendations
+    if (data.model_efficiency.length > 1) {
+      const leastEfficient = data.model_efficiency[data.model_efficiency.length - 1];
+      const mostEfficient = data.model_efficiency[0];
+      
+      if (leastEfficient.efficiency_score > mostEfficient.efficiency_score * 2) {
+        recommendations.push(`Consider using ${mostEfficient.model} more often for better cost efficiency.`);
+      }
+    }
+
+    // Usage pattern recommendations
+    const totalUsage = Object.values(data.usage_patterns).reduce((a, b) => a + b, 0);
+    const nightUsage = data.usage_patterns.night / totalUsage;
+    
+    if (nightUsage > 0.3) {
+      recommendations.push(`High night usage detected (${(nightUsage * 100).toFixed(1)}%). Consider scheduling non-urgent tasks for off-peak hours.`);
+    }
+
+    // Anomaly recommendations
+    if (data.anomalies.length > 5) {
+      recommendations.push(`${data.anomalies.length} anomalies detected. Review unusual usage patterns to optimize costs.`);
+    }
+
+    // Budget risk recommendations
+    if (data.predictions.budget_risk.level === 'high') {
+      recommendations.push(`High budget risk detected. Projected overage: $${data.predictions.budget_risk.projected_overage.toFixed(2)}`);
+    }
+
+    return recommendations;
+  }
+
+  /**
+   * Generate cost optimization suggestions
+   */
+  private generateCostOptimizationSuggestions(data: BusinessIntelligence): string[] {
+    const suggestions: string[] = [];
+
+    // Model selection optimization
+    if (data.model_efficiency.length > 0) {
+      const topModel = data.model_efficiency[0];
+      suggestions.push(`Primary recommendation: Use ${topModel.model} for optimal cost-per-token ratio`);
+    }
+
+    // Usage timing optimization
+    const peakHours = data.peak_usage_hours;
+    if (peakHours.length > 0) {
+      suggestions.push(`Consider spreading usage outside peak hours (${peakHours.join(', ')}) for potentially better performance`);
+    }
+
+    // Session efficiency optimization
+    if (data.session_efficiency > 0) {
+      const avgTokensPerSession = data.session_efficiency;
+      if (avgTokensPerSession < 1000) {
+        suggestions.push(`Low session efficiency detected. Consider batching smaller requests to reduce overhead`);
+      }
+    }
+
+    return suggestions;
+  }
+
+  /**
+   * Generate business intelligence CSV summary
+   */
+  private generateBusinessIntelligenceCSV(data: BusinessIntelligence): string {
+    const headers = [
+      'Metric',
+      'Value',
+      'Unit',
+      'Description'
+    ];
+
+    const rows = [
+      ['Total Cost', data.total_cost.toFixed(4), 'USD', 'Total spending on Claude API'],
+      ['Total Tokens', data.total_tokens.toString(), 'tokens', 'Total tokens processed'],
+      ['Total Sessions', data.total_sessions.toString(), 'sessions', 'Number of unique sessions'],
+      ['Cost Per Token', (data.cost_per_token * 1000000).toFixed(2), 'USD per million', 'Average cost efficiency'],
+      ['Tokens Per Hour', data.tokens_per_hour.toFixed(0), 'tokens/hour', 'Usage velocity'],
+      ['Cost Burn Rate', data.cost_burn_rate.toFixed(4), 'USD/hour', 'Spending rate'],
+      ['Session Efficiency', data.session_efficiency.toFixed(0), 'tokens/session', 'Average tokens per session'],
+      ['Model Diversity', data.model_diversity.toString(), 'models', 'Number of different models used'],
+      ['Most Efficient Model', data.most_efficient_model, 'model', 'Best cost-per-token model'],
+      ['Most Expensive Model', data.most_expensive_model, 'model', 'Highest total cost model'],
+      ['Busiest Day', data.busiest_day_of_week, 'day', 'Most active day of week'],
+      ['Predicted Monthly Cost', data.predictions.predicted_monthly_cost.toFixed(2), 'USD', 'Forecasted monthly spending'],
+      ['Cost Trend', data.predictions.cost_trend, 'trend', 'Current spending direction'],
+      ['Confidence Level', data.predictions.confidence_level.toFixed(1), '%', 'Prediction reliability'],
+      ['Budget Risk Level', data.predictions.budget_risk.level, 'risk', 'Budget overage risk'],
+      ['Anomalies Count', data.anomalies.length.toString(), 'count', 'Unusual usage patterns detected'],
+      ['Data Quality Score', data.data_quality_score.toFixed(1), '%', 'Data completeness and accuracy']
+    ];
+
+    return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
   }
 }
 

@@ -21,12 +21,46 @@ export function setupIpcHandlers(services: Services) {
     return await usageService.getAllUsageEntries();
   });
 
+  ipcMain.handle('usage:get-advanced-stats', async () => {
+    return await usageService.getAdvancedUsageStats();
+  });
+
+  ipcMain.handle('usage:get-business-intelligence', async () => {
+    return await usageService.getBusinessIntelligence();
+  });
+
   ipcMain.handle('usage:get-by-date-range', async (_, start: string, end: string) => {
     return await usageService.getUsageByDateRange(start, end);
   });
 
   ipcMain.handle('usage:get-session-stats', async (_, sessionId: string) => {
     return await usageService.getSessionStats(sessionId);
+  });
+
+  // Advanced analytics handlers
+  ipcMain.handle('usage:detect-anomalies', async () => {
+    return await usageService.detectAnomalies();
+  });
+
+  ipcMain.handle('usage:get-predictions', async () => {
+    return await usageService.generatePredictions();
+  });
+
+  ipcMain.handle('usage:get-model-efficiency', async () => {
+    return await usageService.getModelEfficiency();
+  });
+
+  // Project analytics handlers
+  ipcMain.handle('usage:get-project-breakdown', async () => {
+    return await usageService.getProjectBreakdown();
+  });
+
+  ipcMain.handle('usage:get-project-comparison', async () => {
+    return await usageService.getProjectComparison();
+  });
+
+  ipcMain.handle('usage:get-project-sessions', async (_, projectName: string) => {
+    return await usageService.getProjectSessions(projectName);
   });
 
   // File monitoring handlers
@@ -58,6 +92,10 @@ export function setupIpcHandlers(services: Services) {
 
   ipcMain.handle('export:json', async (_, data) => {
     return await exportService.exportUsageData(data, { format: 'json' });
+  });
+
+  ipcMain.handle('export:business-report', async (_, data) => {
+    return await exportService.exportBusinessIntelligence(data);
   });
 
   // Currency handlers

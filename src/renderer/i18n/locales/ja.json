@@ -1,0 +1,80 @@
+{
+  "app": {
+    "title": "コストトラッカー",
+    "subtitle": "Claude API 使用量モニター",
+    "loading": "コストトラッカーを読み込み中...",
+    "error": "読み込みに失敗しました"
+  },
+  "dashboard": {
+    "title": "使用量ダッシュボード",
+    "overview": "概要",
+    "charts": "チャート",
+    "sessions": "セッション",
+    "export": "データエクスポート"
+  },
+  "metrics": {
+    "totalCost": "総コスト",
+    "totalTokens": "総トークン数",
+    "sessionsCount": "セッション数",
+    "avgCostPerSession": "平均コスト/セッション",
+    "inputTokens": "入力トークン",
+    "outputTokens": "出力トークン"
+  },
+  "charts": {
+    "costOverTime": "時系列コスト",
+    "tokenUsageByModel": "モデル別トークン使用量",
+    "costDistribution": "モデル別コスト分布",
+    "noData": "選択した期間のデータがありません",
+    "loading": "チャートデータを読み込み中..."
+  },
+  "sessions": {
+    "title": "最近のセッション",
+    "sessionId": "セッションID",
+    "model": "モデル",
+    "duration": "継続時間",
+    "messages": "メッセージ",
+    "tokens": "トークン",
+    "cost": "コスト",
+    "startTime": "開始時刻",
+    "noSessions": "セッションが見つかりません",
+    "loading": "セッションを読み込み中..."
+  },
+  "export": {
+    "csv": "CSV エクスポート",
+    "json": "JSON エクスポート",
+    "exporting": "エクスポート中...",
+    "success": "データの エクスポートが完了しました",
+    "error": "データのエクスポートに失敗しました"
+  },
+  "dateRange": {
+    "last7Days": "過去7日間",
+    "last30Days": "過去30日間",
+    "last90Days": "過去90日間",
+    "custom": "カスタム範囲",
+    "from": "開始日",
+    "to": "終了日",
+    "apply": "適用"
+  },
+  "theme": {
+    "light": "ライト",
+    "dark": "ダーク",
+    "catppuccin": "Catppuccin"
+  },
+  "navigation": {
+    "dashboard": "ダッシュボード",
+    "analytics": "使用量分析",
+    "export": "データエクスポート",
+    "settings": "設定"
+  },
+  "common": {
+    "refresh": "更新",
+    "settings": "設定",
+    "close": "閉じる",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "lastUpdated": "最終更新"
+  }
+}

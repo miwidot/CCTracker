@@ -1,0 +1,49 @@
+2025-06-27 14:44:20 +08 - FEATURE: Completed internationalization (i18n) setup for CCTracker
+- Created complete translation files for French (fr.json), Spanish (es.json), Japanese (ja.json), and Chinese Simplified (zh.json)
+- Built comprehensive translations with native language accuracy for all UI elements
+- Created useTranslation hook wrapper for react-i18next integration
+- Implemented LanguageSelector component with native language names and proper styling
+- Updated App.tsx to use translations for loading and error states
+- Updated Header.tsx to use translations for title, subtitle, and button tooltips
+- Added language selector to header with 6 supported languages (EN, DE, FR, ES, JA, ZH)
+- Integrated i18n initialization in index.tsx for automatic language detection
+- All translations maintain same JSON structure as original English file
+- Proper cultural adaptation for each language (not machine translations)
+- Added language detection with localStorage persistence and browser fallback
+- Files: Created fr.json, es.json, ja.json, zh.json, useTranslation.ts, LanguageSelector.tsx
+- Updated App.tsx, Header.tsx, index.tsx with i18n integration
+- All existing i18n packages already installed: react-i18next, i18next, i18next-browser-languagedetector
+
+2025-06-27 14:37:27 +08 - FEATURE: Created comprehensive UsageDashboard component
+- Built complete dashboard with overview cards showing total cost, tokens, sessions, and average cost per session
+- Added three interactive charts: cost over time (line), token usage by model (bar), cost distribution (pie)
+- Implemented session statistics table with recent sessions details (duration, messages, tokens, cost)
+- Added date range picker with preset options (7, 30, 90 days) and custom date selection
+- Built export functionality for CSV and JSON formats with loading states
+- Integrated real-time updates using UsageDataContext with automatic refresh every 30 seconds
+- Added currency display support using SettingsContext for proper currency formatting
+- Implemented comprehensive loading states with skeleton animations for all components
+- Added proper error handling and empty state messages with informative icons
+- Built responsive design that works on desktop and mobile devices
+- Used TypeScript with full type safety and proper interfaces throughout
+- Integrated with existing theme system (light/dark/catppuccin) for consistent styling
+- Added accessibility features with proper ARIA labels and keyboard navigation
+- Performance optimized with useMemo and useCallback hooks for efficient re-rendering
+- Files: Created UsageDashboard.tsx, updated preload.ts and App.tsx, updated Task.md
+- TypeScript compilation successful with zero errors
+- Feature branch: feature/core-services-implementation
+
+2025-06-27 14:30:03 +08 - FEATURE: Implemented core services for CCTracker application
+- Added UsageService: Complete JSONL parsing, cost calculation, and data storage with caching
+- Added FileMonitorService: Real-time file system monitoring using chokidar with event handling
+- Added SettingsService: Application settings management with validation and auto-save
+- Added CurrencyService: Currency conversion with caching, auto-updates, and proper formatting
+- Added ExportService: Data export to CSV, JSON, Excel, PDF formats with flexible options
+- Installed required dependencies: uuid@^10.0.0, chokidar@^3.6.0, @types/uuid@^10.0.0
+- Fixed IPC handlers in ipcHandlers.ts to match actual service method signatures
+- Updated main.ts to properly initialize and integrate all services
+- Created service index file for clean exports
+- All services include proper TypeScript typing, error handling, and production-ready code
+- TypeScript compilation successful with zero errors
+- Feature branch: feature/core-services-implementation
+- Pull Request: https://github.com/miwi-fbsd/CCTracker/pull/1

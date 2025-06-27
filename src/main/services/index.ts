@@ -1,9 +1,9 @@
 // Main services export file
-export { UsageService, usageService } from './UsageService';
-export { FileMonitorService, fileMonitorService } from './FileMonitorService';
-export { SettingsService, settingsService } from './SettingsService';
-export { CurrencyService, currencyService } from './CurrencyService';
-export { ExportService, exportService } from './ExportService';
+export { UsageService } from './UsageService';
+export { FileMonitorService } from './FileMonitorService';
+export { SettingsService } from './SettingsService';
+export { CurrencyService } from './CurrencyService';
+export { ExportService } from './ExportService';
 
 // Service types
 export type { ExportOptions, ExportResult } from './ExportService';

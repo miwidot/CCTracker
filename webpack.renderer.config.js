@@ -8,7 +8,12 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: {
+          loader: 'ts-loader',
+          options: {
+            configFile: 'tsconfig.renderer.json',
+          },
+        },
         exclude: /node_modules/,
       },
       {
@@ -35,11 +40,4 @@ module.exports = {
       filename: 'index.html',
     }),
   ],
-  devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
-    },
-    compress: true,
-    port: 3000,
-  },
 };

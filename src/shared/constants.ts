@@ -1,4 +1,5 @@
 export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+  // Claude 3.5 Models
   'claude-3-5-sonnet-20241022': {
     input: 3.00 / 1_000_000,
     output: 15.00 / 1_000_000,
@@ -11,6 +12,8 @@ export const MODEL_PRICING: Record<string, { input: number; output: number }> = 
     input: 1.00 / 1_000_000,
     output: 5.00 / 1_000_000,
   },
+  
+  // Claude 3 Models
   'claude-3-opus-20240229': {
     input: 15.00 / 1_000_000,
     output: 75.00 / 1_000_000,
@@ -22,6 +25,16 @@ export const MODEL_PRICING: Record<string, { input: number; output: number }> = 
   'claude-3-haiku-20240307': {
     input: 0.25 / 1_000_000,
     output: 1.25 / 1_000_000,
+  },
+  
+  // Claude 4 Models (Sonnet 4)
+  'claude-sonnet-4-20250514': {
+    input: 3.00 / 1_000_000,  // Assuming same pricing as 3.5 Sonnet
+    output: 15.00 / 1_000_000,
+  },
+  'claude-opus-4-20250514': {
+    input: 15.00 / 1_000_000,  // Assuming same pricing as 3 Opus
+    output: 75.00 / 1_000_000,
   },
 };
 

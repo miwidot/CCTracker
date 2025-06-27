@@ -28,6 +28,13 @@ export class CurrencyService {
     this.initializeService();
   }
 
+  /**
+   * Public initialize method for external use
+   */
+  async initialize(): Promise<void> {
+    await this.initializeService();
+  }
+
   private async initializeService(): Promise<void> {
     try {
       await this.ensureDataDirectory();

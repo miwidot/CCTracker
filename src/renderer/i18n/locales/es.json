@@ -1,0 +1,80 @@
+{
+  "app": {
+    "title": "Rastreador de Costos",
+    "subtitle": "Monitor de Uso de API Claude",
+    "loading": "Cargando Rastreador de Costos...",
+    "error": "Error al Cargar"
+  },
+  "dashboard": {
+    "title": "Panel de Uso",
+    "overview": "Resumen",
+    "charts": "Gráficos",
+    "sessions": "Sesiones",
+    "export": "Exportar Datos"
+  },
+  "metrics": {
+    "totalCost": "Costo Total",
+    "totalTokens": "Tokens Totales",
+    "sessionsCount": "Sesiones",
+    "avgCostPerSession": "Costo Promedio/Sesión",
+    "inputTokens": "Tokens de Entrada",
+    "outputTokens": "Tokens de Salida"
+  },
+  "charts": {
+    "costOverTime": "Costo a lo Largo del Tiempo",
+    "tokenUsageByModel": "Uso de Tokens por Modelo",
+    "costDistribution": "Distribución de Costos por Modelo",
+    "noData": "No hay datos disponibles para el período seleccionado",
+    "loading": "Cargando datos del gráfico..."
+  },
+  "sessions": {
+    "title": "Sesiones Recientes",
+    "sessionId": "ID de Sesión",
+    "model": "Modelo",
+    "duration": "Duración",
+    "messages": "Mensajes",
+    "tokens": "Tokens",
+    "cost": "Costo",
+    "startTime": "Hora de Inicio",
+    "noSessions": "No se encontraron sesiones",
+    "loading": "Cargando sesiones..."
+  },
+  "export": {
+    "csv": "Exportar CSV",
+    "json": "Exportar JSON",
+    "exporting": "Exportando...",
+    "success": "Datos exportados exitosamente",
+    "error": "Error al exportar datos"
+  },
+  "dateRange": {
+    "last7Days": "Últimos 7 Días",
+    "last30Days": "Últimos 30 Días",
+    "last90Days": "Últimos 90 Días",
+    "custom": "Rango Personalizado",
+    "from": "Desde",
+    "to": "Hasta",
+    "apply": "Aplicar"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "catppuccin": "Catppuccin"
+  },
+  "navigation": {
+    "dashboard": "Panel",
+    "analytics": "Análisis de Uso",
+    "export": "Exportar Datos",
+    "settings": "Configuración"
+  },
+  "common": {
+    "refresh": "Actualizar",
+    "settings": "Configuración",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "lastUpdated": "Última actualización"
+  }
+}

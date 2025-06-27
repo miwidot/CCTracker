@@ -1,0 +1,80 @@
+{
+  "app": {
+    "title": "Suivi des Coûts",
+    "subtitle": "Moniteur d'Utilisation de l'API Claude",
+    "loading": "Chargement du Suivi des Coûts...",
+    "error": "Échec du Chargement"
+  },
+  "dashboard": {
+    "title": "Tableau de Bord d'Utilisation",
+    "overview": "Aperçu",
+    "charts": "Graphiques",
+    "sessions": "Sessions",
+    "export": "Exporter les Données"
+  },
+  "metrics": {
+    "totalCost": "Coût Total",
+    "totalTokens": "Tokens Totaux",
+    "sessionsCount": "Sessions",
+    "avgCostPerSession": "Coût Moyen/Session",
+    "inputTokens": "Tokens d'Entrée",
+    "outputTokens": "Tokens de Sortie"
+  },
+  "charts": {
+    "costOverTime": "Coût dans le Temps",
+    "tokenUsageByModel": "Utilisation des Tokens par Modèle",
+    "costDistribution": "Répartition des Coûts par Modèle",
+    "noData": "Aucune donnée disponible pour la période sélectionnée",
+    "loading": "Chargement des données graphiques..."
+  },
+  "sessions": {
+    "title": "Sessions Récentes",
+    "sessionId": "ID de Session",
+    "model": "Modèle",
+    "duration": "Durée",
+    "messages": "Messages",
+    "tokens": "Tokens",
+    "cost": "Coût",
+    "startTime": "Heure de Début",
+    "noSessions": "Aucune session trouvée",
+    "loading": "Chargement des sessions..."
+  },
+  "export": {
+    "csv": "Exporter CSV",
+    "json": "Exporter JSON",
+    "exporting": "Exportation...",
+    "success": "Données exportées avec succès",
+    "error": "Échec de l'exportation des données"
+  },
+  "dateRange": {
+    "last7Days": "7 Derniers Jours",
+    "last30Days": "30 Derniers Jours",
+    "last90Days": "90 Derniers Jours",
+    "custom": "Plage Personnalisée",
+    "from": "De",
+    "to": "À",
+    "apply": "Appliquer"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "catppuccin": "Catppuccin"
+  },
+  "navigation": {
+    "dashboard": "Tableau de Bord",
+    "analytics": "Analyses d'Utilisation",
+    "export": "Exporter les Données",
+    "settings": "Paramètres"
+  },
+  "common": {
+    "refresh": "Actualiser",
+    "settings": "Paramètres",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "lastUpdated": "Dernière mise à jour"
+  }
+}

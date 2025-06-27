@@ -1,0 +1,80 @@
+{
+  "app": {
+    "title": "Cost Tracker",
+    "subtitle": "Claude API Usage Monitor",
+    "loading": "Loading Cost Tracker...",
+    "error": "Failed to Load"
+  },
+  "dashboard": {
+    "title": "Usage Dashboard",
+    "overview": "Overview",
+    "charts": "Charts",
+    "sessions": "Sessions",
+    "export": "Export Data"
+  },
+  "metrics": {
+    "totalCost": "Total Cost",
+    "totalTokens": "Total Tokens",
+    "sessionsCount": "Sessions",
+    "avgCostPerSession": "Avg Cost/Session",
+    "inputTokens": "Input Tokens",
+    "outputTokens": "Output Tokens"
+  },
+  "charts": {
+    "costOverTime": "Cost Over Time",
+    "tokenUsageByModel": "Token Usage by Model",
+    "costDistribution": "Cost Distribution by Model",
+    "noData": "No data available for the selected period",
+    "loading": "Loading chart data..."
+  },
+  "sessions": {
+    "title": "Recent Sessions",
+    "sessionId": "Session ID",
+    "model": "Model",
+    "duration": "Duration",
+    "messages": "Messages",
+    "tokens": "Tokens",
+    "cost": "Cost",
+    "startTime": "Start Time",
+    "noSessions": "No sessions found",
+    "loading": "Loading sessions..."
+  },
+  "export": {
+    "csv": "Export CSV",
+    "json": "Export JSON",
+    "exporting": "Exporting...",
+    "success": "Data exported successfully",
+    "error": "Failed to export data"
+  },
+  "dateRange": {
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days",
+    "custom": "Custom Range",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "catppuccin": "Catppuccin"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "analytics": "Usage Analytics",
+    "export": "Export Data",
+    "settings": "Settings"
+  },
+  "common": {
+    "refresh": "Refresh",
+    "settings": "Settings",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "lastUpdated": "Last updated"
+  }
+}

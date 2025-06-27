@@ -40,11 +40,11 @@ class Application {
 
     const isDev = process.env.NODE_ENV === 'development';
     
+    // Always load from file system - no web server needed
+    this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
+    
     if (isDev) {
-      this.mainWindow.loadURL('http://localhost:3000');
       this.mainWindow.webContents.openDevTools();
-    } else {
-      this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
     }
 
     this.mainWindow.once('ready-to-show', () => {
@@ -57,8 +57,13 @@ class Application {
   }
 
   private async setupServices(): Promise<void> {
-    // Services are initialized in their constructors
-    // No additional initialization needed
+    // Initialize services with proper async setup
+    await this.settingsService.initialize();
+    await this.usageService.initialize();
+    await this.currencyService.initialize();
+    
+    // Start Claude CLI monitoring
+    await this.fileMonitorService.startClaudeCliMonitoring();
     
     setupIpcHandlers({
       usageService: this.usageService,

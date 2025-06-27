@@ -63,3 +63,7 @@ electron-builder-output/
 # Temporary folders
 tmp/
 temp/
+
+# Claude Code files
+.claude/
+CLAUDE.md

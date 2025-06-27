@@ -394,6 +394,34 @@ export class FileMonitorService extends EventEmitter {
   }
 
   /**
+   * Auto-start monitoring Claude CLI projects directory
+   */
+  async startClaudeCliMonitoring(): Promise<void> {
+    try {
+      const os = require('os');
+      const claudeProjectsPath = path.join(os.homedir(), '.claude', 'projects');
+      
+      // Check if Claude CLI directory exists
+      try {
+        await fs.promises.access(claudeProjectsPath);
+        console.log('Starting Claude CLI monitoring at:', claudeProjectsPath);
+        await this.startMonitoring(claudeProjectsPath);
+        
+        // Set up event handler for JSONL changes
+        this.on('jsonl-content-change', (data) => {
+          console.log(`Claude CLI file updated: ${path.basename(data.filePath)} (${data.lineCount} lines)`);
+          // This will be picked up by the main process to refresh usage data
+        });
+        
+      } catch (error) {
+        console.log('Claude CLI projects directory not found, monitoring disabled');
+      }
+    } catch (error) {
+      console.error('Failed to start Claude CLI monitoring:', error);
+    }
+  }
+
+  /**
    * Get file monitoring statistics
    */
   getStats(): {

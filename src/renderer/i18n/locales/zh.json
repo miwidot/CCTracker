@@ -1,0 +1,80 @@
+{
+  "app": {
+    "title": "成本追踪器",
+    "subtitle": "Claude API 使用监控器",
+    "loading": "正在加载成本追踪器...",
+    "error": "加载失败"
+  },
+  "dashboard": {
+    "title": "使用情况仪表板",
+    "overview": "概览",
+    "charts": "图表",
+    "sessions": "会话",
+    "export": "导出数据"
+  },
+  "metrics": {
+    "totalCost": "总成本",
+    "totalTokens": "总令牌数",
+    "sessionsCount": "会话数",
+    "avgCostPerSession": "平均成本/会话",
+    "inputTokens": "输入令牌",
+    "outputTokens": "输出令牌"
+  },
+  "charts": {
+    "costOverTime": "成本时间趋势",
+    "tokenUsageByModel": "模型令牌使用情况",
+    "costDistribution": "模型成本分布",
+    "noData": "所选时间段内无可用数据",
+    "loading": "正在加载图表数据..."
+  },
+  "sessions": {
+    "title": "最近会话",
+    "sessionId": "会话ID",
+    "model": "模型",
+    "duration": "持续时间",
+    "messages": "消息",
+    "tokens": "令牌",
+    "cost": "成本",
+    "startTime": "开始时间",
+    "noSessions": "未找到会话",
+    "loading": "正在加载会话..."
+  },
+  "export": {
+    "csv": "导出 CSV",
+    "json": "导出 JSON",
+    "exporting": "正在导出...",
+    "success": "数据导出成功",
+    "error": "数据导出失败"
+  },
+  "dateRange": {
+    "last7Days": "最近7天",
+    "last30Days": "最近30天",
+    "last90Days": "最近90天",
+    "custom": "自定义范围",
+    "from": "从",
+    "to": "到",
+    "apply": "应用"
+  },
+  "theme": {
+    "light": "浅色",
+    "dark": "深色",
+    "catppuccin": "Catppuccin"
+  },
+  "navigation": {
+    "dashboard": "仪表板",
+    "analytics": "使用分析",
+    "export": "导出数据",
+    "settings": "设置"
+  },
+  "common": {
+    "refresh": "刷新",
+    "settings": "设置",
+    "close": "关闭",
+    "save": "保存",
+    "cancel": "取消",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "lastUpdated": "最后更新"
+  }
+}

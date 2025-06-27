@@ -1,0 +1,80 @@
+{
+  "app": {
+    "title": "Kosten-Tracker",
+    "subtitle": "Claude API Nutzungsmonitor",
+    "loading": "Lade Kosten-Tracker...",
+    "error": "Laden fehlgeschlagen"
+  },
+  "dashboard": {
+    "title": "Nutzungs-Dashboard",
+    "overview": "Überblick",
+    "charts": "Diagramme",
+    "sessions": "Sitzungen",
+    "export": "Daten exportieren"
+  },
+  "metrics": {
+    "totalCost": "Gesamtkosten",
+    "totalTokens": "Gesamte Tokens",
+    "sessionsCount": "Sitzungen",
+    "avgCostPerSession": "Ø Kosten/Sitzung",
+    "inputTokens": "Eingabe-Tokens",
+    "outputTokens": "Ausgabe-Tokens"
+  },
+  "charts": {
+    "costOverTime": "Kosten über Zeit",
+    "tokenUsageByModel": "Token-Nutzung nach Modell",
+    "costDistribution": "Kostenverteilung nach Modell",
+    "noData": "Keine Daten für den gewählten Zeitraum verfügbar",
+    "loading": "Lade Diagrammdaten..."
+  },
+  "sessions": {
+    "title": "Letzte Sitzungen",
+    "sessionId": "Sitzungs-ID",
+    "model": "Modell",
+    "duration": "Dauer",
+    "messages": "Nachrichten",
+    "tokens": "Tokens",
+    "cost": "Kosten",
+    "startTime": "Startzeit",
+    "noSessions": "Keine Sitzungen gefunden",
+    "loading": "Lade Sitzungen..."
+  },
+  "export": {
+    "csv": "CSV exportieren",
+    "json": "JSON exportieren",
+    "exporting": "Exportiere...",
+    "success": "Daten erfolgreich exportiert",
+    "error": "Export fehlgeschlagen"
+  },
+  "dateRange": {
+    "last7Days": "Letzte 7 Tage",
+    "last30Days": "Letzte 30 Tage",
+    "last90Days": "Letzte 90 Tage",
+    "custom": "Benutzerdefiniert",
+    "from": "Von",
+    "to": "Bis",
+    "apply": "Anwenden"
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "catppuccin": "Catppuccin"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "analytics": "Nutzungsanalyse",
+    "export": "Daten exportieren",
+    "settings": "Einstellungen"
+  },
+  "common": {
+    "refresh": "Aktualisieren",
+    "settings": "Einstellungen",
+    "close": "Schließen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "loading": "Lade...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "lastUpdated": "Zuletzt aktualisiert"
+  }
+}

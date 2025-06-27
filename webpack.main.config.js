@@ -2,12 +2,20 @@ const path = require('path');
 
 module.exports = {
   target: 'electron-main',
-  entry: './src/main/main.ts',
+  entry: {
+    main: './src/main/main.ts',
+    preload: './src/main/preload.ts',
+  },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: {
+          loader: 'ts-loader',
+          options: {
+            configFile: 'tsconfig.main.json',
+          },
+        },
         exclude: /node_modules/,
       },
     ],
@@ -21,7 +29,7 @@ module.exports = {
     },
   },
   output: {
-    filename: 'main.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
   },
   node: {

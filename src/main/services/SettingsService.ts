@@ -27,6 +27,13 @@ export class SettingsService {
   }
 
   /**
+   * Public initialize method for external use
+   */
+  async initialize(): Promise<void> {
+    await this.loadSettings();
+  }
+
+  /**
    * Load settings from persistent storage
    */
   private async loadSettings(): Promise<void> {
