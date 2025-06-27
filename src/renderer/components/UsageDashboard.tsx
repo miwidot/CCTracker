@@ -78,7 +78,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
             {typeof value === 'number' && currency ? `${currency} ${value.toFixed(2)}` : value}
           </p>
           {trend && (
-            <p className={`text-sm mt-1 font-medium animate-slide-up animate-delay-100 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm mt-1 font-medium animate-slide-up animate-delay-100 theme-transition ${trend.isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
               {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value).toFixed(1)}%
             </p>
           )}
@@ -134,7 +134,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 onDateRangeChange(start, end);
               }
             }}
-            className="px-3 py-1 text-sm bg-[var(--bg-tertiary)] text-[var(--text-secondary)] rounded-md hover:bg-[var(--color-hover)] transition-colors"
+            className="btn interactive-bounce px-3 py-1 text-sm bg-[var(--bg-tertiary)] text-[var(--text-secondary)] rounded-md hover:bg-[var(--color-hover)] theme-transition"
           >
             {range.label}
           </button>
@@ -172,7 +172,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ data, onExport, isExporti
       <button
         onClick={() => onExport('csv')}
         disabled={isExporting || data.length === 0}
-        className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--text-success)] text-white rounded-md hover:bg-[var(--text-success)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed transition-colors"
+        className="btn btn-primary interactive-scale flex items-center gap-2 px-3 py-2 text-sm bg-[var(--color-success)] text-white rounded-md hover:bg-[var(--color-success)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed theme-transition"
       >
         <DocumentArrowDownIcon className="h-4 w-4" />
         {t('export.csv')}
@@ -180,7 +180,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ data, onExport, isExporti
       <button
         onClick={() => onExport('json')}
         disabled={isExporting || data.length === 0}
-        className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--text-accent)] text-white rounded-md hover:bg-[var(--text-accent)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed transition-colors"
+        className="btn btn-primary interactive-scale flex items-center gap-2 px-3 py-2 text-sm bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed theme-transition"
       >
         <DocumentArrowDownIcon className="h-4 w-4" />
         {t('export.json')}

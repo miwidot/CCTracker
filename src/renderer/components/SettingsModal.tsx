@@ -6,6 +6,21 @@ import { useTimeFormat } from '../hooks/useTimeFormat';
 import { useTranslation } from '../hooks/useTranslation';
 import { THEME_NAMES, getThemeConfig } from '@shared/constants';
 
+interface Language {
+  code: string;
+  name: string;
+  nativeName: string;
+}
+
+const getLanguages = (t: any): Language[] => [
+  { code: 'en', name: t('languages.english'), nativeName: 'English' },
+  { code: 'de', name: t('languages.german'), nativeName: 'Deutsch' },
+  { code: 'fr', name: t('languages.french'), nativeName: 'Français' },
+  { code: 'es', name: t('languages.spanish'), nativeName: 'Español' },
+  { code: 'ja', name: t('languages.japanese'), nativeName: '日本語' },
+  { code: 'zh', name: t('languages.chineseSimplified'), nativeName: '简体中文' },
+];
+
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,7 +30,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const { theme, setTheme } = useTheme();
   const { settings, updateSettings } = useSettings();
   const { formatDateTime } = useTimeFormat();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currencyStatus, setCurrencyStatus] = useState<any>(null);
   const [isUpdatingCurrency, setIsUpdatingCurrency] = useState(false);
 
@@ -72,24 +87,33 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto animate-fade-in">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-50 modal-overlay animate-fade-in"
         onClick={onClose}
       />
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-[var(--bg-primary)] shadow-xl transition-all">
+        <div 
+          className="modal modal-content relative w-full max-w-2xl transform overflow-hidden modal-radius bg-[var(--bg-primary)] modal-shadow theme-transition animate-scale-in"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4">
             <h3 className="text-lg font-semibold text-[var(--text-primary)]">
               {t('common.settings')}
             </h3>
             <button
-              onClick={onClose}
-              className="rounded-md p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
+              className="p-2 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+              type="button"
+              style={{ zIndex: 10, position: 'relative', pointerEvents: 'auto' }}
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -97,50 +121,80 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
           {/* Content */}
           <div className="p-6">
+            {/* Language Section */}
+            <div className="mb-8">
+              <h4 className="text-base font-medium text-[var(--text-primary)] mb-4">
+                {t('settings.language')}
+              </h4>
+              <select
+                value={i18n.language}
+                onChange={(e) => i18n.changeLanguage(e.target.value)}
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition"
+              >
+                {getLanguages(t).map((language) => (
+                  <option
+                    key={language.code}
+                    value={language.code}
+                    className="bg-[var(--bg-secondary)] text-[var(--text-primary)]"
+                  >
+                    {language.nativeName} ({language.name})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Theme Section */}
             <div className="mb-8">
               <h4 className="text-base font-medium text-[var(--text-primary)] mb-4">
                 {t('theme.title')}
               </h4>
-              <div className="grid grid-cols-1 gap-3">
+              <select
+                value={theme.name}
+                onChange={(e) => setTheme(e.target.value as any)}
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition"
+              >
                 {THEME_NAMES.map((themeName) => {
                   const themeNameStr = String(themeName);
-                  const themeOption = getThemeConfig(themeName);
                   const themeInfo = getThemeInfo(themeNameStr);
-                  const IconComponent = themeInfo.icon;
                   return (
-                    <button
+                    <option
                       key={themeNameStr}
-                      onClick={() => setTheme(themeName)}
-                      className={`flex items-center space-x-3 rounded-lg border-2 p-4 text-left transition-all ${
-                        theme.name === themeNameStr
-                          ? 'border-[var(--text-accent)] bg-[var(--bg-secondary)]'
-                          : 'border-[var(--border-color)] hover:border-[var(--border-hover)] hover:bg-[var(--bg-secondary)]'
-                      }`}
+                      value={themeNameStr}
+                      className="bg-[var(--bg-secondary)] text-[var(--text-primary)]"
                     >
-                      <div className="flex items-center space-x-3">
-                        <IconComponent className="h-5 w-5 text-[var(--text-primary)]" />
-                        <div
-                          className="h-6 w-6 rounded-full border-2 border-white shadow-sm"
-                          style={{ backgroundColor: themeOption.primary }}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-[var(--text-primary)]">
-                          {themeInfo.label}
-                        </div>
-                        <div className="text-sm text-[var(--text-secondary)]">
-                          {themeInfo.description}
-                        </div>
-                      </div>
-                      {theme.name === themeNameStr && (
-                        <div className="ml-auto">
-                          <div className="h-2 w-2 rounded-full bg-[var(--text-accent)]" />
-                        </div>
-                      )}
-                    </button>
+                      {themeInfo.label}
+                    </option>
                   );
                 })}
+              </select>
+              {/* Theme Preview */}
+              <div className="mt-3 p-4 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] animate-fade-in">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    {(() => {
+                      const themeInfo = getThemeInfo(theme.name);
+                      const IconComponent = themeInfo.icon;
+                      const themeOption = getThemeConfig(theme.name as any);
+                      return (
+                        <>
+                          <IconComponent className="h-5 w-5 text-[var(--text-primary)]" />
+                          <div
+                            className="h-6 w-6 rounded-full border-2 border-white shadow-sm"
+                            style={{ backgroundColor: themeOption.primary }}
+                          />
+                        </>
+                      );
+                    })()}
+                  </div>
+                  <div>
+                    <div className="font-medium text-[var(--text-primary)]">
+                      {getThemeInfo(theme.name).label}
+                    </div>
+                    <div className="text-sm text-[var(--text-secondary)]">
+                      {getThemeInfo(theme.name).description}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -154,11 +208,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   <button
                     key={currency}
                     onClick={() => handleCurrencyChange(currency)}
-                    className={`rounded-lg border-2 p-3 text-center transition-all ${
+                    className={`btn interactive-bounce rounded-lg border-2 p-3 text-center theme-transition animate-slide-up ${
                       settings.currency === currency
-                        ? 'border-[var(--text-accent)] bg-[var(--bg-secondary)] text-[var(--text-accent)]'
-                        : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--border-hover)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
+                        ? 'border-[var(--color-primary)] bg-[var(--bg-secondary)] text-[var(--color-primary)]'
+                        : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--border-hover)] hover:bg-[var(--color-hover)] hover:text-[var(--text-primary)]'
                     }`}
+                    style={{animationDelay: `${['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'].indexOf(currency) * 50}ms`}}
                   >
                     <div className="font-medium">{currency}</div>
                   </button>
@@ -179,11 +234,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   <button
                     key={format.value}
                     onClick={() => updateSettings({ time_format: format.value } as any)}
-                    className={`rounded-lg border-2 p-3 text-center transition-all ${
+                    className={`btn interactive-bounce rounded-lg border-2 p-3 text-center theme-transition animate-slide-up ${
                       settings.time_format === format.value
-                        ? 'border-[var(--text-accent)] bg-[var(--bg-secondary)] text-[var(--text-accent)]'
-                        : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--border-hover)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
+                        ? 'border-[var(--color-primary)] bg-[var(--bg-secondary)] text-[var(--color-primary)]'
+                        : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--border-hover)] hover:bg-[var(--color-hover)] hover:text-[var(--text-primary)]'
                     }`}
+                    style={{animationDelay: `${[{ value: '12h', label: t('settings.timeFormat12') }, { value: '24h', label: t('settings.timeFormat24') }].findIndex(f => f.value === format.value) * 100}ms`}}
                   >
                     <div className="font-medium">{format.label}</div>
                   </button>
@@ -200,7 +256,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 <button
                   onClick={handleForceUpdateCurrency}
                   disabled={isUpdatingCurrency}
-                  className="flex items-center space-x-2 px-3 py-1 text-sm bg-[var(--text-accent)] text-white rounded-md hover:bg-opacity-90 disabled:opacity-50 transition-colors"
+                  className="btn-primary interactive-scale flex items-center space-x-2 px-3 py-1 text-sm bg-[var(--color-primary)] text-white rounded-md hover:bg-opacity-90 disabled:opacity-50 theme-transition"
                 >
                   <ArrowPathIcon className={`h-4 w-4 ${isUpdatingCurrency ? 'animate-spin' : ''}`} />
                   <span>{isUpdatingCurrency ? t('settings.updating') : t('settings.updateNow')}</span>
@@ -211,7 +267,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-[var(--text-secondary)]">{t('ui.status')}</span>
-                      <span className={`font-medium ${currencyStatus.source === 'live' ? 'text-green-600' : currencyStatus.source === 'fallback' ? 'text-yellow-600' : 'text-orange-600'}`}>
+                      <span className={`font-medium theme-transition ${currencyStatus.source === 'live' ? 'text-[var(--color-success)]' : currencyStatus.source === 'fallback' ? 'text-[var(--color-warning)]' : 'text-[var(--color-info)]'}`}>
                         {currencyStatus.source === 'live' ? t('settings.statusLive') : currencyStatus.source === 'fallback' ? t('settings.statusFallback') : t('settings.statusCached')}
                       </span>
                     </div>
@@ -260,7 +316,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
           <div className="flex justify-end border-t border-[var(--border-color)] px-6 py-4">
             <button
               onClick={onClose}
-              className="rounded-md bg-[var(--text-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90 transition-colors"
+              className="btn-primary interactive-scale rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90 theme-transition"
             >
               {t('common.done')}
             </button>

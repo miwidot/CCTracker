@@ -54,10 +54,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const costPerToken = project.total_tokens > 0 ? project.total_cost / project.total_tokens : 0;
 
   return (
-    <div className="bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow p-6 border border-[var(--border-color)]">
+    <div className="card interactive bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] theme-transition p-6 border border-[var(--border-color)]">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <FolderIcon className="h-8 w-8 text-blue-500" />
+          <FolderIcon className="h-8 w-8 text-[var(--color-primary)]" />
           <div>
             <h3 className="text-lg font-semibold text-[var(--text-primary)]">
               {project.project_name}
@@ -166,7 +166,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
             <p className="text-[var(--text-secondary)] mb-4">{error}</p>
             <button
               onClick={loadProjectData}
-              className="px-4 py-2 bg-[var(--text-accent)] text-white rounded-md hover:bg-[var(--text-accent)]/80 transition-colors"
+              className="btn btn-primary interactive-scale px-4 py-2 bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary)]/80 theme-transition"
             >
               {t('analytics.retry')}
             </button>
@@ -198,7 +198,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
             <button
               onClick={loadProjectData}
               disabled={isLoading}
-              className="flex items-center space-x-2 px-4 py-2 bg-[var(--text-accent)] text-white rounded-md hover:bg-[var(--text-accent)]/80 disabled:opacity-50 transition-colors"
+              className="btn btn-primary interactive-scale flex items-center space-x-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary)]/80 disabled:opacity-50 theme-transition"
             >
               <ArrowPathIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               <span>{t('common.refresh')}</span>

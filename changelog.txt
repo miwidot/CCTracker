@@ -1,3 +1,23 @@
+2025-06-28 03:27:53 +08 - SETTINGS UI REORGANIZATION: Consolidated language and theme selection into dropdown menus
+- USER REQUEST: Move theme selection to dropdown like language selection and move language to settings modal
+- SETTINGS MODAL IMPROVEMENTS:
+  * Added language selection dropdown with native names and translated names
+  * Converted theme selection from button grid to clean dropdown menu
+  * Added theme preview section showing current theme icon, color, and description
+  * Improved UX by consolidating all settings in one location
+- HEADER COMPONENT CLEANUP:
+  * Removed LanguageSelector component from header to reduce UI clutter
+  * Adjusted animation delays for remaining header elements
+  * Cleaner header layout with just refresh and settings buttons
+- ENHANCED USER EXPERIENCE:
+  * More consistent UI patterns with dropdown selections
+  * Better space utilization in settings modal
+  * Unified settings location for better discoverability
+- FILES MODIFIED:
+  * src/renderer/components/SettingsModal.tsx - Added language dropdown and converted theme selection
+  * src/renderer/components/Header.tsx - Removed language selector import and usage
+- BUILD VERIFICATION: All changes compiled successfully with webpack
+
 2025-06-28 02:20:56 +08 - PROJECT STRUCTURE CLEANUP: Converted all relative imports to path aliases
 - USER REQUEST: Complete the remaining project structure cleanup tasks including import patterns and path aliases
 - IMPORT PATTERN STANDARDIZATION:

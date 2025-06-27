@@ -35,15 +35,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
 
       {/* Sidebar */}
       <div
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[var(--bg-secondary)] border-r border-[var(--border-color)] sidebar theme-transition transform transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[var(--bg-secondary)] border-r border-[var(--border-color)] sidebar theme-transition transform ease-out ${
+          isOpen ? 'translate-x-0 animate-slide-right' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Header with macOS controls spacing */}
           <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] sidebar-with-controls theme-transition">
             <div className="flex items-center space-x-2 animate-slide-right animate-delay-100">
-              <div className="w-8 h-8 bg-[var(--text-accent)] rounded-lg flex items-center justify-center theme-transition interactive-scale">
+              <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center theme-transition interactive-scale">
                 <ChartBarIcon className="h-5 w-5 text-white" />
               </div>
               <span className="font-semibold text-[var(--text-primary)] theme-transition">{t('app.title')}</span>
@@ -64,15 +64,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
                 onClick={() => handleNavigation(item.page)}
                 className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left sidebar-item relative ${
                   currentPage === item.page
-                    ? 'bg-[var(--text-accent)] text-white'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
-                } ${item.highlight ? 'ring-2 ring-blue-400 ring-opacity-50 animate-float' : ''}`}
+                    ? 'bg-[var(--color-primary)] text-white'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--color-hover)] hover:text-[var(--text-primary)]'
+                } ${item.highlight ? 'ring-2 ring-[var(--color-info)] ring-opacity-50 animate-float' : ''}`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <item.icon className="h-5 w-5 transition-transform duration-200 ease-out group-hover:scale-110" />
+                <item.icon className="h-5 w-5 theme-transition" />
                 <span className="font-medium">{item.label}</span>
                 {item.highlight && (
-                  <span className="absolute -top-1 -right-1 bg-[var(--text-accent)] text-white text-xs px-1 py-0.5 rounded-full font-bold animate-pulse">
+                  <span className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white text-xs px-1 py-0.5 rounded-full font-bold animate-pulse">
                     {t('common.new')}
                   </span>
                 )}

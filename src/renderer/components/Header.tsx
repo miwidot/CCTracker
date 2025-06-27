@@ -4,7 +4,6 @@ import { useUsageData } from '../contexts/UsageDataContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTimeFormat } from '../hooks/useTimeFormat';
-import { LanguageSelector } from './LanguageSelector';
 import { SettingsModal } from './SettingsModal';
 
 interface HeaderProps {
@@ -53,14 +52,10 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <span className="font-mono font-medium">{formatLastUpdated(lastUpdated)}</span>
             </div>
 
-            <div className="animate-slide-left animate-delay-200">
-              <LanguageSelector className="text-[var(--text-primary)]" />
-            </div>
-
             <button
               onClick={refreshData}
               disabled={isLoading}
-              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] disabled:opacity-50 interactive-scale theme-transition animate-slide-left animate-delay-250"
+              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] disabled:opacity-50 interactive-scale theme-transition animate-slide-left animate-delay-200"
               title={t('common.refresh')}
             >
               <ArrowPathIcon className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -68,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
             <button 
               onClick={() => setShowSettings(true)}
-              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] interactive-scale theme-transition animate-slide-left animate-delay-300"
+              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] interactive-scale theme-transition animate-slide-left animate-delay-250"
               title={t('common.settings')}
             >
               <CogIcon className="h-5 w-5" />

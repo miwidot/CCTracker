@@ -62,14 +62,14 @@ const BIMetricCard: React.FC<BIMetricCardProps> = ({
   const getTrendIcon = () => {
     if (!trend) return null;
     switch (trend.direction) {
-      case 'up': return <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />;
-      case 'down': return <ArrowTrendingDownIcon className="h-4 w-4 text-red-500" />;
+      case 'up': return <ArrowTrendingUpIcon className="h-4 w-4 text-[var(--color-success)]" />;
+      case 'down': return <ArrowTrendingDownIcon className="h-4 w-4 text-[var(--color-error)]" />;
       case 'stable': return <MinusIcon className="h-4 w-4 text-[var(--text-secondary)]" />;
     }
   };
 
   return (
-    <div className="p-6 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-secondary)] transition-all hover:scale-105">
+    <div className="card interactive-scale p-6 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-secondary)] theme-transition hover:scale-105">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <Icon className="h-8 w-8 text-[var(--text-accent)]" />
@@ -169,7 +169,7 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
     <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)]">
       <div className="p-6 border-b border-[var(--border-color)]">
         <h3 className="text-lg font-semibold flex items-center text-[var(--text-primary)]">
-          <ExclamationTriangleIcon className="h-5 w-5 mr-2 text-red-500" />
+          <ExclamationTriangleIcon className="h-5 w-5 mr-2 text-[var(--color-error)]" />
           {t('businessIntelligence.recentAnomalies')} ({anomalies.length})
         </h3>
       </div>
@@ -261,8 +261,8 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <div className="text-center">
-          <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto" />
-          <p className="mt-4 text-red-600">{error}</p>
+          <ExclamationTriangleIcon className="h-12 w-12 text-[var(--color-error)] mx-auto" />
+          <p className="mt-4 text-[var(--color-error)]">{error}</p>
           <button
             onClick={loadBusinessIntelligence}
             className="mt-4 px-4 py-2 bg-[var(--text-accent)] text-white rounded-lg hover:bg-opacity-90"
