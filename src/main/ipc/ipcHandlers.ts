@@ -207,19 +207,47 @@ export function setupIpcHandlers(services: Services) {
     }
   });
 
-  // Export handlers
-  ipcMain.handle('export:csv', async (_, data) => {
+  // Export handlers with save dialog
+  ipcMain.handle('export:csv', async (event, data) => {
     try {
-      return await exportService.exportUsageData(data, { format: 'csv' });
+      const { dialog } = await import('electron');
+      const result = await dialog.showSaveDialog({
+        title: 'Save CSV Export',
+        defaultPath: `usage_export_${new Date().toISOString().split('T')[0]}.csv`,
+        filters: [
+          { name: 'CSV Files', extensions: ['csv'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+      });
+      
+      if (result.canceled || !result.filePath) {
+        return { success: false, error: 'Export canceled by user' };
+      }
+      
+      return await exportService.exportUsageDataToPath(data, result.filePath, { format: 'csv' });
     } catch (error) {
       log.ipc.error('export:csv', error as Error);
       throw error;
     }
   });
 
-  ipcMain.handle('export:json', async (_, data) => {
+  ipcMain.handle('export:json', async (event, data) => {
     try {
-      return await exportService.exportUsageData(data, { format: 'json' });
+      const { dialog } = await import('electron');
+      const result = await dialog.showSaveDialog({
+        title: 'Save JSON Export',
+        defaultPath: `usage_export_${new Date().toISOString().split('T')[0]}.json`,
+        filters: [
+          { name: 'JSON Files', extensions: ['json'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+      });
+      
+      if (result.canceled || !result.filePath) {
+        return { success: false, error: 'Export canceled by user' };
+      }
+      
+      return await exportService.exportUsageDataToPath(data, result.filePath, { format: 'json' });
     } catch (error) {
       log.ipc.error('export:json', error as Error);
       throw error;

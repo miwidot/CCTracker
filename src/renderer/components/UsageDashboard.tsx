@@ -282,9 +282,9 @@ const UsageDashboard: React.FC = () => {
   // State for centralized project costs
   const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
   
-  // State for date range filtering
+  // State for date range filtering - default to today
   const [dateRange, setDateRange] = useState({
-    start: startOfDay(subDays(new Date(), 30)),
+    start: startOfDay(new Date()),
     end: endOfDay(new Date()),
   });
   

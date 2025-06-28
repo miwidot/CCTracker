@@ -53,7 +53,59 @@ export class ExportService {
   }
 
   /**
-   * Export usage data to various formats
+   * Export usage data to a specific file path (for save dialog)
+   */
+  async exportUsageDataToPath(data: UsageEntry[], filePath: string, options: ExportOptions): Promise<ExportResult> {
+    const startTime = Date.now();
+    
+    try {
+      let content: string;
+      const processedData = this.processDataForExport(data, options);
+      
+      switch (options.format) {
+        case 'csv':
+          content = this.generateCSVContentString(data, options);
+          break;
+        case 'json':
+          content = JSON.stringify(processedData, null, 2);
+          break;
+        default:
+          throw new Error(`Unsupported export format: ${options.format}`);
+      }
+      
+      await fs.writeFile(filePath, content, 'utf-8');
+      const stats = await fs.stat(filePath);
+      
+      const result: ExportResult = {
+        success: true,
+        filePath,
+        stats: {
+          totalEntries: data.length,
+          totalCost: calculateTotalCost(data),
+          fileSize: stats.size,
+          exportTime: Date.now() - startTime,
+        },
+      };
+      
+      log.debug(`Export completed to ${filePath} in ${result.stats.exportTime}ms`, 'ExportService');
+      return result;
+    } catch (error) {
+      log.service.error('ExportService', 'Export failed', error as Error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown export error',
+        stats: {
+          totalEntries: data.length,
+          totalCost: calculateTotalCost(data),
+          fileSize: 0,
+          exportTime: Date.now() - startTime,
+        },
+      };
+    }
+  }
+
+  /**
+   * Export usage data to various formats (legacy method for auto-save)
    */
   async exportUsageData(
     data: UsageEntry[],
@@ -101,52 +153,61 @@ export class ExportService {
   }
 
   /**
-   * Export to CSV format
+   * Generate CSV content string (helper method for save dialog)
+   */
+  private generateCSVContentString(data: UsageEntry[], options: ExportOptions): string {
+    const processedData = this.processDataForExport(data, options);
+    let csvContent = '';
+
+    // Add summary if requested
+    if (options.includeSummary === true) {
+      csvContent += this.generateCSVSummary(data);
+      csvContent += '\n\n';
+    }
+
+    // Add headers
+    if (options.includeHeaders !== false) {
+      const headers = [
+        'ID',
+        'Timestamp',
+        'Model',
+        'Input Tokens',
+        'Output Tokens',
+        'Total Tokens',
+        'Cost USD',
+        'Session ID',
+        'Project Path',
+        'Conversation ID',
+      ];
+      csvContent += `${headers.join(',')  }\n`;
+    }
+
+    // Add data rows
+    for (const entry of processedData) {
+      const row = [
+        this.escapeCSV(entry.id),
+        this.escapeCSV(this.formatDate(entry.timestamp, options.dateFormat)),
+        this.escapeCSV(entry.model),
+        entry.input_tokens.toString(),
+        entry.output_tokens.toString(),
+        entry.total_tokens.toString(),
+        entry.cost_usd.toFixed(6),
+        this.escapeCSV(entry.session_id ?? ''),
+        this.escapeCSV(entry.project_path ?? ''),
+        this.escapeCSV(entry.conversation_id ?? ''),
+      ];
+      csvContent += `${row.join(',')  }\n`;
+    }
+
+    return csvContent;
+  }
+
+  /**
+   * Export to CSV format (legacy method for auto-save)
    */
   private async exportToCSV(data: UsageEntry[], options: ExportOptions): Promise<ExportResult> {
     try {
-      const processedData = this.processDataForExport(data, options);
-      let csvContent = '';
-
-      // Add summary if requested
-      if (options.includeSummary === true) {
-        csvContent += this.generateCSVSummary(data);
-        csvContent += '\n\n';
-      }
-
-      // Add headers
-      if (options.includeHeaders !== false) {
-        const headers = [
-          'ID',
-          'Timestamp',
-          'Model',
-          'Input Tokens',
-          'Output Tokens',
-          'Total Tokens',
-          'Cost USD',
-          'Session ID',
-          'Project Path',
-          'Conversation ID',
-        ];
-        csvContent += `${headers.join(',')  }\n`;
-      }
-
-      // Add data rows
-      for (const entry of processedData) {
-        const row = [
-          this.escapeCSV(entry.id),
-          this.escapeCSV(this.formatDate(entry.timestamp, options.dateFormat)),
-          this.escapeCSV(entry.model),
-          entry.input_tokens.toString(),
-          entry.output_tokens.toString(),
-          entry.total_tokens.toString(),
-          entry.cost_usd.toFixed(6),
-          this.escapeCSV(entry.session_id ?? ''),
-          this.escapeCSV(entry.project_path ?? ''),
-          this.escapeCSV(entry.conversation_id ?? ''),
-        ];
-        csvContent += `${row.join(',')  }\n`;
-      }
+      const csvContent = this.generateCSVContentString(data, options);
 
       // Save to file
       const fileName = `usage_export_${this.getTimestamp()}.csv`;

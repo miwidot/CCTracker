@@ -35,12 +35,12 @@ class Application {
         contextIsolation: true,
         preload: path.join(__dirname, 'preload.js'),
       },
-      titleBarStyle: 'hiddenInset',
-      titleBarOverlay: {
-        color: '#1e293b',
-        symbolColor: '#ffffff',
-        height: 32
-      },
+      // Removed titleBarStyle: 'hiddenInset' - causes modal click issues on macOS
+      // titleBarOverlay: {
+      //   color: '#1e293b', 
+      //   symbolColor: '#ffffff',
+      //   height: 32
+      // },
       show: false,
       backgroundColor: '#ffffff',
       paintWhenInitiallyHidden: true
