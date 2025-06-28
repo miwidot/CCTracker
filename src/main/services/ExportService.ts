@@ -509,9 +509,7 @@ export class ExportService {
           key = 'all';
       }
 
-      if (!grouped[key]) {
-        grouped[key] = [];
-      }
+      grouped[key] ??= [];
       grouped[key].push(entry);
     }
 

@@ -1,7 +1,30 @@
 import '@testing-library/jest-dom';
 
 // Mock Electron API
-(global as any).window = {
+declare global {
+  interface Global {
+    window: {
+      electronAPI: {
+        getUsageStats: jest.Mock;
+        getUsageByDateRange: jest.Mock;
+        getSessionStats: jest.Mock;
+        startMonitoring: jest.Mock;
+        stopMonitoring: jest.Mock;
+        getMonitoringStatus: jest.Mock;
+        getSettings: jest.Mock;
+        updateSettings: jest.Mock;
+        exportCsv: jest.Mock;
+        exportJson: jest.Mock;
+        getCurrencyRates: jest.Mock;
+        convertCurrency: jest.Mock;
+        onUsageUpdate: jest.Mock;
+        onFileSystemEvent: jest.Mock;
+      };
+    };
+  }
+}
+
+(global as unknown as Global).window = {
   electronAPI: {
     getUsageStats: jest.fn(),
     getUsageByDateRange: jest.fn(),

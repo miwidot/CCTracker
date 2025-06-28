@@ -107,18 +107,18 @@ export class UsageService {
       const data = JSON.parse(trimmedLine);
       
       // Skip if data is not an object
-      if (!data || typeof data !== 'object') {
+      if (data == null || typeof data !== 'object') {
         log.parsing.error('JSONL entry', new Error(`Skipping invalid JSONL entry (not an object): ${JSON.stringify(data)}`));
         return null;
       }
       
       // Check if it's Claude CLI format
-      if (data.uuid && data.sessionId && data.message) {
+      if (typeof data === 'object' && data != null && 'uuid' in data && 'sessionId' in data && 'message' in data) {
         return this.parseClaudeJSONLEntry(data as ClaudeJSONLEntry);
       }
       
       // Skip Claude CLI summary entries and other non-usage entries
-      if (data.type && ['summary', 'system', 'metadata'].includes(data.type)) {
+      if (typeof data === 'object' && data != null && 'type' in data && typeof data.type === 'string' && ['summary', 'system', 'metadata'].includes(data.type)) {
         return null; // These are not usage entries, skip silently
       }
       
@@ -135,13 +135,13 @@ export class UsageService {
    */
   private parseClaudeJSONLEntry(data: ClaudeJSONLEntry): UsageEntry | null {
     // Validate required Claude CLI fields
-    if (!data.uuid || !data.sessionId || !data.message || !data.timestamp) {
+    if (data.uuid == null || data.uuid === '' || data.sessionId == null || data.sessionId === '' || data.message == null || data.timestamp == null || data.timestamp === '') {
       log.warn('Invalid Claude CLI entry - missing required fields', 'UsageService');
       return null;
     }
     
     // Only process assistant messages with usage data
-    if (data.type !== 'assistant' || !data.message.usage || !data.message.model) {
+    if (data.type !== 'assistant' || data.message.usage == null || data.message.model == null || data.message.model === '') {
       return null;
     }
 
@@ -180,9 +180,9 @@ export class UsageService {
    * Parse legacy format JSONL entry (backwards compatibility)
    */
   private parseLegacyJSONLEntry(data: LegacyJSONLEntry): UsageEntry | null {
-    if (!data.model || !data.usage || !data.timestamp) {
+    if (data.model == null || data.model === '' || !data.usage || data.timestamp == null || data.timestamp === '') {
       // Only log detailed warnings for entries that might actually be usage data
-      const keys = Object.keys(data || {});
+      const keys = Object.keys(data ?? {});
       const isLikelyUsageEntry = keys.some(key => ['model', 'usage', 'tokens', 'cost'].includes(key));
       
       if (isLikelyUsageEntry) {
@@ -314,7 +314,7 @@ export class UsageService {
       const sessionMap = new Map<string, SessionStats>();
       
       filteredEntries.forEach(entry => {
-        if (!entry.session_id) return;
+        if (entry.session_id == null || entry.session_id === '') return;
 
         if (!sessionMap.has(entry.session_id)) {
           sessionMap.set(entry.session_id, {
@@ -328,7 +328,8 @@ export class UsageService {
           });
         }
 
-        const session = sessionMap.get(entry.session_id)!;
+        const session = sessionMap.get(entry.session_id);
+        if (!session) return;
         session.total_cost += entry.cost_usd;
         session.total_tokens += entry.total_tokens;
         session.message_count += 1;
@@ -362,7 +363,10 @@ export class UsageService {
   async getSessionStats(sessionId: string): Promise<SessionStats | null> {
     try {
       if (this.sessionCache.has(sessionId)) {
-        return this.sessionCache.get(sessionId)!;
+        const cachedSession = this.sessionCache.get(sessionId);
+        if (cachedSession) {
+          return cachedSession;
+        }
       }
 
       const allEntries = await this.getAllUsageEntries();
@@ -943,7 +947,7 @@ export class UsageService {
       const mostEfficientModel = modelEfficiency.length > 0 ? modelEfficiency[0].model : '';
 
       // Data quality score
-      const completeEntries = allEntries.filter(e => e.model && e.timestamp && e.cost_usd >= 0 && e.total_tokens > 0);
+      const completeEntries = allEntries.filter(e => e.model != null && e.model !== '' && e.timestamp != null && e.timestamp !== '' && e.cost_usd >= 0 && e.total_tokens > 0);
       const dataQualityScore = (completeEntries.length / allEntries.length) * 100;
 
       const businessIntelligence: BusinessIntelligence = {
@@ -1019,14 +1023,14 @@ export class UsageService {
    */
   private extractProjectName(entry: UsageEntry): string {
     // Try to extract from project_path first
-    if (entry.project_path) {
+    if (entry.project_path != null && entry.project_path !== '') {
       const pathParts = entry.project_path.split('/');
       const lastPart = pathParts[pathParts.length - 1];
       return lastPart || 'Unknown Project';
     }
 
     // Fall back to extracting from session_id or other fields
-    if (entry.session_id) {
+    if (entry.session_id != null && entry.session_id !== '') {
       // Try to match session to known project directories
       const sessionFiles = this.sessionToFileMap.get(entry.session_id);
       if (sessionFiles && sessionFiles.length > 0) {
@@ -1072,7 +1076,10 @@ export class UsageService {
         if (!projectGroups.has(projectName)) {
           projectGroups.set(projectName, []);
         }
-        projectGroups.get(projectName)!.push(entry);
+        const projectGroup = projectGroups.get(projectName);
+        if (projectGroup) {
+          projectGroup.push(entry);
+        }
       });
 
       const projectAnalytics: ProjectAnalytics[] = [];
@@ -1149,9 +1156,11 @@ export class UsageService {
           timelineMap.set(date, { projects: new Set(), cost: 0 });
         }
         
-        const dayData = timelineMap.get(date)!;
-        dayData.projects.add(projectName);
-        dayData.cost += entry.cost_usd;
+        const dayData = timelineMap.get(date);
+        if (dayData != null) {
+          dayData.projects.add(projectName);
+          dayData.cost += entry.cost_usd;
+        }
       });
 
       const activityTimeline = Array.from(timelineMap.entries())
@@ -1198,11 +1207,14 @@ export class UsageService {
       // Group by session
       const sessionGroups = new Map<string, UsageEntry[]>();
       projectEntries.forEach(entry => {
-        if (entry.session_id) {
+        if (entry.session_id != null && entry.session_id !== '') {
           if (!sessionGroups.has(entry.session_id)) {
             sessionGroups.set(entry.session_id, []);
           }
-          sessionGroups.get(entry.session_id)!.push(entry);
+          const sessionGroup = sessionGroups.get(entry.session_id);
+          if (sessionGroup) {
+            sessionGroup.push(entry);
+          }
         }
       });
 
@@ -1272,8 +1284,9 @@ export class UsageService {
                   if (!this.sessionToFileMap.has(entry.sessionId)) {
                     this.sessionToFileMap.set(entry.sessionId, []);
                   }
-                  if (!this.sessionToFileMap.get(entry.sessionId)!.includes(filePath)) {
-                    this.sessionToFileMap.get(entry.sessionId)!.push(filePath);
+                  const sessionFiles = this.sessionToFileMap.get(entry.sessionId);
+                  if (sessionFiles && !sessionFiles.includes(filePath)) {
+                    sessionFiles.push(filePath);
                   }
                 }
               } catch (_parseError) {

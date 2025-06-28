@@ -402,7 +402,7 @@ const UsageDashboard: React.FC = () => {
     };
 
     void calculateMetrics();
-  }, [filteredData, uniqueSessionsInRange, dateRange, usageData, forceUpdate, settings.currency]);
+  }, [filteredData, uniqueSessionsInRange, dateRange, usageData, forceUpdate, settings.currency, convertFromUSD]);
 
   // Calculate project costs with centralized service
   useEffect(() => {
@@ -468,7 +468,7 @@ const UsageDashboard: React.FC = () => {
       tokensByModel: tokenChartData,
       costByModel: costPieData,
     };
-  }, [filteredData, settings.currency]);
+  }, [filteredData, settings.currency, convertFromUSD]);
 
   // Get currency symbol from hook
   const currencySymbol = getCurrencySymbol();

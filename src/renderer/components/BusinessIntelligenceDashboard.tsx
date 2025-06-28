@@ -172,7 +172,7 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
           <div className="space-y-3">
             {anomalies.slice(0, 5).map((anomaly, index) => (
               <div
-                key={`anomaly-${anomaly.timestamp}-${index}`}
+                key={`anomaly-${anomaly.timestamp}-${anomaly.type}-${anomaly.actual_value}`}
                 className={`p-4 rounded-lg border-2 ${severityColors[anomaly.severity]}`}
               >
                 <div className="flex justify-between items-start">

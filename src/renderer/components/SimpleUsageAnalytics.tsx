@@ -136,10 +136,10 @@ export const SimpleUsageAnalytics: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
-    loadProjectData();
+    void loadProjectData();
   }, [loadProjectData]);
 
   const chartData = useMemo(() => {
@@ -167,7 +167,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
             </h2>
             <p className="text-[var(--text-secondary)] mb-4">{error}</p>
             <button
-              onClick={loadProjectData}
+              onClick={() => void loadProjectData()}
               className="btn btn-primary interactive-scale px-4 py-2 bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary)]/80 theme-transition"
             >
               {t('analytics.retry')}
@@ -198,7 +198,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
               </div>
             </div>
             <button
-              onClick={loadProjectData}
+              onClick={() => void loadProjectData()}
               disabled={isLoading}
               className="btn btn-primary interactive-scale flex items-center space-x-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary)]/80 disabled:opacity-50 theme-transition"
             >
@@ -318,7 +318,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
                 <ProjectCard 
-                  key={i}
+                  key={`loading-project-${i}`}
                   project={{} as ProjectAnalytics}
                   currency={settings.currency}
                   isLoading

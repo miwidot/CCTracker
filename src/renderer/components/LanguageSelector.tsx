@@ -25,7 +25,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ className = 
 
   const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newLanguage = event.target.value;
-    i18n.changeLanguage(newLanguage);
+    void i18n.changeLanguage(newLanguage);
   };
 
   return (

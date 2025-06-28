@@ -118,8 +118,8 @@ export function calculateEfficiencyScore(totalCost: number, totalTokens: number)
   // Baseline: Claude 3.5 Sonnet average cost per token
   // (Assuming 60% input, 40% output ratio)
   const baselineModel = MODEL_PRICING['claude-3-5-sonnet-20241022'];
-  const baselineInputPrice = baselineModel?.input ?? 0.000003;
-  const baselineOutputPrice = baselineModel?.output ?? 0.000015;
+  const baselineInputPrice = baselineModel.input;
+  const baselineOutputPrice = baselineModel.output;
   const baselineCostPerToken = (baselineInputPrice * 0.6) + (baselineOutputPrice * 0.4);
   
   // Calculate efficiency ratio (lower cost per token = higher efficiency)

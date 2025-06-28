@@ -66,12 +66,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
                   currentPage === item.page
                     ? 'bg-[var(--color-primary)] text-white'
                     : 'text-[var(--text-secondary)] hover:bg-[var(--color-hover)] hover:text-[var(--text-primary)]'
-                } ${item.highlight ? 'ring-2 ring-[var(--color-info)] ring-opacity-50 animate-float' : ''}`}
+                } ${item.highlight === true ? 'ring-2 ring-[var(--color-info)] ring-opacity-50 animate-float' : ''}`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <item.icon className="h-5 w-5 theme-transition" />
                 <span className="font-medium">{item.label}</span>
-                {item.highlight && (
+                {item.highlight === true && (
                   <span className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white text-xs px-1 py-0.5 rounded-full font-bold animate-pulse">
                     {t('common.new')}
                   </span>
