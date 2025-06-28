@@ -18,6 +18,8 @@
     "package:mac:arm64": "electron-builder --mac --arm64",
     "package:linux": "electron-builder --linux",
     "package:linux:x64": "electron-builder --linux --x64",
+    "package:linux:deb": "electron-builder --linux deb",
+    "package:linux:tar": "electron-builder --linux tar.gz",
     "package:all": "electron-builder --mac --linux",
     "package:mac:signed": "npm run package:mac && ./scripts/sign-app.sh",
     "test": "jest",

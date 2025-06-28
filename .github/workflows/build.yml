@@ -155,14 +155,11 @@ jobs:
             dist/*.dmg
           retention-days: 30
 
-  # Build for Linux
-  build-linux:
+  # Build for Linux DEB (Debian/Ubuntu)
+  build-linux-deb:
     needs: prepare-release
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.build_targets != 'mac-only' }}
-    strategy:
-      matrix:
-        arch: [x64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -204,26 +201,68 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Package for Linux (${{ matrix.arch }})
-        run: |
-          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-            npm run package:linux:arm64
-          else
-            npm run package:linux:x64
-          fi
+      - name: Package for Linux DEB
+        run: npm run package:linux:deb
 
-      - name: Upload Linux artifacts
+      - name: Upload Linux DEB artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cctracker-linux-${{ matrix.arch }}-${{ needs.prepare-release.outputs.version }}
+          name: cctracker-linux-deb-${{ needs.prepare-release.outputs.version }}
           path: |
             dist/*.deb
+          retention-days: 30
+
+  # Build for Linux TAR.GZ (Universal Linux)
+  build-linux-tar:
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.build_targets != 'mac-only' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm-dev libxcomposite-dev libxdamage-dev libxrandr-dev libgbm-dev libxss1 libasound2-dev
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm run postinstall || true
+
+      - name: Update version in package.json
+        run: |
+          npm version ${{ needs.prepare-release.outputs.version }} --no-git-tag-version
+
+      - name: Build application
+        run: npm run build
+
+      - name: Package for Linux TAR.GZ
+        run: npm run package:linux:tar
+
+      - name: Upload Linux TAR.GZ artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cctracker-linux-tar-${{ needs.prepare-release.outputs.version }}
+          path: |
             dist/*.tar.gz
           retention-days: 30
 
   # Create release
   release:
-    needs: [prepare-release, build-mac, build-linux]
+    needs: [prepare-release, build-mac, build-linux-deb, build-linux-tar]
     runs-on: ubuntu-latest
     if: ${{ needs.prepare-release.outputs.should_release == 'true' && (success() || failure()) }}
     steps:
@@ -258,12 +297,18 @@ jobs:
           
           ### 📦 Download Options
           
-          **macOS:**
-          - Universal (Intel + Apple Silicon): `CCTracker-universal.dmg`
+          **🍎 macOS:**
+          - `CCTracker-${{ needs.prepare-release.outputs.version }}-universal.dmg` - Universal binary (Intel + Apple Silicon)
           
-          **Linux:**
-          - Debian/Ubuntu: `.deb` package
-          - Other distros: `.tar.gz` archive
+          **🐧 Linux:**
+          - `CCTracker-${{ needs.prepare-release.outputs.version }}-amd64.deb` - Debian/Ubuntu package
+          - `CCTracker-${{ needs.prepare-release.outputs.version }}-linux-x64.tar.gz` - Generic Linux archive
+          
+          ### 📋 Installation Instructions
+          
+          **macOS:** Open the `.dmg` file and drag CCTracker to Applications
+          **Debian/Ubuntu:** `sudo dpkg -i CCTracker-*.deb && sudo apt-get install -f`
+          **Other Linux:** Extract `.tar.gz` and run `./CCTracker`
           
           ### ⚠️ Note
           ${{ needs.prepare-release.outputs.is_nightly == 'true' && 'This is a nightly development build. Use at your own risk.' || 'This is a manual release build.' }}
