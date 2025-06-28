@@ -6,15 +6,16 @@ import { Layout } from './components/Layout';
 import UsageDashboard from './components/UsageDashboard';
 import { BusinessIntelligenceDashboard } from './components/BusinessIntelligenceDashboard';
 import { SimpleUsageAnalytics } from './components/SimpleUsageAnalytics';
+import ProjectDetailView from './components/ProjectDetailView';
 import { useTranslation } from './hooks/useTranslation';
-import type { AppSettings } from '@shared/types';
+import type { AppSettings, ProjectAnalytics } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
-type CurrentPage = 'dashboard' | 'analytics' | 'business-intelligence';
+type CurrentPage = 'dashboard' | 'analytics' | 'business-intelligence' | 'project-detail';
 
 // Type guard function to validate if a page is a valid CurrentPage
 const isValidCurrentPage = (page: string): page is CurrentPage => {
-  return page === 'dashboard' || page === 'analytics' || page === 'business-intelligence';
+  return page === 'dashboard' || page === 'analytics' || page === 'business-intelligence' || page === 'project-detail';
 };
 
 export const App: React.FC = () => {
@@ -22,6 +23,7 @@ export const App: React.FC = () => {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState<CurrentPage>('dashboard');
+  const [selectedProject, setSelectedProject] = useState<ProjectAnalytics | null>(null);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -86,14 +88,33 @@ export const App: React.FC = () => {
     );
   }
 
+  const handleProjectSelect = (project: ProjectAnalytics) => {
+    setSelectedProject(project);
+    setCurrentPage('project-detail');
+  };
+
+  const handleBackToAnalytics = () => {
+    setSelectedProject(null);
+    setCurrentPage('analytics');
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'dashboard':
         return <UsageDashboard />;
       case 'analytics':
-        return <SimpleUsageAnalytics />;
+        return <SimpleUsageAnalytics onProjectSelect={handleProjectSelect} />;
       case 'business-intelligence':
         return <BusinessIntelligenceDashboard />;
+      case 'project-detail':
+        return selectedProject ? (
+          <ProjectDetailView 
+            project={selectedProject} 
+            onBack={handleBackToAnalytics}
+          />
+        ) : (
+          <SimpleUsageAnalytics onProjectSelect={handleProjectSelect} />
+        );
       default:
         return <UsageDashboard />;
     }
@@ -105,12 +126,16 @@ export const App: React.FC = () => {
         <UsageDataProvider>
           <Layout onNavigate={(page: string) => {
             if (isValidCurrentPage(page)) {
+              // Reset project selection when navigating away from project detail
+              if (page !== 'project-detail') {
+                setSelectedProject(null);
+              }
               setCurrentPage(page);
             } else {
               log.warn(`Invalid page navigation attempt: ${page}. Defaulting to dashboard.`, 'App');
               setCurrentPage('dashboard');
             }
-          }} currentPage={currentPage}>
+          }} currentPage={currentPage === 'project-detail' ? 'analytics' : currentPage}>
             {renderCurrentPage()}
           </Layout>
         </UsageDataProvider>

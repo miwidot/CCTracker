@@ -29,12 +29,14 @@ interface ProjectCardProps {
   project: ProjectAnalytics;
   currency?: string;
   isLoading?: boolean;
+  onClick?: () => void;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ 
   project, 
   currency: _currency = 'USD',
-  isLoading = false 
+  isLoading = false,
+  onClick
 }) => {
   const { formatCurrencyDetailed } = useCurrency();
   const { formatDate } = useTimeFormat();
@@ -55,7 +57,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const costPerToken = project.total_tokens > 0 ? project.total_cost / project.total_tokens : 0;
 
   return (
-    <div className="card interactive bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] theme-transition p-4 border border-[var(--border-color)]">
+    <div 
+      className="card interactive bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] theme-transition p-4 border border-[var(--border-color)] cursor-pointer transform hover:scale-105"
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between mb-4 min-h-[60px]">
         <div className="flex items-center space-x-3">
           <FolderIcon className="h-8 w-8 text-[var(--color-primary)]" />
@@ -106,7 +111,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   );
 };
 
-export const SimpleUsageAnalytics: React.FC = () => {
+interface SimpleUsageAnalyticsProps {
+  onProjectSelect?: (project: ProjectAnalytics) => void;
+}
+
+export const SimpleUsageAnalytics: React.FC<SimpleUsageAnalyticsProps> = ({ onProjectSelect }) => {
   const { settings } = useSettings();
   const { formatCurrencyDetailed } = useCurrency();
   const { t } = useTranslation();
@@ -342,6 +351,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
                   key={project.project_name}
                   project={project}
                   currency={settings.currency}
+                  onClick={() => onProjectSelect?.(project)}
                 />
               ))}
             </div>
