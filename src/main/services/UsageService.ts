@@ -65,8 +65,8 @@ interface LegacyJSONLEntry {
 }
 
 export class UsageService {
-  private readonly dataDir: string;
-  private readonly usageFile: string;
+  private dataDir: string;
+  private usageFile: string;
   private readonly cache: Map<string, UsageEntry> = new Map();
   private readonly sessionCache: Map<string, SessionStats> = new Map();
 
@@ -634,7 +634,12 @@ export class UsageService {
   /**
    * Initialize service and load Claude CLI data
    */
-  async initialize(): Promise<void> {
+  async initialize(userDataPath?: string): Promise<void> {
+    // Update data directory if userDataPath is provided
+    if (userDataPath) {
+      this.dataDir = userDataPath;
+      this.usageFile = path.join(userDataPath, 'usage.jsonl');
+    }
     try {
       // First try to load from Claude CLI
       log.service.start('UsageService');

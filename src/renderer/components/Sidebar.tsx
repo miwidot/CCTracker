@@ -57,24 +57,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2 stagger-children">
+          <nav className="flex-1 p-6 space-y-3 stagger-children">
             {menuItems.map((item, index) => (
               <button
                 key={item.label}
                 onClick={() => handleNavigation(item.page)}
-                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left sidebar-item relative ${
+                className={`group w-full flex items-center space-x-4 px-4 py-3 rounded-xl text-left sidebar-item relative transition-all duration-200 ease-out ${
                   currentPage === item.page
-                    ? 'bg-[var(--color-primary)] text-white'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--color-hover)] hover:text-[var(--text-primary)]'
-                } ${item.highlight === true ? 'ring-2 ring-[var(--color-info)] ring-opacity-50 animate-float' : ''}`}
-                style={{ animationDelay: `${index * 50}ms` }}
+                    ? 'bg-[var(--color-primary)] text-white shadow-lg transform scale-[1.02]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--color-hover)] hover:text-[var(--text-primary)] hover:transform hover:scale-[1.01] hover:shadow-md'
+                } ${item.highlight === true ? 'ring-2 ring-[var(--color-info)] ring-opacity-50 animate-pulse' : ''}`}
+                style={{ animationDelay: `${index * 75}ms` }}
               >
-                <item.icon className="h-5 w-5 theme-transition" />
-                <span className="font-medium">{item.label}</span>
-                {item.highlight === true && (
-                  <span className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white text-xs px-1 py-0.5 rounded-full font-bold animate-pulse">
-                    {t('common.new')}
-                  </span>
+                <div className={`p-2 rounded-lg transition-all duration-200 ${
+                  currentPage === item.page
+                    ? 'bg-white bg-opacity-20'
+                    : 'bg-[var(--bg-tertiary)] group-hover:bg-[var(--color-primary)] group-hover:bg-opacity-10'
+                }`}>
+                  <item.icon className="h-5 w-5 theme-transition" />
+                </div>
+                <div className="flex-1">
+                  <span className="font-semibold text-sm tracking-wide">{item.label}</span>
+                  {item.highlight === true && (
+                    <div className="flex items-center mt-1">
+                      <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow-sm">
+                        {t('common.new')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {currentPage === item.page && (
+                  <div className="w-1 h-6 bg-white rounded-full opacity-80"></div>
                 )}
               </button>
             ))}

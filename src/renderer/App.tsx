@@ -26,10 +26,30 @@ export const App: React.FC = () => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        // Wait for DOM to be fully ready
+        if (document.readyState !== 'complete') {
+          await new Promise(resolve => {
+            window.addEventListener('load', resolve, { once: true });
+          });
+        }
+        
+        // Small delay to ensure IPC is ready
+        await new Promise(resolve => setTimeout(resolve, 150));
+        
         const appSettings = await window.electronAPI.getSettings();
         setSettings(appSettings);
       } catch (error) {
         log.component.error('App', error as Error);
+        // Set default settings if IPC fails
+        setSettings({
+          language: 'en',
+          theme: 'light',
+          currency: 'USD',
+          monitoring_enabled: true,
+          refresh_interval: 5000,
+          data_retention_days: 90,
+          time_format: '24h'
+        });
       } finally {
         setLoading(false);
       }

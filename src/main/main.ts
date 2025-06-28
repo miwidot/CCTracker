@@ -19,9 +19,9 @@ class Application {
   constructor() {
     this.usageService = new UsageService();
     this.fileMonitorService = new FileMonitorService();
-    this.settingsService = new SettingsService();
+    this.settingsService = new SettingsService(); // Initialize without path first
     this.currencyService = new CurrencyService();
-    this.exportService = new ExportService();
+    this.exportService = new ExportService(); // Will be updated after app.getPath is available
   }
 
   private createWindow(): void {
@@ -94,16 +94,19 @@ class Application {
     try {
       // Initialize services with proper async setup and error handling
       console.log('Initializing settings service...');
-      await this.settingsService.initialize();
+      await this.settingsService.initialize(app.getPath('userData'));
       
       console.log('Initializing usage service...');
-      await this.usageService.initialize();
+      await this.usageService.initialize(app.getPath('userData'));
       
       console.log('Initializing currency service...');
-      await this.currencyService.initialize();
+      await this.currencyService.initialize(app.getPath('userData'));
       
       console.log('Starting file monitoring...');
       await this.fileMonitorService.startClaudeCliMonitoring();
+      
+      // Update export service directory  
+      this.exportService.updateExportDirectory(path.join(app.getPath('userData'), 'exports'));
       
       console.log('Setting up IPC handlers...');
       setupIpcHandlers({
@@ -128,6 +131,10 @@ class Application {
       
       console.log('App ready, setting up services...');
       await this.setupServices();
+      
+      // Small delay to ensure IPC handlers are fully registered
+      console.log('Waiting for IPC handlers to be ready...');
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       console.log('Creating window...');
       this.createWindow();

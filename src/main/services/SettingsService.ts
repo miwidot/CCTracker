@@ -7,12 +7,13 @@ import { log } from '@shared/utils/logger';
 const VALID_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'];
 
 export class SettingsService {
-  private readonly settingsFile: string;
+  private settingsFile: string;
   private settings: AppSettings;
   private isDirty = false;
   private saveTimeout: NodeJS.Timeout | null = null;
 
   constructor(configDir: string = path.join(process.cwd(), 'config')) {
+    // Use settings.json directly in the provided directory (userData)
     this.settingsFile = path.join(configDir, 'settings.json');
     this.settings = { ...DEFAULT_SETTINGS };
   }
@@ -30,7 +31,12 @@ export class SettingsService {
   /**
    * Public initialize method for external use
    */
-  async initialize(): Promise<void> {
+  async initialize(userDataPath?: string): Promise<void> {
+    // Update settings file path if userDataPath is provided
+    if (userDataPath) {
+      this.settingsFile = path.join(userDataPath, 'settings.json');
+    }
+    
     await this.ensureConfigDirectory();
     await this.loadSettings();
   }

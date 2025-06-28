@@ -28,10 +28,18 @@ export interface ExportResult {
 }
 
 export class ExportService {
-  private readonly exportDir: string;
+  private exportDir: string;
 
   constructor(exportDir: string = path.join(process.cwd(), 'exports')) {
     this.exportDir = exportDir;
+    void this.ensureExportDirectory();
+  }
+
+  /**
+   * Update export directory path (useful for packaged apps)
+   */
+  updateExportDirectory(newExportDir: string): void {
+    this.exportDir = newExportDir;
     void this.ensureExportDirectory();
   }
 

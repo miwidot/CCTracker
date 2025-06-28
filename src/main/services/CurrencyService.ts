@@ -11,7 +11,7 @@ interface CurrencyCache {
 }
 
 export class CurrencyService {
-  private readonly cacheFile: string;
+  private cacheFile: string;
   private cache: CurrencyCache;
   private updateInterval: NodeJS.Timeout | null = null;
   private readonly CACHE_TTL = 86400000; // 24 hours in milliseconds (daily updates)
@@ -31,7 +31,12 @@ export class CurrencyService {
   /**
    * Public initialize method for external use
    */
-  async initialize(): Promise<void> {
+  async initialize(userDataPath?: string): Promise<void> {
+    // Update cache file path if userDataPath is provided
+    if (userDataPath) {
+      this.cacheFile = path.join(userDataPath, 'currency_cache.json');
+    }
+    
     await this.initializeService();
   }
 
