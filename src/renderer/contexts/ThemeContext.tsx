@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useSettings } from './SettingsContext';
 import { getThemeConfig, COLOR_PALETTES } from '@shared/constants';
-import type { CHART_PALETTES } from '@shared/constants';
 import { getSemanticColor, isDarkTheme, getChartColors } from '@shared/design-tokens';
 import type { ThemeConfig } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 interface ThemeContextType {
   theme: ThemeConfig;
@@ -34,13 +34,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const { settings, updateSettings } = useSettings();
   
   // Safe theme validation with fallback
-  const validateTheme = (themeValue: any): keyof typeof COLOR_PALETTES => {
+  const validateTheme = (themeValue: unknown): keyof typeof COLOR_PALETTES => {
     // Check if theme value is a valid key in COLOR_PALETTES
     if (typeof themeValue === 'string' && themeValue in COLOR_PALETTES) {
       return themeValue as keyof typeof COLOR_PALETTES;
     }
     
-    console.warn(`Invalid theme value: ${themeValue}, falling back to 'light'`);
+    log.warn(`Invalid theme value: ${themeValue}, falling back to 'light'`, 'ThemeContext');
     return 'light'; // Safe fallback
   };
   
@@ -49,7 +49,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const setTheme = (themeName: ThemeConfig['name']) => {
     // Fire and forget - don't block UI
-    updateSettings({ theme: themeName }).catch(console.error);
+    updateSettings({ theme: themeName }).catch((error) => {
+      log.error('Failed to update theme setting', error as Error, 'ThemeContext');
+    });
   };
 
   // Enhanced theme utilities with safe type assertions
@@ -61,7 +63,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         getSemanticColor(safeTheme, semantic),
       
       getChartColors: () => 
-        getChartColors(safeTheme as keyof typeof CHART_PALETTES),
+        getChartColors(safeTheme),
       
       isDark: isDarkTheme(safeTheme),
       

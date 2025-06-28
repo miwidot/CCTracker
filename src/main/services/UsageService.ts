@@ -2,7 +2,8 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 import { v4 as uuidv4 } from 'uuid';
-import { MODEL_PRICING } from '@shared/constants';
+// Import MODEL_PRICING if needed in the future
+// import { MODEL_PRICING } from '@shared/constants';
 import { 
   calculateCost, 
   calculateModelEfficiency,
@@ -10,6 +11,7 @@ import {
   calculatePredictiveAnalytics,
   calculateProjectAnalytics
 } from './CostCalculatorService';
+import { log } from '@shared/utils/logger';
 import type { 
   UsageEntry, 
   SessionStats, 
@@ -42,7 +44,7 @@ interface ClaudeJSONLEntry {
       output_tokens: number;
       service_tier?: string;
     };
-    content: any; // Content varies by message type
+    content: unknown; // Content varies by message type
   };
   requestId?: string;
   version: string;
@@ -71,14 +73,14 @@ export class UsageService {
   constructor(dataDir: string = path.join(process.cwd(), 'data')) {
     this.dataDir = dataDir;
     this.usageFile = path.join(dataDir, 'usage.jsonl');
-    this.ensureDataDirectory();
+    void this.ensureDataDirectory();
   }
 
   private async ensureDataDirectory(): Promise<void> {
     try {
       await fs.mkdir(this.dataDir, { recursive: true });
     } catch (error) {
-      console.error('Failed to create data directory:', error);
+      log.service.error('UsageService', 'Failed to create data directory', error as Error);
       throw new Error(`Failed to create data directory: ${error}`);
     }
   }
@@ -98,7 +100,7 @@ export class UsageService {
       
       // Skip lines that are just strings (malformed entries)
       if (!trimmedLine.startsWith('{')) {
-        console.warn('Skipping malformed JSONL line (not JSON object):', `${trimmedLine.substring(0, 50)  }...`);
+        log.parsing.error(`${trimmedLine.substring(0, 50)  }...`, new Error('Skipping malformed JSONL line (not JSON object)'));
         return null;
       }
       
@@ -106,7 +108,7 @@ export class UsageService {
       
       // Skip if data is not an object
       if (!data || typeof data !== 'object') {
-        console.warn('Skipping invalid JSONL entry (not an object):', data);
+        log.parsing.error('JSONL entry', new Error(`Skipping invalid JSONL entry (not an object): ${JSON.stringify(data)}`));
         return null;
       }
       
@@ -123,7 +125,7 @@ export class UsageService {
       // Fall back to legacy format
       return this.parseLegacyJSONLEntry(data as LegacyJSONLEntry);
     } catch (error) {
-      console.error('Failed to parse JSONL line:', `${line.substring(0, 100)  }...`, error);
+      log.parsing.error(`${line.substring(0, 100)  }...`, error as Error);
       return null;
     }
   }
@@ -134,13 +136,7 @@ export class UsageService {
   private parseClaudeJSONLEntry(data: ClaudeJSONLEntry): UsageEntry | null {
     // Validate required Claude CLI fields
     if (!data.uuid || !data.sessionId || !data.message || !data.timestamp) {
-      console.warn('Invalid Claude CLI entry - missing required fields:', {
-        hasUuid: !!data.uuid,
-        hasSessionId: !!data.sessionId,
-        hasMessage: !!data.message,
-        hasTimestamp: !!data.timestamp,
-        type: data.type
-      });
+      log.warn('Invalid Claude CLI entry - missing required fields', 'UsageService');
       return null;
     }
     
@@ -153,8 +149,8 @@ export class UsageService {
     const model = data.message.model;
 
     const inputTokens = usage.input_tokens || 0;
-    const cacheCreationTokens = usage.cache_creation_input_tokens || 0;
-    const cacheReadTokens = usage.cache_read_input_tokens || 0;
+    const cacheCreationTokens = usage.cache_creation_input_tokens ?? 0;
+    const cacheReadTokens = usage.cache_read_input_tokens ?? 0;
     const outputTokens = usage.output_tokens || 0;
     
     // Total input tokens include cache tokens
@@ -190,19 +186,14 @@ export class UsageService {
       const isLikelyUsageEntry = keys.some(key => ['model', 'usage', 'tokens', 'cost'].includes(key));
       
       if (isLikelyUsageEntry) {
-        console.warn('Invalid legacy JSONL entry - missing required fields (model, usage, timestamp):', {
-          hasModel: !!data.model,
-          hasUsage: !!data.usage,
-          hasTimestamp: !!data.timestamp,
-          actualKeys: keys
-        });
+        log.warn('Invalid legacy JSONL entry - missing required fields (model, usage, timestamp)', 'UsageService');
       }
       return null;
     }
 
-    const inputTokens = data.usage.input_tokens || 0;
-    const outputTokens = data.usage.output_tokens || 0;
-    const totalTokens = data.usage.total_tokens || (inputTokens + outputTokens);
+    const inputTokens = data.usage.input_tokens ?? 0;
+    const outputTokens = data.usage.output_tokens ?? 0;
+    const totalTokens = data.usage.total_tokens ?? (inputTokens + outputTokens);
 
     const costUsd = calculateCost(data.model, inputTokens, outputTokens);
 
@@ -240,14 +231,14 @@ export class UsageService {
         }
       }
 
-      console.log(`Parsed ${entries.length} usage entries from ${filePath}`);
+      log.info(`Parsed ${entries.length} usage entries from ${filePath}`, 'UsageService');
       return entries;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        console.log(`File not found: ${filePath}`);
+        log.info(`File not found: ${filePath}`, 'UsageService');
         return [];
       }
-      console.error('Failed to parse JSONL file:', error);
+      log.service.error('UsageService', 'Failed to parse JSONL file', error as Error);
       throw new Error(`Failed to parse JSONL file: ${error}`);
     }
   }
@@ -277,9 +268,9 @@ export class UsageService {
       })  }\n`;
 
       await fs.appendFile(this.usageFile, jsonlLine, 'utf-8');
-      console.log('Added usage entry:', entry.id);
+      log.debug(`Added usage entry: ${entry.id}`, 'UsageService');
     } catch (error) {
-      console.error('Failed to add usage entry:', error);
+      log.service.error('UsageService', 'Failed to add usage entry', error as Error);
       throw new Error(`Failed to add usage entry: ${error}`);
     }
   }
@@ -297,7 +288,7 @@ export class UsageService {
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
     } catch (error) {
-      console.error('Failed to get usage entries:', error);
+      log.service.error('UsageService', 'Failed to get usage entries', error as Error);
       throw new Error(`Failed to get usage entries: ${error}`);
     }
   }
@@ -360,7 +351,7 @@ export class UsageService {
         sessions: Array.from(sessionMap.values()),
       };
     } catch (error) {
-      console.error('Failed to get usage by date range:', error);
+      log.service.error('UsageService', 'Failed to get usage by date range', error as Error);
       throw new Error(`Failed to get usage by date range: ${error}`);
     }
   }
@@ -397,7 +388,7 @@ export class UsageService {
       this.sessionCache.set(sessionId, stats);
       return stats;
     } catch (error) {
-      console.error('Failed to get session stats:', error);
+      log.service.error('UsageService', 'Failed to get session stats', error as Error);
       throw new Error(`Failed to get session stats: ${error}`);
     }
   }
@@ -410,9 +401,9 @@ export class UsageService {
       const entries = await this.parseJSONLFile(this.usageFile);
       this.cache.clear();
       entries.forEach(entry => this.cache.set(entry.id, entry));
-      console.log(`Loaded ${entries.length} usage entries from storage`);
+      log.info(`Loaded ${entries.length} usage entries from storage`, 'UsageService');
     } catch (error) {
-      console.error('Failed to load usage data:', error);
+      log.service.error('UsageService', 'Failed to load usage data', error as Error);
       // Don't throw - allow service to continue with empty cache
     }
   }
@@ -436,7 +427,7 @@ export class UsageService {
 
       return entries;
     } catch (error) {
-      console.error('Failed to process Claude output:', error);
+      log.service.error('UsageService', 'Failed to process Claude output', error as Error);
       throw new Error(`Failed to process Claude output: ${error}`);
     }
   }
@@ -483,10 +474,10 @@ export class UsageService {
         // Reload cache
         recentEntries.forEach(entry => this.cache.set(entry.id, entry));
         
-        console.log(`Cleaned up ${allEntries.length - recentEntries.length} old entries, kept ${recentEntries.length}`);
+        log.info(`Cleaned up ${allEntries.length - recentEntries.length} old entries, kept ${recentEntries.length}`, 'UsageService');
       }
     } catch (error) {
-      console.error('Failed to cleanup old data:', error);
+      log.service.error('UsageService', 'Failed to cleanup old data', error as Error);
       throw new Error(`Failed to cleanup old data: ${error}`);
     }
   }
@@ -538,7 +529,7 @@ export class UsageService {
         },
       };
     } catch (error) {
-      console.error('Failed to get usage stats:', error);
+      log.service.error('UsageService', 'Failed to get usage stats', error as Error);
       throw new Error(`Failed to get usage stats: ${error}`);
     }
   }
@@ -561,7 +552,7 @@ export class UsageService {
       try {
         await fs.access(projectsPath);
       } catch {
-        console.log('Claude CLI projects directory not found:', projectsPath);
+        log.info(`Claude CLI projects directory not found: ${projectsPath}`, 'UsageService');
         return [];
       }
 
@@ -581,17 +572,17 @@ export class UsageService {
               files.push(fullPath);
             }
           }
-        } catch (error) {
-          console.warn(`Failed to read directory ${dir}:`, error);
+        } catch (_error) {
+          log.warn(`Failed to read directory ${dir}`, 'UsageService');
         }
       };
 
       await findJsonlFiles(projectsPath);
       
-      console.log(`Discovered ${files.length} Claude CLI JSONL files`);
+      log.info(`Discovered ${files.length} Claude CLI JSONL files`, 'UsageService');
       return files;
     } catch (error) {
-      console.error('Failed to discover Claude files:', error);
+      log.service.error('UsageService', 'Failed to discover Claude files', error as Error);
       return [];
     }
   }
@@ -604,15 +595,15 @@ export class UsageService {
       const jsonlFiles = await this.discoverClaudeFiles();
       const allEntries: UsageEntry[] = [];
       
-      console.log(`Loading usage data from ${jsonlFiles.length} Claude CLI files...`);
+      log.info(`Loading usage data from ${jsonlFiles.length} Claude CLI files...`, 'UsageService');
       
       for (const filePath of jsonlFiles) {
         try {
           const entries = await this.parseJSONLFile(filePath);
           allEntries.push(...entries);
-          console.log(`Loaded ${entries.length} entries from ${path.basename(filePath)}`);
-        } catch (error) {
-          console.warn(`Failed to load ${filePath}:`, error);
+          log.debug(`Loaded ${entries.length} entries from ${path.basename(filePath)}`, 'UsageService');
+        } catch (_error) {
+          log.warn(`Failed to load ${filePath}`, 'UsageService');
         }
       }
 
@@ -628,10 +619,10 @@ export class UsageService {
       this.cache.clear();
       finalEntries.forEach(entry => this.cache.set(entry.id, entry));
       
-      console.log(`Successfully loaded ${finalEntries.length} unique usage entries from Claude CLI`);
+      log.info(`Successfully loaded ${finalEntries.length} unique usage entries from Claude CLI`, 'UsageService');
       return finalEntries;
     } catch (error) {
-      console.error('Failed to load from Claude CLI:', error);
+      log.service.error('UsageService', 'Failed to load from Claude CLI', error as Error);
       throw new Error(`Failed to load from Claude CLI: ${error}`);
     }
   }
@@ -642,7 +633,7 @@ export class UsageService {
   async initialize(): Promise<void> {
     try {
       // First try to load from Claude CLI
-      console.log('Initializing UsageService with Claude CLI integration...');
+      log.service.start('UsageService');
       
       // Build session-to-file mapping for better project extraction
       await this.buildSessionFileMapping();
@@ -650,15 +641,15 @@ export class UsageService {
       const claudeEntries = await this.loadFromClaudeCLI();
       
       if (claudeEntries.length > 0) {
-        console.log(`Found ${claudeEntries.length} entries from Claude CLI`);
+        log.info(`Found ${claudeEntries.length} entries from Claude CLI`, 'UsageService');
       } else {
-        console.log('No Claude CLI data found, using local storage');
+        log.info('No Claude CLI data found, using local storage', 'UsageService');
         await this.loadUsageData();
       }
       
-      console.log('UsageService initialized successfully');
+      log.info('UsageService initialized successfully', 'UsageService');
     } catch (error) {
-      console.error('Failed to initialize UsageService:', error);
+      log.service.error('UsageService', 'Failed to initialize UsageService', error as Error);
       // Fall back to local storage
       await this.loadUsageData();
     }
@@ -682,10 +673,10 @@ export class UsageService {
       // Use centralized calculator for consistent model efficiency calculation
       const efficiency = calculateModelEfficiency(allEntries);
 
-      console.log(`Calculated efficiency for ${efficiency.length} models`);
+      log.debug(`Calculated efficiency for ${efficiency.length} models`, 'UsageService');
       return efficiency;
     } catch (error) {
-      console.error('Failed to calculate model efficiency:', error);
+      log.service.error('UsageService', 'Failed to calculate model efficiency', error as Error);
       throw new Error(`Failed to calculate model efficiency: ${error}`);
     }
   }
@@ -699,10 +690,10 @@ export class UsageService {
       const allEntries = await this.getAllUsageEntries();
       const trends = calculateUsageTrends(allEntries, granularity);
       
-      console.log(`Generated ${trends.length} ${granularity} trend points`);
+      log.debug(`Generated ${trends.length} ${granularity} trend points`, 'UsageService');
       return trends;
     } catch (error) {
-      console.error('Failed to generate usage trends:', error);
+      log.service.error('UsageService', 'Failed to generate usage trends', error as Error);
       throw new Error(`Failed to generate usage trends: ${error}`);
     }
   }
@@ -763,9 +754,9 @@ export class UsageService {
 
         // Unusual model detection (models used less than 5% of the time)
         const modelCounts = new Map<string, number>();
-        allEntries.forEach(e => modelCounts.set(e.model, (modelCounts.get(e.model) || 0) + 1));
+        allEntries.forEach(e => modelCounts.set(e.model, (modelCounts.get(e.model) ?? 0) + 1));
         const totalEntries = allEntries.length;
-        const modelUsageRate = (modelCounts.get(entry.model) || 0) / totalEntries;
+        const modelUsageRate = (modelCounts.get(entry.model) ?? 0) / totalEntries;
         
         if (modelUsageRate < 0.05) { // Less than 5% usage
           anomalies.push({
@@ -780,10 +771,10 @@ export class UsageService {
         }
       });
 
-      console.log(`Detected ${anomalies.length} anomalies`);
+      log.debug(`Detected ${anomalies.length} anomalies`, 'UsageService');
       return anomalies.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     } catch (error) {
-      console.error('Failed to detect anomalies:', error);
+      log.service.error('UsageService', 'Failed to detect anomalies', error as Error);
       throw new Error(`Failed to detect anomalies: ${error}`);
     }
   }
@@ -818,7 +809,7 @@ export class UsageService {
       // If not enough recent data, fall back to last 30 entries but warn
       const entriesForAnalysis = recentEntries.length >= 7 ? recentEntries : allEntries.slice(0, 30);
       
-      console.log(`Using ${entriesForAnalysis.length} entries from last 30 days for predictions (filtered from ${allEntries.length} total)`);
+      log.debug(`Using ${entriesForAnalysis.length} entries from last 30 days for predictions (filtered from ${allEntries.length} total)`, 'UsageService');
       
       // Use centralized predictive analytics calculation
       const predictionResults = calculatePredictiveAnalytics(entriesForAnalysis);
@@ -838,10 +829,10 @@ export class UsageService {
         }
       };
 
-      console.log(`Generated predictions with ${predictionResults.confidenceLevel.toFixed(1)}% confidence`);
+      log.debug(`Generated predictions with ${predictionResults.confidenceLevel.toFixed(1)}% confidence`, 'UsageService');
       return predictions;
     } catch (error) {
-      console.error('Failed to generate predictions:', error);
+      log.service.error('UsageService', 'Failed to generate predictions', error as Error);
       throw new Error(`Failed to generate predictions: ${error}`);
     }
   }
@@ -983,10 +974,10 @@ export class UsageService {
         last_updated: new Date().toISOString()
       };
 
-      console.log(`Generated business intelligence report in ${businessIntelligence.calculation_time_ms.toFixed(2)}ms`);
+      log.debug(`Generated business intelligence report in ${businessIntelligence.calculation_time_ms.toFixed(2)}ms`, 'UsageService');
       return businessIntelligence;
     } catch (error) {
-      console.error('Failed to generate business intelligence:', error);
+      log.service.error('UsageService', 'Failed to generate business intelligence', error as Error);
       throw new Error(`Failed to generate business intelligence: ${error}`);
     }
   }
@@ -1014,7 +1005,7 @@ export class UsageService {
 
       return advancedStats;
     } catch (error) {
-      console.error('Failed to get advanced usage stats:', error);
+      log.service.error('UsageService', 'Failed to get advanced usage stats', error as Error);
       throw new Error(`Failed to get advanced usage stats: ${error}`);
     }
   }
@@ -1040,7 +1031,7 @@ export class UsageService {
       const sessionFiles = this.sessionToFileMap.get(entry.session_id);
       if (sessionFiles && sessionFiles.length > 0) {
         const filePath = sessionFiles[0];
-        const pathMatch = filePath.match(/projects\/([^\/]+)\//);
+        const pathMatch = filePath.match(/projects\/([^/]+)\//);
         if (pathMatch) {
           return this.formatProjectName(pathMatch[1]);
         }
@@ -1095,10 +1086,10 @@ export class UsageService {
       // Sort by total cost (highest first)
       projectAnalytics.sort((a, b) => b.total_cost - a.total_cost);
 
-      console.log(`Generated project breakdown for ${projectAnalytics.length} projects`);
+      log.debug(`Generated project breakdown for ${projectAnalytics.length} projects`, 'UsageService');
       return projectAnalytics;
     } catch (error) {
-      console.error('Failed to get project breakdown:', error);
+      log.service.error('UsageService', 'Failed to get project breakdown', error as Error);
       throw new Error(`Failed to get project breakdown: ${error}`);
     }
   }
@@ -1180,10 +1171,10 @@ export class UsageService {
         activity_timeline: activityTimeline
       };
 
-      console.log(`Generated project comparison for ${projects.length} projects`);
+      log.debug(`Generated project comparison for ${projects.length} projects`, 'UsageService');
       return comparison;
     } catch (error) {
-      console.error('Failed to get project comparison:', error);
+      log.service.error('UsageService', 'Failed to get project comparison', error as Error);
       throw new Error(`Failed to get project comparison: ${error}`);
     }
   }
@@ -1250,10 +1241,10 @@ export class UsageService {
         new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
       );
 
-      console.log(`Found ${projectSessions.length} sessions for project: ${projectName}`);
+      log.debug(`Found ${projectSessions.length} sessions for project: ${projectName}`, 'UsageService');
       return projectSessions;
     } catch (error) {
-      console.error('Failed to get project sessions:', error);
+      log.service.error('UsageService', 'Failed to get project sessions', error as Error);
       throw new Error(`Failed to get project sessions: ${error}`);
     }
   }
@@ -1285,19 +1276,19 @@ export class UsageService {
                     this.sessionToFileMap.get(entry.sessionId)!.push(filePath);
                   }
                 }
-              } catch (parseError) {
+              } catch (_parseError) {
                 // Skip invalid JSON lines
               }
             }
           }
-        } catch (fileError) {
-          console.warn(`Failed to read file for mapping: ${filePath}`);
+        } catch (_fileError) {
+          log.warn(`Failed to read file for mapping: ${filePath}`, 'UsageService');
         }
       }
       
-      console.log(`Built session mapping for ${this.sessionToFileMap.size} sessions`);
+      log.debug(`Built session mapping for ${this.sessionToFileMap.size} sessions`, 'UsageService');
     } catch (error) {
-      console.error('Failed to build session file mapping:', error);
+      log.service.error('UsageService', 'Failed to build session file mapping', error as Error);
     }
   }
 }

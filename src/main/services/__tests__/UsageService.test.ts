@@ -1,8 +1,8 @@
 import { UsageService } from '../UsageService';
-import { MODEL_PRICING } from '@shared/constants';
+// import { MODEL_PRICING } from '@shared/constants';
 import { calculateCost } from '../CostCalculatorService';
 import * as fs from 'fs/promises';
-import * as path from 'path';
+// import * as path from 'path';
 
 // Mock fs module
 jest.mock('fs/promises');

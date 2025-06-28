@@ -7,6 +7,7 @@ import type {
   UsageTrend,
   CurrencyRates
 } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 
 /**
@@ -77,7 +78,7 @@ export function calculateCost(
   if (pricing == null) {
     // Skip logging for synthetic/test models that don't have real pricing
     if (!model.includes('<synthetic>')) {
-      console.warn(`Unknown model for cost calculation: ${model}`);
+      log.cost.calculation(`Unknown model for cost calculation: ${model}`);
     }
     return 0;
   }

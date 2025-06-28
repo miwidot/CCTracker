@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { AppSettings } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 interface SettingsContextType {
   settings: AppSettings;
@@ -36,7 +37,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       await window.electronAPI.updateSettings(newSettings);
       setSettings(newSettings);
     } catch (error) {
-      console.error('Failed to update settings:', error);
+      log.error('Failed to update settings', error as Error, 'SettingsContext');
       throw error;
     } finally {
       setIsLoading(false);

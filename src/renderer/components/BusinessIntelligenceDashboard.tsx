@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   ChartBarIcon,
   CpuChipIcon,
@@ -25,9 +25,10 @@ import {
   Bar,
 } from 'recharts';
 import { useTranslation } from '../hooks/useTranslation';
-import { useChartTheme, getChartCSSVariables } from '../hooks/useChartTheme';
+import { useChartTheme } from '../hooks/useChartTheme';
 import { cleanModelName, capitalizeWords } from '@shared/utils';
 import type { BusinessIntelligence, ModelEfficiency, UsageAnomaly } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 interface BIMetricCardProps {
   title: string;
@@ -44,10 +45,11 @@ interface BIMetricCardProps {
 const BIMetricCard: React.FC<BIMetricCardProps> = ({ 
   title, 
   value, 
-  icon: Icon, 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  icon: IconComponent, 
   trend, 
   subtitle, 
-  color = 'blue' 
+  color: _color = 'blue' 
 }) => {
   const getTrendIcon = () => {
     if (!trend) return null;
@@ -62,11 +64,11 @@ const BIMetricCard: React.FC<BIMetricCardProps> = ({
     <div className="card interactive-scale p-6 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-secondary)] theme-transition hover:scale-105">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <Icon className="h-8 w-8 text-[var(--text-accent)]" />
+          <IconComponent className="h-8 w-8 text-[var(--text-accent)]" />
           <div>
             <p className="text-sm font-medium text-[var(--text-secondary)]">{title}</p>
             <p className="text-2xl font-bold text-[var(--text-primary)]">{value}</p>
-            {subtitle && <p className="text-xs text-[var(--text-secondary)]">{subtitle}</p>}
+            {Boolean(subtitle) && <p className="text-xs text-[var(--text-secondary)]">{subtitle}</p>}
           </div>
         </div>
         {trend && (
@@ -170,7 +172,7 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
           <div className="space-y-3">
             {anomalies.slice(0, 5).map((anomaly, index) => (
               <div
-                key={index}
+                key={`anomaly-${anomaly.timestamp}-${index}`}
                 className={`p-4 rounded-lg border-2 ${severityColors[anomaly.severity]}`}
               >
                 <div className="flex justify-between items-start">
@@ -201,16 +203,13 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
 export const BusinessIntelligenceDashboard: React.FC = () => {
   const { t } = useTranslation();
   const chartTheme = useChartTheme();
-  const chartCSSVars = getChartCSSVariables();
+  // Chart CSS variables available if needed
+  // const chartCSSVars = getChartCSSVariables();
   const [biData, setBiData] = useState<BusinessIntelligence | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadBusinessIntelligence();
-  }, []);
-
-  const loadBusinessIntelligence = async () => {
+  const loadBusinessIntelligence = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -218,11 +217,16 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
       setBiData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('analytics.errorMessage'));
-      console.error('Failed to load BI data:', err);
+      // Log error for debugging
+      log.component.error('BusinessIntelligenceDashboard', err as Error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    void loadBusinessIntelligence();
+  }, [loadBusinessIntelligence]);
 
   const [exportStatus, setExportStatus] = useState<{type: 'success' | 'error' | null, message: string}>({type: null, message: ''});
 
@@ -252,7 +256,7 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error !== null) {
     return (
       <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <div className="text-center">

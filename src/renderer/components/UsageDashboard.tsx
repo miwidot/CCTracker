@@ -19,7 +19,7 @@ import {
   CurrencyDollarIcon,
   CpuChipIcon,
   ChatBubbleLeftRightIcon,
-  ClockIcon,
+  // ClockIcon,
   DocumentArrowDownIcon,
   CalendarDaysIcon,
   ArrowPathIcon,
@@ -31,8 +31,9 @@ import { useUsageData } from '../contexts/UsageDataContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTranslation } from '../hooks/useTranslation';
-import { useChartTheme, getChartCSSVariables } from '../hooks/useChartTheme';
+import { useChartTheme } from '../hooks/useChartTheme';
 import type { UsageEntry, SessionStats } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 // Sub-components
 interface OverviewCardProps {
@@ -192,7 +193,7 @@ interface SessionTableProps {
   isLoading: boolean;
 }
 
-const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency, isLoading }) => {
+const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency: _currency, isLoading }) => {
   const { convertFromUSD, formatCurrency } = useCurrency();
   const { t } = useTranslation();
   if (isLoading) {
@@ -275,7 +276,8 @@ const UsageDashboard: React.FC = () => {
   const { settings } = useSettings();
   const { convertFromUSD, formatCurrency, formatCurrencyDetailed, getCurrencySymbol } = useCurrency();
   const chartTheme = useChartTheme();
-  const chartCSSVars = getChartCSSVariables();
+  // Chart CSS variables available if needed
+  // const chartCSSVars = getChartCSSVariables();
   
   // State for centralized project costs
   const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
@@ -378,7 +380,7 @@ const UsageDashboard: React.FC = () => {
           costTrend: metrics.costTrend,
         });
       } catch (error) {
-        console.error('Failed to calculate dashboard metrics with centralized service:', error);
+        log.component.error('UsageDashboard', error as Error);
         // Fallback to basic calculations using centralized service
         try {
           const currencies = await window.electronAPI.getCurrencyRates();
@@ -394,7 +396,7 @@ const UsageDashboard: React.FC = () => {
             costTrend: 0,
           });
         } catch (fallbackError) {
-          console.error('Fallback calculation also failed:', fallbackError);
+          log.component.error('UsageDashboard', fallbackError as Error);
         }
       }
     };
@@ -416,7 +418,7 @@ const UsageDashboard: React.FC = () => {
         setProjectCosts(costs);
         
       } catch (error) {
-        console.error('Failed to calculate project costs:', error);
+        log.component.error('UsageDashboard', error as Error);
         setProjectCosts({});
       }
     };

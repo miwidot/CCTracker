@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
 import {
   BarChart,
   Bar,
@@ -21,8 +21,9 @@ import { useSettings } from '../contexts/SettingsContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTimeFormat } from '../hooks/useTimeFormat';
 import { useTranslation } from '../hooks/useTranslation';
-import { useChartTheme, getChartCSSVariables } from '../hooks/useChartTheme';
+import { useChartTheme } from '../hooks/useChartTheme';
 import type { ProjectAnalytics, ProjectComparison } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 interface ProjectCardProps {
   project: ProjectAnalytics;
@@ -32,10 +33,10 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ 
   project, 
-  currency = 'USD',
+  currency: _currency = 'USD',
   isLoading = false 
 }) => {
-  const { convertFromUSD, formatCurrency, formatCurrencyDetailed } = useCurrency();
+  const { formatCurrencyDetailed } = useCurrency();
   const { formatDate } = useTimeFormat();
   const { t } = useTranslation();
   if (isLoading) {
@@ -107,10 +108,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
 export const SimpleUsageAnalytics: React.FC = () => {
   const { settings } = useSettings();
-  const { convertFromUSD, formatCurrency, formatCurrencyDetailed } = useCurrency();
+  const { formatCurrencyDetailed } = useCurrency();
   const { t } = useTranslation();
   const chartTheme = useChartTheme();
-  const chartCSSVars = getChartCSSVariables();
+  // Chart CSS variables available if needed
+  // const chartCSSVars = getChartCSSVariables();
   const [projects, setProjects] = useState<ProjectAnalytics[]>([]);
   const [comparison, setComparison] = useState<ProjectComparison | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,7 +131,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
       setProjects(projectsData);
       setComparison(comparisonData);
     } catch (err) {
-      console.error('Failed to load project analytics:', err);
+      log.component.error('SimpleUsageAnalytics', err as Error);
       setError(t('analytics.errorMessage'));
     } finally {
       setIsLoading(false);
@@ -251,7 +253,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
                 <div className="ml-4">
                   <p className="text-sm text-[var(--text-secondary)]">{t('analytics.totalCost')}</p>
                   <p className="text-2xl font-bold text-[var(--text-primary)]">
-                    {formatCurrency(projects.reduce((sum, p) => sum + p.total_cost, 0))}
+                    {formatCurrencyDetailed(projects.reduce((sum, p) => sum + p.total_cost, 0))}
                   </p>
                 </div>
               </div>
@@ -297,7 +299,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
                   ]}
                   labelFormatter={(label) => {
                     const item = chartData.find(d => d.name === label);
-                    return item?.fullName || label;
+                    return item?.fullName ?? label;
                   }}
                 />
                 <Bar dataKey="cost" fill={chartTheme.primary} name="cost" radius={[4, 4, 0, 0]} />

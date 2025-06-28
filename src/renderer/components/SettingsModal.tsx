@@ -5,6 +5,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { useTimeFormat } from '../hooks/useTimeFormat';
 import { useTranslation } from '../hooks/useTranslation';
 import { THEME_NAMES, getThemeConfig } from '@shared/constants';
+import { log } from '@shared/utils/logger';
 
 interface Language {
   code: string;
@@ -18,7 +19,7 @@ interface CurrencyStatus {
   nextUpdate: string | null;
 }
 
-const getLanguages = (t: any): Language[] => [
+const getLanguages = (t: (key: string) => string): Language[] => [
   { code: 'en', name: t('languages.english'), nativeName: 'English' },
   { code: 'de', name: t('languages.german'), nativeName: 'Deutsch' },
   { code: 'fr', name: t('languages.french'), nativeName: 'Français' },
@@ -70,7 +71,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
       const status = await window.electronAPI.getCurrencyStatus();
       setCurrencyStatus(status);
     } catch (error) {
-      console.error('Failed to load currency status:', error);
+      log.component.error('SettingsModal', error as Error);
     }
   };
 
@@ -80,7 +81,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
       await window.electronAPI.forceUpdateCurrency();
       await loadCurrencyStatus(); // Refresh status
     } catch (error) {
-      console.error('Failed to update currency rates:', error);
+      log.component.error('SettingsModal', error as Error);
     } finally {
       setIsUpdatingCurrency(false);
     }

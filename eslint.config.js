@@ -347,6 +347,7 @@ export default [
       '*.min.js',
       'coverage/**',
       '.nyc_output/**',
+      'test-logger.js',
     ],
   },
 ];

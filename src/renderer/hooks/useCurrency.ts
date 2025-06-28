@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 import { CURRENCY_SYMBOLS } from '@shared/constants';
+import { log } from '@shared/utils/logger';
 
 interface CurrencyRates {
   USD: number;
@@ -26,7 +27,7 @@ export const useCurrency = () => {
       const currentRates = await window.electronAPI.getCurrencyRates();
       setRates(currentRates);
     } catch (error) {
-      console.error('Failed to load currency rates:', error);
+      log.error('Failed to load currency rates', error as Error, 'useCurrency');
     } finally {
       setIsLoading(false);
     }
@@ -36,13 +37,13 @@ export const useCurrency = () => {
     (usdAmount: number): number => {
       // Validate input amount
       if (typeof usdAmount !== 'number' || !isFinite(usdAmount)) {
-        console.warn('Invalid USD amount provided to convertFromUSD:', usdAmount);
+        log.warn(`Invalid USD amount provided to convertFromUSD: ${usdAmount}`, 'useCurrency');
         return 0;
       }
 
       // Check if rates are available
-      if (rates == null || settings.currency == null || settings.currency === '') {
-        console.warn('Currency rates or settings not available, returning USD amount');
+      if (rates == null || settings.currency == null) {
+        log.warn('Currency rates or settings not available, returning USD amount', 'useCurrency');
         return usdAmount;
       }
 
@@ -56,17 +57,17 @@ export const useCurrency = () => {
       
       // Comprehensive rate validation
       if (rate == null) {
-        console.error(`Currency rate not found for ${settings.currency}, falling back to USD`);
+        log.error(`Currency rate not found for ${settings.currency}, falling back to USD`, undefined, 'useCurrency');
         return usdAmount;
       }
 
       if (typeof rate !== 'number' || !isFinite(rate)) {
-        console.error(`Invalid currency rate for ${settings.currency}: ${rate}, falling back to USD`);
+        log.error(`Invalid currency rate for ${settings.currency}: ${rate}, falling back to USD`, undefined, 'useCurrency');
         return usdAmount;
       }
 
       if (rate <= 0) {
-        console.error(`Invalid currency rate (must be > 0) for ${settings.currency}: ${rate}, falling back to USD`);
+        log.error(`Invalid currency rate (must be > 0) for ${settings.currency}: ${rate}, falling back to USD`, undefined, 'useCurrency');
         return usdAmount;
       }
 
@@ -74,7 +75,7 @@ export const useCurrency = () => {
       const convertedAmount = usdAmount * rate;
       
       if (!isFinite(convertedAmount)) {
-        console.error(`Currency conversion resulted in invalid number for ${settings.currency}: ${convertedAmount}, falling back to USD`);
+        log.error(`Currency conversion resulted in invalid number for ${settings.currency}: ${convertedAmount}, falling back to USD`, undefined, 'useCurrency');
         return usdAmount;
       }
 

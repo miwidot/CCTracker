@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { UsageEntry, SessionStats, DateRangeStats } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 interface UsageDataContextType {
   usageData: UsageEntry[];
@@ -68,7 +69,7 @@ export const UsageDataProvider: React.FC<UsageDataProviderProps> = ({ children }
       setSessionStats(sessions);
       setLastUpdated(new Date());
     } catch (error) {
-      console.error('Failed to refresh usage data:', error);
+      log.error('Failed to refresh usage data', error as Error, 'UsageDataContext');
     } finally {
       setIsLoading(false);
     }

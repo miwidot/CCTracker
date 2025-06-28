@@ -4,7 +4,36 @@ import type { FileMonitorService } from '../services/FileMonitorService';
 import type { SettingsService } from '../services/SettingsService';
 import type { CurrencyService } from '../services/CurrencyService';
 import type { ExportService } from '../services/ExportService';
-import type { CurrencyRates } from '@shared/types';
+import type { CurrencyRates, UsageEntry } from '@shared/types';
+import { log } from '@shared/utils/logger';
+
+// Type guards for runtime type checking
+function isUsageEntry(obj: unknown): obj is UsageEntry {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const record = obj as Record<string, unknown>;
+  return typeof record.id === 'string' &&
+    typeof record.timestamp === 'string' &&
+    typeof record.model === 'string' &&
+    typeof record.input_tokens === 'number' &&
+    typeof record.output_tokens === 'number' &&
+    typeof record.total_tokens === 'number' &&
+    typeof record.cost_usd === 'number';
+}
+
+function isUsageEntryArray(arr: unknown): arr is UsageEntry[] {
+  return Array.isArray(arr) && arr.every(isUsageEntry);
+}
+
+function isCurrencyRates(obj: unknown): obj is CurrencyRates {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const record = obj as Record<string, unknown>;
+  return typeof record.USD === 'number' &&
+    typeof record.EUR === 'number' &&
+    typeof record.GBP === 'number' &&
+    typeof record.JPY === 'number' &&
+    typeof record.CNY === 'number' &&
+    typeof record.MYR === 'number';
+}
 
 interface Services {
   usageService: UsageService;
@@ -33,7 +62,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getAllUsageEntries();
     } catch (error) {
-      console.error('Error in usage:get-stats:', error);
+      log.ipc.error('usage:get-stats', error as Error);
       throw error;
     }
   });
@@ -42,7 +71,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getAdvancedUsageStats();
     } catch (error) {
-      console.error('Error in usage:get-advanced-stats:', error);
+      log.ipc.error('usage:get-advanced-stats', error as Error);
       throw error;
     }
   });
@@ -51,7 +80,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getBusinessIntelligence();
     } catch (error) {
-      console.error('Error in usage:get-business-intelligence:', error);
+      log.ipc.error('usage:get-business-intelligence', error as Error);
       throw error;
     }
   });
@@ -60,7 +89,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getUsageByDateRange(start, end);
     } catch (error) {
-      console.error('Error in usage:get-by-date-range:', error);
+      log.ipc.error('usage:get-by-date-range', error as Error);
       throw error;
     }
   });
@@ -69,7 +98,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getSessionStats(sessionId);
     } catch (error) {
-      console.error('Error in usage:get-session-stats:', error);
+      log.ipc.error('usage:get-session-stats', error as Error);
       throw error;
     }
   });
@@ -79,7 +108,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.detectAnomalies();
     } catch (error) {
-      console.error('Error in usage:detect-anomalies:', error);
+      log.ipc.error('usage:detect-anomalies', error as Error);
       throw error;
     }
   });
@@ -88,7 +117,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.generatePredictions();
     } catch (error) {
-      console.error('Error in usage:get-predictions:', error);
+      log.ipc.error('usage:get-predictions', error as Error);
       throw error;
     }
   });
@@ -97,7 +126,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getModelEfficiency();
     } catch (error) {
-      console.error('Error in usage:get-model-efficiency:', error);
+      log.ipc.error('usage:get-model-efficiency', error as Error);
       throw error;
     }
   });
@@ -107,7 +136,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getProjectBreakdown();
     } catch (error) {
-      console.error('Error in usage:get-project-breakdown:', error);
+      log.ipc.error('usage:get-project-breakdown', error as Error);
       throw error;
     }
   });
@@ -116,7 +145,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getProjectComparison();
     } catch (error) {
-      console.error('Error in usage:get-project-comparison:', error);
+      log.ipc.error('usage:get-project-comparison', error as Error);
       throw error;
     }
   });
@@ -125,7 +154,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await usageService.getProjectSessions(projectName);
     } catch (error) {
-      console.error('Error in usage:get-project-sessions:', error);
+      log.ipc.error('usage:get-project-sessions', error as Error);
       throw error;
     }
   });
@@ -135,7 +164,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await fileMonitorService.startMonitoring(path);
     } catch (error) {
-      console.error('Error in monitor:start:', error);
+      log.ipc.error('monitor:start', error as Error);
       throw error;
     }
   });
@@ -144,7 +173,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await fileMonitorService.stopMonitoring();
     } catch (error) {
-      console.error('Error in monitor:stop:', error);
+      log.ipc.error('monitor:stop', error as Error);
       throw error;
     }
   });
@@ -153,7 +182,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return fileMonitorService.getMonitoringStatus();
     } catch (error) {
-      console.error('Error in monitor:status:', error);
+      log.ipc.error('monitor:status', error as Error);
       throw error;
     }
   });
@@ -163,16 +192,17 @@ export function setupIpcHandlers(services: Services) {
     try {
       return settingsService.getSettings();
     } catch (error) {
-      console.error('Error in settings:get:', error);
+      log.ipc.error('settings:get', error as Error);
       throw error;
     }
   });
 
-  ipcMain.handle('settings:update', async (_, settings) => {
+  ipcMain.handle('settings:update', (_, settings) => {
     try {
-      return await settingsService.updateSettings(settings);
+      settingsService.updateSettings(settings);
+      return settingsService.getSettings();
     } catch (error) {
-      console.error('Error in settings:update:', error);
+      log.ipc.error('settings:update', error as Error);
       throw error;
     }
   });
@@ -182,7 +212,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await exportService.exportUsageData(data, { format: 'csv' });
     } catch (error) {
-      console.error('Error in export:csv:', error);
+      log.ipc.error('export:csv', error as Error);
       throw error;
     }
   });
@@ -191,7 +221,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await exportService.exportUsageData(data, { format: 'json' });
     } catch (error) {
-      console.error('Error in export:json:', error);
+      log.ipc.error('export:json', error as Error);
       throw error;
     }
   });
@@ -200,7 +230,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await exportService.exportBusinessIntelligence(data);
     } catch (error) {
-      console.error('Error in export:business-report:', error);
+      log.ipc.error('export:business-report', error as Error);
       throw error;
     }
   });
@@ -210,7 +240,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await currencyService.getCurrentRates();
     } catch (error) {
-      console.error('Error in currency:get-rates:', error);
+      log.ipc.error('currency:get-rates', error as Error);
       throw error;
     }
   });
@@ -225,7 +255,7 @@ export function setupIpcHandlers(services: Services) {
       }
       return await currencyService.convertCurrency(amount, from, to);
     } catch (error) {
-      console.error('Error in currency:convert:', error);
+      log.ipc.error('currency:convert', error as Error);
       throw error;
     }
   });
@@ -234,7 +264,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return currencyService.getCacheStatus();
     } catch (error) {
-      console.error('Error in currency:get-status:', error);
+      log.ipc.error('currency:get-status', error as Error);
       throw error;
     }
   });
@@ -243,7 +273,7 @@ export function setupIpcHandlers(services: Services) {
     try {
       return await currencyService.forceUpdateRates();
     } catch (error) {
-      console.error('Error in currency:force-update:', error);
+      log.ipc.error('currency:force-update', error as Error);
       throw error;
     }
   });
@@ -251,52 +281,67 @@ export function setupIpcHandlers(services: Services) {
   // Centralized cost calculation handlers with currency support
   ipcMain.handle('cost-calculator:dashboard-metrics', async (_, currentPeriodData: unknown[], previousPeriodData: unknown[]) => {
     try {
+      if (!isUsageEntryArray(currentPeriodData) || !isUsageEntryArray(previousPeriodData)) {
+        throw new Error('Invalid usage data provided to dashboard-metrics');
+      }
       const { calculateDashboardMetrics } = await import('../services/CostCalculatorService');
       return calculateDashboardMetrics(currentPeriodData, previousPeriodData);
     } catch (error) {
-      console.error('Error in cost-calculator:dashboard-metrics:', error);
+      log.ipc.error('cost-calculator:dashboard-metrics', error as Error);
       throw error;
     }
   });
   
   ipcMain.handle('cost-calculator:dashboard-metrics-with-currency', async (_, currentPeriodData: unknown[], previousPeriodData: unknown[], targetCurrency: string, rates: unknown) => {
     try {
+      if (!isUsageEntryArray(currentPeriodData) || !isUsageEntryArray(previousPeriodData) || !isCurrencyRates(rates)) {
+        throw new Error('Invalid data provided to dashboard-metrics-with-currency');
+      }
       const { setCurrencyRates, calculateDashboardMetricsWithCurrency } = await import('../services/CostCalculatorService');
       setCurrencyRates(rates);
       return calculateDashboardMetricsWithCurrency(currentPeriodData, previousPeriodData, targetCurrency);
     } catch (error) {
-      console.error('Error in cost-calculator:dashboard-metrics-with-currency:', error);
+      log.ipc.error('cost-calculator:dashboard-metrics-with-currency', error as Error);
       throw error;
     }
   });
   
   ipcMain.handle('cost-calculator:project-costs', async (_, entries: unknown[], targetCurrency: string, rates: unknown) => {
     try {
+      if (!isUsageEntryArray(entries) || !isCurrencyRates(rates)) {
+        throw new Error('Invalid data provided to project-costs');
+      }
       const { setCurrencyRates, calculateProjectCostsByName } = await import('../services/CostCalculatorService');
       setCurrencyRates(rates);
       return calculateProjectCostsByName(entries, targetCurrency);
     } catch (error) {
-      console.error('Error in cost-calculator:project-costs:', error);
+      log.ipc.error('cost-calculator:project-costs', error as Error);
       throw error;
     }
   });
 
   ipcMain.handle('cost-calculator:total-cost', async (_, entries: unknown[], targetCurrency?: string) => {
     try {
+      if (!isUsageEntryArray(entries)) {
+        throw new Error('Invalid usage entries provided to total-cost');
+      }
       const { calculateTotalCost } = await import('../services/CostCalculatorService');
       return calculateTotalCost(entries, targetCurrency);
     } catch (error) {
-      console.error('Error in cost-calculator:total-cost:', error);
+      log.ipc.error('cost-calculator:total-cost', error as Error);
       throw error;
     }
   });
 
   ipcMain.handle('cost-calculator:model-breakdown', async (_, entries: unknown[]) => {
     try {
+      if (!isUsageEntryArray(entries)) {
+        throw new Error('Invalid usage entries provided to model-breakdown');
+      }
       const { calculateModelBreakdown } = await import('../services/CostCalculatorService');
       return calculateModelBreakdown(entries);
     } catch (error) {
-      console.error('Error in cost-calculator:model-breakdown:', error);
+      log.ipc.error('cost-calculator:model-breakdown', error as Error);
       throw error;
     }
   });

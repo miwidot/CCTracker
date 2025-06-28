@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { CurrencyRates } from '@shared/types';
 import { DEFAULT_CURRENCY_RATES, CURRENCY_SYMBOLS } from '@shared/constants';
+import { log } from '@shared/utils/logger';
 
 interface CurrencyCache {
   rates: CurrencyRates;
@@ -42,9 +43,9 @@ export class CurrencyService {
       // Start automatic updates
       this.startPeriodicUpdates();
       
-      console.log('CurrencyService initialized');
+      log.service.start('CurrencyService');
     } catch (error) {
-      console.error('Failed to initialize CurrencyService:', error);
+      log.service.error('CurrencyService', 'Failed to initialize CurrencyService', error as Error);
       // Continue with fallback rates
     }
   }
@@ -54,7 +55,7 @@ export class CurrencyService {
       const dataDir = path.dirname(this.cacheFile);
       await fs.mkdir(dataDir, { recursive: true });
     } catch (error) {
-      console.error('Failed to create data directory:', error);
+      log.service.error('CurrencyService', 'Failed to create data directory', error as Error);
       throw new Error(`Failed to create data directory: ${error}`);
     }
   }
@@ -72,17 +73,17 @@ export class CurrencyService {
         this.cache = cachedData;
         // Always ensure TTL is correct (fix legacy cache files)
         this.cache.ttl = this.CACHE_TTL;
-        console.log('Loaded cached currency rates');
+        log.debug('Loaded cached currency rates', 'CurrencyService');
       } else {
-        console.warn('Invalid cached currency data, using defaults');
+        log.warn('Invalid cached currency data, using defaults', 'CurrencyService');
         await this.saveCachedRates();
       }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        console.log('No cached currency rates found, using defaults');
+        log.info('No cached currency rates found, using defaults', 'CurrencyService');
         await this.saveCachedRates();
       } else {
-        console.error('Failed to load cached rates:', error);
+        log.service.error('CurrencyService', 'Failed to load cached rates', error as Error);
       }
     }
   }
@@ -94,9 +95,9 @@ export class CurrencyService {
     try {
       const content = JSON.stringify(this.cache, null, 2);
       await fs.writeFile(this.cacheFile, content, 'utf-8');
-      console.log('Currency rates cached successfully');
+      log.debug('Currency rates cached successfully', 'CurrencyService');
     } catch (error) {
-      console.error('Failed to save currency cache:', error);
+      log.service.error('CurrencyService', 'Failed to save currency cache', error as Error);
     }
   }
 
@@ -131,7 +132,7 @@ export class CurrencyService {
         const ratesObj = rates as Record<string, unknown>;
         return currency in ratesObj && 
                typeof ratesObj[currency] === 'number' && 
-               (ratesObj[currency] as number) > 0;
+               ratesObj[currency] > 0;
       })
     );
   }
@@ -158,7 +159,7 @@ export class CurrencyService {
       await this.updateRates();
       return { ...this.cache.rates };
     } catch (error) {
-      console.error('Failed to get current rates:', error);
+      log.service.error('CurrencyService', 'Failed to get current rates', error as Error);
       // Return cached rates even if stale, or fallback rates
       return { ...this.cache.rates };
     }
@@ -170,14 +171,14 @@ export class CurrencyService {
   private async updateRates(): Promise<void> {
     // Prevent concurrent updates
     if (this.isUpdating) {
-      console.log('Currency update already in progress, skipping...');
+      log.debug('Currency update already in progress, skipping...', 'CurrencyService');
       return;
     }
 
     this.isUpdating = true;
     
     try {
-      console.log('Updating currency rates...');
+      log.info('Updating currency rates...', 'CurrencyService');
       const updatedRates = await this.fetchRatesFromAPI();
       
       if (this.isValidRatesData(updatedRates)) {
@@ -185,16 +186,16 @@ export class CurrencyService {
         this.cache.lastUpdated = Date.now();
         this.cache.ttl = this.CACHE_TTL; // Ensure TTL is always 24 hours
         await this.saveCachedRates();
-        console.log('Currency rates updated successfully');
+        log.info('Currency rates updated successfully', 'CurrencyService');
       } else {
         throw new Error('Invalid rates data received from API');
       }
     } catch (error) {
-      console.error('Failed to update currency rates:', error instanceof Error ? error.message : error);
+      log.service.error('CurrencyService', 'Failed to update currency rates', error as Error);
       // Don't throw - continue with cached rates
       // If we have no cached data at all, initialize with fallback rates
       if (this.cache.lastUpdated === 0) {
-        console.log('No cached rates available, using fallback rates');
+        log.warn('No cached rates available, using fallback rates', 'CurrencyService');
         this.cache.rates = { ...this.FALLBACK_RATES };
         this.cache.lastUpdated = Date.now();
         this.cache.ttl = this.CACHE_TTL; // Ensure TTL is always 24 hours
@@ -233,7 +234,7 @@ export class CurrencyService {
 
     for (const api of APIs) {
       try {
-        console.log(`Fetching currency rates from ${api.name}...`);
+        log.debug(`Fetching currency rates from ${api.name}...`, 'CurrencyService');
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -279,11 +280,11 @@ export class CurrencyService {
           }
         }
         
-        console.log(`Successfully fetched rates from ${api.name}`);
+        log.debug(`Successfully fetched rates from ${api.name}`, 'CurrencyService');
         return currencyRates;
         
-      } catch (error) {
-        console.warn(`Failed to fetch from ${api.name}:`, error instanceof Error ? error.message : error);
+      } catch (_error) {
+        log.warn(`Failed to fetch from ${api.name}`, 'CurrencyService');
         // Continue to next API
       }
     }
@@ -317,7 +318,7 @@ export class CurrencyService {
       
       return Math.round(convertedAmount * 100) / 100; // Round to 2 decimal places
     } catch (error) {
-      console.error('Failed to convert currency:', error);
+      log.service.error('CurrencyService', 'Failed to convert currency', error as Error);
       throw new Error(`Failed to convert currency: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -370,7 +371,7 @@ export class CurrencyService {
         try {
           await this.updateRates();
         } catch (error) {
-          console.error('Periodic rate update failed:', error);
+          log.service.error('CurrencyService', 'Periodic rate update failed', error as Error);
         }
       })();
     }, this.UPDATE_INTERVAL);
@@ -392,9 +393,9 @@ export class CurrencyService {
   async forceUpdateRates(): Promise<void> {
     try {
       await this.updateRates();
-      console.log('Currency rates force updated');
+      log.info('Currency rates force updated', 'CurrencyService');
     } catch (error) {
-      console.error('Failed to force update rates:', error);
+      log.service.error('CurrencyService', 'Failed to force update rates', error as Error);
       throw new Error(`Failed to force update rates: ${error}`);
     }
   }
@@ -442,9 +443,9 @@ export class CurrencyService {
       };
       
       await this.saveCachedRates();
-      console.log('Currency rates reset to defaults');
+      log.info('Currency rates reset to defaults', 'CurrencyService');
     } catch (error) {
-      console.error('Failed to reset currency rates:', error);
+      log.service.error('CurrencyService', 'Failed to reset currency rates', error as Error);
       throw new Error(`Failed to reset currency rates: ${error}`);
     }
   }
@@ -454,7 +455,7 @@ export class CurrencyService {
    */
   cleanup(): void {
     this.stopPeriodicUpdates();
-    console.log('CurrencyService cleaned up');
+    log.info('CurrencyService cleaned up', 'CurrencyService');
   }
 }
 

@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { AppSettings } from '@shared/types';
 import { DEFAULT_SETTINGS, THEME_NAMES, SUPPORTED_LANGUAGES, getThemeConfig } from '@shared/constants';
+import { log } from '@shared/utils/logger';
 
 const VALID_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'];
 
@@ -21,7 +22,7 @@ export class SettingsService {
       const configDir = path.dirname(this.settingsFile);
       await fs.mkdir(configDir, { recursive: true });
     } catch (error) {
-      console.error('Failed to create config directory:', error);
+      log.service.error('SettingsService', 'Failed to create config directory', error as Error);
       throw new Error(`Failed to create config directory: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -51,13 +52,13 @@ export class SettingsService {
       // Validate settings
       this.validateSettings();
       
-      console.log('Settings loaded successfully');
+      log.info('Settings loaded successfully', 'SettingsService');
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        console.log('Settings file not found, using defaults');
+        log.info('Settings file not found, using defaults', 'SettingsService');
         await this.saveSettings();
       } else {
-        console.error('Failed to load settings:', error);
+        log.service.error('SettingsService', 'Failed to load settings', error as Error);
         // Use defaults on error
         this.settings = { ...DEFAULT_SETTINGS };
       }
@@ -72,9 +73,9 @@ export class SettingsService {
       const content = JSON.stringify(this.settings, null, 2);
       await fs.writeFile(this.settingsFile, content, 'utf-8');
       this.isDirty = false;
-      console.log('Settings saved successfully');
+      log.debug('Settings saved successfully', 'SettingsService');
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      log.service.error('SettingsService', 'Failed to save settings', error as Error);
       throw new Error(`Failed to save settings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -87,9 +88,9 @@ export class SettingsService {
       clearTimeout(this.saveTimeout);
     }
     
-    this.saveTimeout = setTimeout(async () => {
+    this.saveTimeout = setTimeout(() => {
       if (this.isDirty) {
-        await this.saveSettings();
+        void this.saveSettings();
       }
     }, 500); // Save after 500ms of inactivity
   }
@@ -99,20 +100,20 @@ export class SettingsService {
    */
   private validateSettings(): void {
     // Validate theme
-    if (!THEME_NAMES.includes(this.settings.theme as any)) {
-      console.warn(`Invalid theme: ${this.settings.theme}, using default`);
+    if (!THEME_NAMES.includes(this.settings.theme)) {
+      log.warn(`Invalid theme: ${this.settings.theme}, using default`, 'SettingsService');
       this.settings.theme = DEFAULT_SETTINGS.theme;
     }
 
     // Validate language
     if (!Object.keys(SUPPORTED_LANGUAGES).includes(this.settings.language)) {
-      console.warn(`Invalid language: ${this.settings.language}, using default`);
+      log.warn(`Invalid language: ${this.settings.language}, using default`, 'SettingsService');
       this.settings.language = DEFAULT_SETTINGS.language;
     }
 
     // Validate currency
     if (!VALID_CURRENCIES.includes(this.settings.currency)) {
-      console.warn(`Invalid currency: ${this.settings.currency}, using default`);
+      log.warn(`Invalid currency: ${this.settings.currency}, using default`, 'SettingsService');
       this.settings.currency = DEFAULT_SETTINGS.currency;
     }
 
@@ -120,7 +121,7 @@ export class SettingsService {
     if (typeof this.settings.refresh_interval !== 'number' || 
         this.settings.refresh_interval < 100 || 
         this.settings.refresh_interval > 60000) {
-      console.warn(`Invalid refresh interval: ${this.settings.refresh_interval}, using default`);
+      log.warn(`Invalid refresh interval: ${this.settings.refresh_interval}, using default`, 'SettingsService');
       this.settings.refresh_interval = DEFAULT_SETTINGS.refresh_interval;
     }
 
@@ -128,13 +129,13 @@ export class SettingsService {
     if (typeof this.settings.data_retention_days !== 'number' || 
         this.settings.data_retention_days < 1 || 
         this.settings.data_retention_days > 365) {
-      console.warn(`Invalid data retention days: ${this.settings.data_retention_days}, using default`);
+      log.warn(`Invalid data retention days: ${this.settings.data_retention_days}, using default`, 'SettingsService');
       this.settings.data_retention_days = DEFAULT_SETTINGS.data_retention_days;
     }
 
     // Validate monitoring enabled
     if (typeof this.settings.monitoring_enabled !== 'boolean') {
-      console.warn(`Invalid monitoring enabled: ${this.settings.monitoring_enabled}, using default`);
+      log.warn(`Invalid monitoring enabled: ${this.settings.monitoring_enabled}, using default`, 'SettingsService');
       this.settings.monitoring_enabled = DEFAULT_SETTINGS.monitoring_enabled;
     }
   }
@@ -174,13 +175,13 @@ export class SettingsService {
       if (hasChanges) {
         this.isDirty = true;
         this.scheduleSave();
-        console.log('Settings updated:', updates);
+        log.debug(`Settings updated: ${JSON.stringify(updates)}`, 'SettingsService');
         
         // Emit change events for specific settings
         this.notifySettingsChange(oldSettings, this.settings);
       }
     } catch (error) {
-      console.error('Failed to update settings:', error);
+      log.service.error('SettingsService', 'Failed to update settings', error as Error);
       throw new Error(`Failed to update settings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -189,7 +190,7 @@ export class SettingsService {
    * Update single setting
    */
   async updateSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K]): Promise<void> {
-    await this.updateSettings({ [key]: value } as Partial<AppSettings>);
+    return this.updateSettings({ [key]: value } as Partial<AppSettings>);
   }
 
   /**
@@ -202,10 +203,10 @@ export class SettingsService {
       this.isDirty = true;
       await this.saveSettings();
       
-      console.log('Settings reset to defaults');
+      log.info('Settings reset to defaults', 'SettingsService');
       this.notifySettingsChange(oldSettings, this.settings);
     } catch (error) {
-      console.error('Failed to reset settings:', error);
+      log.service.error('SettingsService', 'Failed to reset settings', error as Error);
       throw new Error(`Failed to reset settings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -216,32 +217,32 @@ export class SettingsService {
   private notifySettingsChange(oldSettings: AppSettings, newSettings: AppSettings): void {
     // Check for theme changes
     if (oldSettings.theme !== newSettings.theme) {
-      console.log(`Theme changed: ${oldSettings.theme} -> ${newSettings.theme}`);
+      log.debug(`Theme changed: ${oldSettings.theme} -> ${newSettings.theme}`, 'SettingsService');
     }
 
     // Check for language changes
     if (oldSettings.language !== newSettings.language) {
-      console.log(`Language changed: ${oldSettings.language} -> ${newSettings.language}`);
+      log.debug(`Language changed: ${oldSettings.language} -> ${newSettings.language}`, 'SettingsService');
     }
 
     // Check for currency changes
     if (oldSettings.currency !== newSettings.currency) {
-      console.log(`Currency changed: ${oldSettings.currency} -> ${newSettings.currency}`);
+      log.debug(`Currency changed: ${oldSettings.currency} -> ${newSettings.currency}`, 'SettingsService');
     }
 
     // Check for monitoring changes
     if (oldSettings.monitoring_enabled !== newSettings.monitoring_enabled) {
-      console.log(`Monitoring ${newSettings.monitoring_enabled ? 'enabled' : 'disabled'}`);
+      log.debug(`Monitoring ${newSettings.monitoring_enabled ? 'enabled' : 'disabled'}`, 'SettingsService');
     }
 
     // Check for refresh interval changes
     if (oldSettings.refresh_interval !== newSettings.refresh_interval) {
-      console.log(`Refresh interval changed: ${oldSettings.refresh_interval}ms -> ${newSettings.refresh_interval}ms`);
+      log.debug(`Refresh interval changed: ${oldSettings.refresh_interval}ms -> ${newSettings.refresh_interval}ms`, 'SettingsService');
     }
 
     // Check for data retention changes
     if (oldSettings.data_retention_days !== newSettings.data_retention_days) {
-      console.log(`Data retention changed: ${oldSettings.data_retention_days} -> ${newSettings.data_retention_days} days`);
+      log.debug(`Data retention changed: ${oldSettings.data_retention_days} -> ${newSettings.data_retention_days} days`, 'SettingsService');
     }
   }
 
@@ -255,7 +256,7 @@ export class SettingsService {
   /**
    * Import settings from JSON
    */
-  async importSettings(jsonString: string): Promise<void> {
+  importSettings(jsonString: string): void {
     try {
       const importedSettings = JSON.parse(jsonString);
       
@@ -274,10 +275,10 @@ export class SettingsService {
         }
       }
 
-      await this.updateSettings(filteredSettings);
-      console.log('Settings imported successfully');
+      this.updateSettings(filteredSettings);
+      log.info('Settings imported successfully', 'SettingsService');
     } catch (error) {
-      console.error('Failed to import settings:', error);
+      log.service.error('SettingsService', 'Failed to import settings', error as Error);
       throw new Error(`Failed to import settings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -314,7 +315,7 @@ export class SettingsService {
    * Get current theme configuration
    */
   getCurrentTheme() {
-    return getThemeConfig(this.settings.theme as any) || getThemeConfig('dark');
+    return getThemeConfig(this.settings.theme) || getThemeConfig('dark');
   }
 
   /**
@@ -340,10 +341,10 @@ export class SettingsService {
       
       if (this.isDirty) {
         await this.saveSettings();
-        console.log('Settings validated and repaired');
+        log.info('Settings validated and repaired', 'SettingsService');
       }
     } catch (error) {
-      console.error('Failed to validate settings:', error);
+      log.service.error('SettingsService', 'Failed to validate settings', error as Error);
       // Reset to defaults on validation failure
       await this.resetSettings();
     }

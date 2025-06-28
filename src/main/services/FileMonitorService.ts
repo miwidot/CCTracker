@@ -4,6 +4,7 @@ import * as chokidar from 'chokidar';
 import * as os from 'os';
 import { EventEmitter } from 'events';
 import type { FileSystemEvent } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 export class FileMonitorService extends EventEmitter {
   private watcher: chokidar.FSWatcher | null = null;
@@ -18,7 +19,7 @@ export class FileMonitorService extends EventEmitter {
 
   private setupEventHandlers(): void {
     this.on('file-change', (event: FileSystemEvent) => {
-      console.log('File system event:', event);
+      log.debug(`File system event: ${JSON.stringify(event)}`, 'FileMonitorService');
     });
   }
 
@@ -28,7 +29,7 @@ export class FileMonitorService extends EventEmitter {
   async startMonitoring(paths: string | string[]): Promise<void> {
     try {
       if (this.isMonitoring) {
-        console.log('File monitoring is already active');
+        log.warn('File monitoring is already active', 'FileMonitorService');
         return;
       }
 
@@ -39,13 +40,13 @@ export class FileMonitorService extends EventEmitter {
         try {
           await fs.promises.access(watchPath);
         } catch (_error) {
-          console.warn(`Path does not exist or is not accessible: ${watchPath}`);
+          log.warn(`Path does not exist or is not accessible: ${watchPath}`, 'FileMonitorService');
           // Create directory if it doesn't exist (for output directories)
           try {
             await fs.promises.mkdir(watchPath, { recursive: true });
-            console.log(`Created directory: ${watchPath}`);
+            log.info(`Created directory: ${watchPath}`, 'FileMonitorService');
           } catch (createError) {
-            console.error(`Failed to create directory ${watchPath}:`, createError);
+            log.service.error('FileMonitorService', `Failed to create directory ${watchPath}`, createError as Error);
             throw new Error(`Cannot monitor path: ${watchPath}`);
           }
         }
@@ -57,7 +58,7 @@ export class FileMonitorService extends EventEmitter {
       // Create watcher with optimized settings
       this.watcher = chokidar.watch(pathsToWatch, {
         ignored: [
-          /(^|[\/\\])\../, // ignore dotfiles
+          /(^|[/\\])\../, // ignore dotfiles
           /node_modules/,
           /\.git/,
           /\.DS_Store/,
@@ -80,19 +81,19 @@ export class FileMonitorService extends EventEmitter {
         .on('change', (filePath) => void this.handleFileEvent('modified', filePath))
         .on('unlink', (filePath) => void this.handleFileEvent('deleted', filePath))
         .on('error', (error) => {
-          console.error('File watcher error:', error);
+          log.service.error('FileMonitorService', 'File watcher error', error);
           this.emit('error', error);
         })
         .on('ready', () => {
-          console.log('File monitoring initialized and ready');
+          log.info('File monitoring initialized and ready', 'FileMonitorService');
           this.isMonitoring = true;
           pathsToWatch.forEach(p => this.watchedPaths.add(p));
           this.emit('monitoring-started', pathsToWatch);
         });
 
-      console.log(`Started monitoring paths: ${pathsToWatch.join(', ')}`);
+      log.info(`Started monitoring paths: ${pathsToWatch.join(', ')}`, 'FileMonitorService');
     } catch (error) {
-      console.error('Failed to start file monitoring:', error);
+      log.service.error('FileMonitorService', 'Failed to start file monitoring', error as Error);
       throw new Error(`Failed to start file monitoring: ${error}`);
     }
   }
@@ -103,7 +104,7 @@ export class FileMonitorService extends EventEmitter {
   async stopMonitoring(): Promise<void> {
     try {
       if (!this.isMonitoring || !this.watcher) {
-        console.log('File monitoring is not active');
+        log.warn('File monitoring is not active', 'FileMonitorService');
         return;
       }
 
@@ -113,10 +114,10 @@ export class FileMonitorService extends EventEmitter {
       this.watchedPaths.clear();
       this.lastFileStates.clear();
 
-      console.log('File monitoring stopped');
+      log.info('File monitoring stopped', 'FileMonitorService');
       this.emit('monitoring-stopped');
     } catch (error) {
-      console.error('Failed to stop file monitoring:', error);
+      log.service.error('FileMonitorService', 'Failed to stop file monitoring', error as Error);
       throw new Error(`Failed to stop file monitoring: ${error}`);
     }
   }
@@ -159,10 +160,10 @@ export class FileMonitorService extends EventEmitter {
       // Initialize file states for new path
       await this.initializeFileStates([watchPath]);
       
-      console.log(`Added watch path: ${watchPath}`);
+      log.info(`Added watch path: ${watchPath}`, 'FileMonitorService');
       this.emit('path-added', watchPath);
     } catch (error) {
-      console.error('Failed to add watch path:', error);
+      log.service.error('FileMonitorService', 'Failed to add watch path', error as Error);
       throw new Error(`Failed to add watch path: ${error}`);
     }
   }
@@ -186,10 +187,10 @@ export class FileMonitorService extends EventEmitter {
         }
       }
       
-      console.log(`Removed watch path: ${watchPath}`);
+      log.info(`Removed watch path: ${watchPath}`, 'FileMonitorService');
       this.emit('path-removed', watchPath);
     } catch (error) {
-      console.error('Failed to remove watch path:', error);
+      log.service.error('FileMonitorService', 'Failed to remove watch path', error as Error);
       throw new Error(`Failed to remove watch path: ${error}`);
     }
   }
@@ -220,8 +221,8 @@ export class FileMonitorService extends EventEmitter {
             size: stats.size,
             mtime: stats.mtime.getTime(),
           });
-        } catch (error) {
-          console.warn(`Failed to get stats for ${filePath}:`, error);
+        } catch (_error) {
+          log.warn(`Failed to get stats for ${filePath}`, 'FileMonitorService');
         }
       }
 
@@ -242,9 +243,9 @@ export class FileMonitorService extends EventEmitter {
         await this.handleJSONLFileChange(filePath);
       }
 
-      console.log(`File ${eventType}: ${filePath}`);
+      log.debug(`File ${eventType}: ${filePath}`, 'FileMonitorService');
     } catch (error) {
-      console.error('Error handling file event:', error);
+      log.service.error('FileMonitorService', 'Error handling file event', error as Error);
       this.emit('error', error);
     }
   }
@@ -268,7 +269,7 @@ export class FileMonitorService extends EventEmitter {
         });
       }
     } catch (error) {
-      console.error('Failed to handle JSONL file change:', error);
+      log.service.error('FileMonitorService', 'Failed to handle JSONL file change', error as Error);
     }
   }
 
@@ -287,12 +288,12 @@ export class FileMonitorService extends EventEmitter {
               size: stats.size,
               mtime: stats.mtime.getTime(),
             });
-          } catch (error) {
-            console.warn(`Failed to get initial stats for ${filePath}:`, error);
+          } catch (_error) {
+            log.warn(`Failed to get initial stats for ${filePath}`, 'FileMonitorService');
           }
         }
-      } catch (error) {
-        console.warn(`Failed to initialize file states for ${watchPath}:`, error);
+      } catch (_error) {
+        log.warn(`Failed to initialize file states for ${watchPath}`, 'FileMonitorService');
       }
     }
   }
@@ -320,8 +321,8 @@ export class FileMonitorService extends EventEmitter {
           files.push(fullPath);
         }
       }
-    } catch (error) {
-      console.warn(`Failed to read directory ${dir}:`, error);
+    } catch (_error) {
+      log.warn(`Failed to read directory ${dir}`, 'FileMonitorService');
     }
 
     return files;
@@ -404,20 +405,20 @@ export class FileMonitorService extends EventEmitter {
       // Check if Claude CLI directory exists
       try {
         await fs.promises.access(claudeProjectsPath);
-        console.log('Starting Claude CLI monitoring at:', claudeProjectsPath);
+        log.info(`Starting Claude CLI monitoring at: ${claudeProjectsPath}`, 'FileMonitorService');
         await this.startMonitoring(claudeProjectsPath);
         
         // Set up event handler for JSONL changes
         this.on('jsonl-content-change', (data) => {
-          console.log(`Claude CLI file updated: ${path.basename(data.filePath)} (${data.lineCount} lines)`);
+          log.debug(`Claude CLI file updated: ${path.basename(data.filePath)} (${data.lineCount} lines)`, 'FileMonitorService');
           // This will be picked up by the main process to refresh usage data
         });
         
       } catch (_error) {
-        console.log('Claude CLI projects directory not found, monitoring disabled');
+        log.warn('Claude CLI projects directory not found, monitoring disabled', 'FileMonitorService');
       }
     } catch (error) {
-      console.error('Failed to start Claude CLI monitoring:', error);
+      log.service.error('FileMonitorService', 'Failed to start Claude CLI monitoring', error as Error);
     }
   }
 
@@ -445,9 +446,9 @@ export class FileMonitorService extends EventEmitter {
     try {
       await this.stopMonitoring();
       this.removeAllListeners();
-      console.log('FileMonitorService cleaned up');
+      log.info('FileMonitorService cleaned up', 'FileMonitorService');
     } catch (error) {
-      console.error('Failed to cleanup FileMonitorService:', error);
+      log.service.error('FileMonitorService', 'Failed to cleanup FileMonitorService', error as Error);
     }
   }
 }

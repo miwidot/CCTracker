@@ -8,6 +8,7 @@ import { BusinessIntelligenceDashboard } from './components/BusinessIntelligence
 import { SimpleUsageAnalytics } from './components/SimpleUsageAnalytics';
 import { useTranslation } from './hooks/useTranslation';
 import type { AppSettings } from '@shared/types';
+import { log } from '@shared/utils/logger';
 
 type CurrentPage = 'dashboard' | 'analytics' | 'business-intelligence';
 
@@ -28,7 +29,7 @@ export const App: React.FC = () => {
         const appSettings = await window.electronAPI.getSettings();
         setSettings(appSettings);
       } catch (error) {
-        console.error('Failed to load settings:', error);
+        log.component.error('App', error as Error);
       } finally {
         setLoading(false);
       }
@@ -82,7 +83,7 @@ export const App: React.FC = () => {
             if (isValidCurrentPage(page)) {
               setCurrentPage(page);
             } else {
-              console.warn(`Invalid page navigation attempt: ${page}. Defaulting to dashboard.`);
+              log.warn(`Invalid page navigation attempt: ${page}. Defaulting to dashboard.`, 'App');
               setCurrentPage('dashboard');
             }
           }} currentPage={currentPage}>

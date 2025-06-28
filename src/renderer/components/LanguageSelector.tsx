@@ -7,7 +7,7 @@ interface Language {
   nativeName: string;
 }
 
-const getLanguages = (t: any): Language[] => [
+const getLanguages = (t: (key: string) => string): Language[] => [
   { code: 'en', name: t('languages.english'), nativeName: 'English' },
   { code: 'de', name: t('languages.german'), nativeName: 'Deutsch' },
   { code: 'fr', name: t('languages.french'), nativeName: 'Français' },

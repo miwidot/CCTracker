@@ -6,6 +6,7 @@ import { SettingsService } from './services/SettingsService';
 import { CurrencyService } from './services/CurrencyService';
 import { ExportService } from './services/ExportService';
 import { setupIpcHandlers } from './ipc/ipcHandlers';
+import { log } from '@shared/utils/logger';
 
 class Application {
   private mainWindow: BrowserWindow | null = null;
@@ -99,7 +100,7 @@ class Application {
     app.on('before-quit', () => {
       // Fire and forget cleanup - don't block app quit
       this.fileMonitorService.stopMonitoring().catch((error) => {
-        console.error('Failed to stop monitoring during app quit:', error);
+        log.error('Failed to stop monitoring during app quit', error as Error, 'Application');
         // Continue with quit process even if cleanup fails
       });
     });
@@ -107,4 +108,6 @@ class Application {
 }
 
 const application = new Application();
-application.initialize().catch(console.error);
+application.initialize().catch((error) => {
+  log.error('Failed to initialize application', error as Error, 'Application');
+});

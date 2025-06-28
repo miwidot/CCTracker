@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as XLSX from 'xlsx';
 import type { UsageEntry, SessionStats, CurrencyRates, BusinessIntelligence } from '@shared/types';
 import { calculateTotalCost, calculateModelBreakdown } from './CostCalculatorService';
+import { log } from '@shared/utils/logger';
 
 export interface ExportOptions {
   format: 'csv' | 'json' | 'excel' | 'pdf';
@@ -38,7 +39,7 @@ export class ExportService {
     try {
       await fs.mkdir(this.exportDir, { recursive: true });
     } catch (error) {
-      console.error('Failed to create export directory:', error);
+      log.service.error('ExportService', 'Failed to create export directory', error as Error);
       throw new Error(`Failed to create export directory: ${error}`);
     }
   }
@@ -73,11 +74,11 @@ export class ExportService {
       }
 
       result.stats.exportTime = Date.now() - startTime;
-      console.log(`Export completed in ${result.stats.exportTime}ms`);
+      log.debug(`Export completed in ${result.stats.exportTime}ms`, 'ExportService');
       
       return result;
     } catch (error) {
-      console.error('Export failed:', error);
+      log.service.error('ExportService', 'Export failed', error as Error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown export error',
@@ -459,7 +460,7 @@ export class ExportService {
         },
       };
     } catch (error) {
-      console.error('Session stats export failed:', error);
+      log.service.error('ExportService', 'Session stats export failed', error as Error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown export error',
@@ -662,7 +663,7 @@ export class ExportService {
         file.endsWith('.html')
       ).sort().reverse(); // Newest first
     } catch (error) {
-      console.error('Failed to list export files:', error);
+      log.service.error('ExportService', 'Failed to list export files', error as Error);
       return [];
     }
   }
@@ -674,9 +675,9 @@ export class ExportService {
     try {
       const filePath = path.join(this.exportDir, fileName);
       await fs.unlink(filePath);
-      console.log(`Deleted export file: ${fileName}`);
+      log.debug(`Deleted export file: ${fileName}`, 'ExportService');
     } catch (error) {
-      console.error('Failed to delete export file:', error);
+      log.service.error('ExportService', 'Failed to delete export file', error as Error);
       throw new Error(`Failed to delete export file: ${error}`);
     }
   }
@@ -695,11 +696,11 @@ export class ExportService {
         
         if (stats.mtime.getTime() < cutoffTime) {
           await fs.unlink(filePath);
-          console.log(`Deleted old export file: ${file}`);
+          log.debug(`Deleted old export file: ${file}`, 'ExportService');
         }
       }
     } catch (error) {
-      console.error('Failed to cleanup old exports:', error);
+      log.service.error('ExportService', 'Failed to cleanup old exports', error as Error);
     }
   }
 
@@ -785,7 +786,7 @@ export class ExportService {
       const csvFilePath = path.join(this.exportDir, csvFileName);
       await fs.writeFile(csvFilePath, csvSummary, 'utf-8');
 
-      console.log(`Generated business intelligence report: ${fileName}`);
+      log.info(`Generated business intelligence report: ${fileName}`, 'ExportService');
 
       return {
         success: true,
@@ -799,7 +800,7 @@ export class ExportService {
         },
       };
     } catch (error) {
-      console.error('Business intelligence export failed:', error);
+      log.service.error('ExportService', 'Business intelligence export failed', error as Error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown export error',
