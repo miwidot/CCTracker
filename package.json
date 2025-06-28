@@ -108,12 +108,11 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["universal"]
+          "arch": ["x64", "arm64"]
         }
       ],
       "identity": null,
-      "gatekeeperAssess": false,
-      "singleArchFiles": "*"
+      "gatekeeperAssess": false
     },
     "linux": {
       "target": [
