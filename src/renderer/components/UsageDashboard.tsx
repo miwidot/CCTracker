@@ -51,12 +51,12 @@ interface OverviewCardProps {
 const OverviewCard: React.FC<OverviewCardProps> = ({ 
   title, 
   value, 
-  icon: Icon, 
+  icon: iconComponent, 
   trend, 
   isLoading, 
   currency 
 }) => {
-  if (isLoading) {
+  if (isLoading === true) {
     return (
       <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-sm border border-[var(--border-color)] card theme-transition">
         <div className="flex items-center justify-between">
@@ -76,7 +76,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
         <div className="animate-slide-right">
           <p className="text-sm font-medium text-[var(--text-secondary)] theme-transition">{title}</p>
           <p className="text-2xl font-bold text-[var(--text-primary)] mt-1 theme-transition">
-            {typeof value === 'number' && currency ? `${currency} ${value.toFixed(2)}` : value}
+            {typeof value === 'number' && currency != null ? `${currency} ${value.toFixed(2)}` : value}
           </p>
           {trend && (
             <p className={`text-sm mt-1 font-medium animate-slide-up animate-delay-100 theme-transition ${trend.isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
@@ -85,7 +85,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
           )}
         </div>
         <div className="p-3 bg-[var(--bg-tertiary)] rounded-lg interactive-scale theme-transition animate-slide-left animate-delay-150">
-          <Icon className="h-6 w-6 text-[var(--text-accent)] theme-transition" />
+          {React.createElement(iconComponent, { className: "h-6 w-6 text-[var(--text-accent)] theme-transition" })}
         </div>
       </div>
     </div>
@@ -194,13 +194,13 @@ interface SessionTableProps {
 }
 
 const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency: _currency, isLoading }) => {
-  const { convertFromUSD, formatCurrency } = useCurrency();
+  const { convertFromUSD: _convertFromUSD, formatCurrency } = useCurrency();
   const { t } = useTranslation();
   if (isLoading) {
     return (
       <div className="space-y-2">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-12 bg-[var(--bg-skeleton)] rounded animate-pulse" />
+        {['session-sk-1', 'session-sk-2', 'session-sk-3', 'session-sk-4', 'session-sk-5'].map((key) => (
+          <div key={key} className="h-12 bg-[var(--bg-skeleton)] rounded animate-pulse" />
         ))}
       </div>
     );
@@ -363,12 +363,12 @@ const UsageDashboard: React.FC = () => {
 
       try {
         // Use centralized cost calculator with currency support
-        const currencies = await window.electronAPI.getCurrencyRates();
+        const _currencies = await window.electronAPI.getCurrencyRates();
         const metrics = await window.electronAPI.calculateDashboardMetricsWithCurrency(
           filteredData, 
           previousPeriodData, 
           settings.currency,
-          currencies
+          _currencies
         );
         
         
@@ -383,7 +383,7 @@ const UsageDashboard: React.FC = () => {
         log.component.error('UsageDashboard', error as Error);
         // Fallback to basic calculations using centralized service
         try {
-          const currencies = await window.electronAPI.getCurrencyRates();
+          const _currenciesFallback = await window.electronAPI.getCurrencyRates();
           const totalCostUSD = await window.electronAPI.calculateTotalCost(filteredData);
           const totalCost = convertFromUSD(totalCostUSD);
           const fallbackSessionsCount = uniqueSessionsInRange.length;
@@ -401,8 +401,8 @@ const UsageDashboard: React.FC = () => {
       }
     };
 
-    calculateMetrics();
-  }, [filteredData, uniqueSessionsInRange, dateRange, usageData, forceUpdate]);
+    void calculateMetrics();
+  }, [filteredData, uniqueSessionsInRange, dateRange, usageData, forceUpdate, settings.currency, convertFromUSD]);
 
   // Calculate project costs with centralized service
   useEffect(() => {
@@ -413,8 +413,8 @@ const UsageDashboard: React.FC = () => {
       }
       
       try {
-        const currencies = await window.electronAPI.getCurrencyRates();
-        const costs = await window.electronAPI.calculateProjectCosts(filteredData, settings.currency, currencies);
+        const _currenciesProject = await window.electronAPI.getCurrencyRates();
+        const costs = await window.electronAPI.calculateProjectCosts(filteredData, settings.currency, _currenciesProject);
         setProjectCosts(costs);
         
       } catch (error) {
@@ -423,7 +423,7 @@ const UsageDashboard: React.FC = () => {
       }
     };
     
-    calculateProjectCosts();
+    void calculateProjectCosts();
   }, [filteredData, settings.currency]); // Removed formatCurrencyDetailed to prevent infinite loop
 
   // Prepare chart data
@@ -477,12 +477,12 @@ const UsageDashboard: React.FC = () => {
   const handleExport = useCallback(async (format: 'csv' | 'json') => {
     setIsExporting(true);
     try {
-      const result = format === 'csv' 
+      const _result = format === 'csv' 
         ? await window.electronAPI.exportCsv(filteredData)
         : await window.electronAPI.exportJson(filteredData);
       
       // Export completed successfully
-    } catch (error) {
+    } catch (_error) {
       // Export failed - error is handled by the main process
     } finally {
       setIsExporting(false);
@@ -500,7 +500,7 @@ const UsageDashboard: React.FC = () => {
   }, [refreshData]);
 
   // Chart colors from theme
-  const COLORS = chartTheme.dataColors;
+  const _COLORS = chartTheme.dataColors;
 
   return (
     <div className="space-y-6 p-6 theme-transition">
@@ -514,7 +514,7 @@ const UsageDashboard: React.FC = () => {
         </div>
         <div className="flex gap-2 animate-slide-left animate-delay-200">
           <button
-            onClick={handleRefresh}
+            onClick={() => void handleRefresh()}
             disabled={isRefreshing}
             className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--text-secondary)] text-white rounded-md hover:bg-[var(--text-secondary)]/80 disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed btn interactive-scale theme-transition"
           >
@@ -523,7 +523,7 @@ const UsageDashboard: React.FC = () => {
           </button>
           <ExportButtons
             data={filteredData}
-            onExport={handleExport}
+            onExport={(format) => void handleExport(format)}
             isExporting={isExporting}
           />
         </div>
@@ -603,8 +603,8 @@ const UsageDashboard: React.FC = () => {
           </h3>
           {isLoading ? (
             <div className="space-y-3">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-4 bg-[var(--bg-skeleton)] rounded animate-skeleton" style={{animationDelay: `${i * 100}ms`}} />
+              {['token-sk-1', 'token-sk-2', 'token-sk-3', 'token-sk-4'].map((key, index) => (
+                <div key={key} className="h-4 bg-[var(--bg-skeleton)] rounded animate-skeleton" style={{animationDelay: `${index * 100}ms`}} />
               ))}
             </div>
           ) : (
@@ -624,13 +624,13 @@ const UsageDashboard: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-sm text-[var(--text-secondary)]">{t('metrics.cacheWrite')}</span>
                 <span className="text-sm font-medium text-[var(--text-primary)]">
-                  {formatTokens(filteredData.reduce((sum, entry) => sum + (entry.cache_creation_tokens || 0), 0))}
+                  {formatTokens(filteredData.reduce((sum, entry) => sum + (entry.cache_creation_tokens ?? 0), 0))}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-[var(--text-secondary)]">{t('metrics.cacheRead')}</span>
                 <span className="text-sm font-medium text-[var(--text-primary)]">
-                  {formatTokens(filteredData.reduce((sum, entry) => sum + (entry.cache_read_tokens || 0), 0))}
+                  {formatTokens(filteredData.reduce((sum, entry) => sum + (entry.cache_read_tokens ?? 0), 0))}
                 </span>
               </div>
             </div>
@@ -644,8 +644,8 @@ const UsageDashboard: React.FC = () => {
           </h3>
           {isLoading ? (
             <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-12 bg-[var(--bg-skeleton)] rounded animate-skeleton" style={{animationDelay: `${i * 100}ms`}} />
+              {['model-sk-1', 'model-sk-2', 'model-sk-3'].map((key, index) => (
+                <div key={key} className="h-12 bg-[var(--bg-skeleton)] rounded animate-skeleton" style={{animationDelay: `${index * 100}ms`}} />
               ))}
             </div>
           ) : (
@@ -681,8 +681,8 @@ const UsageDashboard: React.FC = () => {
           </h3>
           {isLoading ? (
             <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-8 bg-[var(--bg-skeleton)] rounded animate-pulse" />
+              {['project-sk-1', 'project-sk-2', 'project-sk-3', 'project-sk-4', 'project-sk-5'].map((key) => (
+                <div key={key} className="h-8 bg-[var(--bg-skeleton)] rounded animate-pulse" />
               ))}
             </div>
           ) : (
@@ -831,7 +831,7 @@ const UsageDashboard: React.FC = () => {
                   dataKey="value"
                 >
                   {chartData.costByModel.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={chartTheme.getDataColor(index)} />
+                    <Cell key={`cost-cell-${entry.name}`} fill={chartTheme.getDataColor(index)} />
                   ))}
                 </Pie>
                 <Tooltip
