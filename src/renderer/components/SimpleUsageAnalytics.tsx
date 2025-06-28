@@ -64,7 +64,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               {project.project_name}
             </h3>
             <p className="text-sm text-[var(--text-secondary)] truncate">
-              {project.project_path.split('/').pop() || project.project_path}
+              {project.project_path.split('/').pop() ?? project.project_path}
             </p>
           </div>
         </div>
@@ -156,7 +156,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
     }));
   }, [projects]);
 
-  if (error) {
+  if (error != null && error !== '') {
     return (
       <div className="min-h-screen bg-[var(--bg-secondary)] p-6">
         <div className="max-w-7xl mx-auto">
@@ -316,7 +316,7 @@ export const SimpleUsageAnalytics: React.FC = () => {
           
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
+              {Array.from({ length: 6 }, (_, i) => (
                 <ProjectCard 
                   key={`loading-project-${i}`}
                   project={{} as ProjectAnalytics}

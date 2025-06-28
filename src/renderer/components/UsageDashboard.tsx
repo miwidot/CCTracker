@@ -402,7 +402,7 @@ const UsageDashboard: React.FC = () => {
     };
 
     void calculateMetrics();
-  }, [filteredData, uniqueSessionsInRange, dateRange, usageData, forceUpdate, settings.currency]);
+  }, [filteredData, uniqueSessionsInRange, dateRange, usageData, forceUpdate, settings.currency, convertFromUSD]);
 
   // Calculate project costs with centralized service
   useEffect(() => {
@@ -468,7 +468,7 @@ const UsageDashboard: React.FC = () => {
       tokensByModel: tokenChartData,
       costByModel: costPieData,
     };
-  }, [filteredData, settings.currency]);
+  }, [filteredData, convertFromUSD]);
 
   // Get currency symbol from hook
   const currencySymbol = getCurrencySymbol();
@@ -697,7 +697,7 @@ const UsageDashboard: React.FC = () => {
                         {index + 1}
                       </span>
                       <span className="text-sm text-[var(--text-primary)] truncate">
-                        {project.split('/').pop() || project}
+                        {project.split('/').pop() ?? project}
                       </span>
                     </div>
                     <span className="text-xs text-[var(--text-secondary)]">
