@@ -94,14 +94,19 @@ export const useCurrency = () => {
         // Japanese Yen and Chinese Yuan don't use decimal places
         return `${symbol}${Math.round(convertedAmount).toLocaleString()}`;
       } else {
-        return `${symbol}${convertedAmount.toFixed(2)}`;
+        // Use proper number formatting with thousand separators
+        const formatted = convertedAmount.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `${symbol}${formatted}`;
       }
     },
     [convertFromUSD, settings.currency]
   );
 
   const formatCurrencyDetailed = useCallback(
-    (amount: number, decimals = 4): string => {
+    (amount: number, decimals = 2): string => {
       const convertedAmount = convertFromUSD(amount);
       const symbol = CURRENCY_SYMBOLS[settings.currency] || '$';
       
@@ -110,7 +115,12 @@ export const useCurrency = () => {
         // Japanese Yen and Chinese Yuan don't use decimal places
         return `${symbol}${Math.round(convertedAmount).toLocaleString()}`;
       } else {
-        return `${symbol}${convertedAmount.toFixed(decimals)}`;
+        // Use proper number formatting with thousand separators
+        const formatted = convertedAmount.toLocaleString('en-US', {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        });
+        return `${symbol}${formatted}`;
       }
     },
     [convertFromUSD, settings.currency]

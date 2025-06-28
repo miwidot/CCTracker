@@ -697,7 +697,7 @@ const UsageDashboard: React.FC = () => {
                         {index + 1}
                       </span>
                       <span className="text-sm text-[var(--text-primary)] truncate">
-                        {project}
+                        {project.split('/').pop() || project}
                       </span>
                     </div>
                     <span className="text-xs text-[var(--text-secondary)]">

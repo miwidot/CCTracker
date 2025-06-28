@@ -55,50 +55,50 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const costPerToken = project.total_tokens > 0 ? project.total_cost / project.total_tokens : 0;
 
   return (
-    <div className="card interactive bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] theme-transition p-6 border border-[var(--border-color)]">
-      <div className="flex items-start justify-between mb-4">
+    <div className="card interactive bg-[var(--bg-primary)] rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] theme-transition p-4 border border-[var(--border-color)]">
+      <div className="flex items-start justify-between mb-4 min-h-[60px]">
         <div className="flex items-center space-x-3">
           <FolderIcon className="h-8 w-8 text-[var(--color-primary)]" />
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] truncate">
               {project.project_name}
             </h3>
-            <p className="text-sm text-[var(--text-secondary)] truncate max-w-xs">
-              {project.project_path}
+            <p className="text-sm text-[var(--text-secondary)] truncate">
+              {project.project_path.split('/').pop() || project.project_path}
             </p>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-[var(--text-secondary)]">{t('analytics.lastUsed')}</p>
-          <p className="text-sm text-[var(--text-primary)]">
+        <div className="text-right flex-shrink-0 ml-4">
+          <p className="text-xs text-[var(--text-secondary)] whitespace-nowrap">{t('analytics.lastUsed')}</p>
+          <p className="text-sm text-[var(--text-primary)] whitespace-nowrap">
             {formatDate(project.last_used)}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <p className="text-sm text-[var(--text-secondary)]">{t('analytics.totalCost')}</p>
-          <p className="text-xl font-bold text-[var(--text-primary)]">
-            {formatCurrencyDetailed(project.total_cost, 4)}
+      <div className="grid grid-cols-2 gap-4 mb-4 mt-4">
+        <div className="text-center">
+          <p className="text-xs text-[var(--text-secondary)] mb-1">{t('analytics.totalCost')}</p>
+          <p className="text-lg font-bold text-[var(--text-primary)] break-all">
+            {formatCurrencyDetailed(project.total_cost, 2)}
           </p>
         </div>
-        <div>
-          <p className="text-sm text-[var(--text-secondary)]">{t('analytics.totalTokens')}</p>
-          <p className="text-xl font-bold text-[var(--text-primary)]">
+        <div className="text-center">
+          <p className="text-xs text-[var(--text-secondary)] mb-1">{t('analytics.totalTokens')}</p>
+          <p className="text-lg font-bold text-[var(--text-primary)]">
             {project.total_tokens.toLocaleString()}
           </p>
         </div>
-        <div>
-          <p className="text-sm text-[var(--text-secondary)]">{t('analytics.sessions')}</p>
+        <div className="text-center">
+          <p className="text-xs text-[var(--text-secondary)] mb-1">{t('analytics.sessions')}</p>
           <p className="text-lg font-semibold text-[var(--text-primary)]">
             {project.session_count}
           </p>
         </div>
-        <div>
-          <p className="text-sm text-[var(--text-secondary)]">{t('analytics.costPerToken')}</p>
-          <p className="text-lg font-semibold text-[var(--text-primary)]">
-            {formatCurrencyDetailed(costPerToken, 6)}
+        <div className="text-center">
+          <p className="text-xs text-[var(--text-secondary)] mb-1">{t('analytics.costPerToken')}</p>
+          <p className="text-lg font-semibold text-[var(--text-primary)] break-all">
+            {formatCurrencyDetailed(costPerToken, 4)}
           </p>
         </div>
       </div>

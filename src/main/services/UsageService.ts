@@ -157,20 +157,22 @@ export class UsageService {
     const totalInputTokens = inputTokens + cacheCreationTokens + cacheReadTokens;
     const totalTokens = totalInputTokens + outputTokens;
 
-    // Calculate cost using centralized pricing model
-    const costUsd = calculateCost(model, totalInputTokens, outputTokens);
+    // Calculate cost using centralized pricing model with separate cache pricing
+    const costUsd = calculateCost(model, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens);
 
     const entry: UsageEntry = {
       id: data.uuid, // Use Claude's UUID instead of generating new one
       timestamp: data.timestamp,
       model,
-      input_tokens: totalInputTokens,
+      input_tokens: inputTokens, // Pure input tokens only
       output_tokens: outputTokens,
       total_tokens: totalTokens,
       cost_usd: costUsd,
       session_id: data.sessionId,
       project_path: data.cwd,
       conversation_id: data.requestId,
+      cache_creation_tokens: cacheCreationTokens,
+      cache_read_tokens: cacheReadTokens,
     };
 
     return entry;
