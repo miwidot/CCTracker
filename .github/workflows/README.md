@@ -12,7 +12,7 @@ This repository includes comprehensive GitHub Actions workflows for automated bu
 - Manual dispatch with configurable options
 
 **Features:**
-- ✅ Multi-platform builds (macOS x64/ARM64, Linux x64/ARM64)
+- ✅ Multi-platform builds (macOS x64/ARM64, Linux x64)
 - ✅ Automated testing and quality checks
 - ✅ Nightly releases with automatic cleanup (keeps latest 7)
 - ✅ Manual release triggers with version control
@@ -53,7 +53,7 @@ This repository includes comprehensive GitHub Actions workflows for automated bu
 ```
 Version: 1.0.0-nightly.20240615
 Trigger: Schedule (2:00 AM UTC)
-Platforms: macOS (x64, ARM64), Linux (x64, ARM64)
+Platforms: macOS (x64, ARM64), Linux (x64)
 Release: Yes (prerelease)
 Cleanup: Keeps latest 7 nightly releases
 ```
@@ -84,11 +84,11 @@ Each successful build produces:
 - **Architectures:** x64 (Intel), arm64 (Apple Silicon)
 
 ### Linux
-- **AppImage:** `CCTracker-linux-{arch}.AppImage` (portable)
-- **DEB packages:** `CCTracker-linux-{arch}.deb` (Debian/Ubuntu)
-- **RPM packages:** `CCTracker-linux-{arch}.rpm` (RedHat/Fedora)
-- **TAR.GZ archives:** `CCTracker-linux-{arch}.tar.gz`
-- **Architectures:** x64 (Intel/AMD), arm64 (ARM)
+- **AppImage:** `CCTracker-linux-x64.AppImage` (portable)
+- **DEB packages:** `CCTracker-linux-x64.deb` (Debian/Ubuntu)
+- **RPM packages:** `CCTracker-linux-x64.rpm` (RedHat/Fedora)
+- **TAR.GZ archives:** `CCTracker-linux-x64.tar.gz`
+- **Architecture:** x64 (Intel/AMD)
 
 ## 🔧 Configuration
 
@@ -149,7 +149,7 @@ Each build includes:
 ### Build Matrix
 Parallel builds for efficiency:
 - **macOS:** Intel (x64) + Apple Silicon (arm64)
-- **Linux:** Intel/AMD (x64) + ARM (arm64)
+- **Linux:** Intel/AMD (x64)
 
 ## 🗂️ File Structure
 ```

@@ -13,7 +13,6 @@ on:
           - mac-intel
           - mac-apple-silicon
           - linux-x64
-          - linux-arm64
       version_suffix:
         description: 'Version suffix (optional)'
         required: false
@@ -70,8 +69,7 @@ jobs:
               MATRIX='{"include":[
                 {"os":"macos-latest","platform":"mac","arch":"x64","script":"package:mac:x64"},
                 {"os":"macos-latest","platform":"mac","arch":"arm64","script":"package:mac:arm64"},
-                {"os":"ubuntu-latest","platform":"linux","arch":"x64","script":"package:linux:x64"},
-                {"os":"ubuntu-latest","platform":"linux","arch":"arm64","script":"package:linux:arm64"}
+                {"os":"ubuntu-latest","platform":"linux","arch":"x64","script":"package:linux:x64"}
               ]}'
               ;;
             "mac-intel")
@@ -82,9 +80,6 @@ jobs:
               ;;
             "linux-x64")
               MATRIX='{"include":[{"os":"ubuntu-latest","platform":"linux","arch":"x64","script":"package:linux:x64"}]}'
-              ;;
-            "linux-arm64")
-              MATRIX='{"include":[{"os":"ubuntu-latest","platform":"linux","arch":"arm64","script":"package:linux:arm64"}]}'
               ;;
           esac
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT

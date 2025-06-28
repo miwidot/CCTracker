@@ -171,7 +171,7 @@ jobs:
     if: ${{ github.event.inputs.build_targets != 'mac-only' }}
     strategy:
       matrix:
-        arch: [x64, arm64]
+        arch: [x64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
