@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { XMarkIcon, ArrowPathIcon, SunIcon, MoonIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -41,6 +41,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const { t, i18n } = useTranslation();
   const [currencyStatus, setCurrencyStatus] = useState<CurrencyStatus | null>(null);
   const [isUpdatingCurrency, setIsUpdatingCurrency] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const getThemeInfo = (themeName: string) => {
     switch (themeName) {
@@ -64,8 +66,50 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   useEffect(() => {
     if (isOpen) {
       void loadCurrencyStatus();
+      // Focus the close button when modal opens
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 100);
     }
   }, [isOpen]);
+
+  // Handle escape key and focus trapping
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+      
+      // Focus trapping
+      if (e.key === 'Tab') {
+        const modal = modalRef.current;
+        if (!modal) return;
+        
+        const focusableElements = modal.querySelectorAll(
+          'button, select, input, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0] as HTMLElement;
+        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+        
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const loadCurrencyStatus = async () => {
     try {
@@ -95,35 +139,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-50 overflow-y-auto animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black bg-opacity-50 modal-overlay animate-fade-in"
         onClick={onClose}
+        aria-hidden="true"
       />
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div 
+          ref={modalRef}
           className="modal modal-content relative w-full max-w-2xl transform overflow-hidden modal-radius bg-[var(--bg-primary)] modal-shadow theme-transition animate-scale-in"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4">
-            <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+            <h3 id="settings-modal-title" className="text-lg font-semibold text-[var(--text-primary)]">
               {t('common.settings')}
             </h3>
             <button
+              ref={closeButtonRef}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 onClose();
               }}
-              className="p-2 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+              aria-label={t('common.close')}
+              className="p-2 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               type="button"
               style={{ zIndex: 10, position: 'relative', pointerEvents: 'auto' }}
             >
-              <XMarkIcon className="h-5 w-5" />
+              <XMarkIcon className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
 
@@ -139,6 +187,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 onChange={(e) => {
                   void i18n.changeLanguage(e.target.value);
                 }}
+                aria-label={t('ui.selectLanguage')}
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition"
               >
                 {getLanguages(t).map((language) => (
@@ -161,6 +210,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               <select
                 value={theme.name}
                 onChange={(e) => setTheme(e.target.value as keyof typeof COLOR_PALETTES)}
+                aria-label={t('theme.title')}
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition"
               >
                 {THEME_NAMES.map((themeName) => {

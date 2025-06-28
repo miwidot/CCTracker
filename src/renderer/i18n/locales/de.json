@@ -91,7 +91,10 @@
     "analytics": "Nutzungsanalyse",
     "businessIntelligence": "Business Intelligence",
     "export": "Daten exportieren",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "toggleMenu": "Navigationsmenü umschalten",
+    "closeMenu": "Navigationsmenü schließen",
+    "currentPage": "Aktuelle Seite"
   },
   "common": {
     "refresh": "Aktualisieren",

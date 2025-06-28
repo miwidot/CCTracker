@@ -30,9 +30,16 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <div className="flex items-center space-x-4 header-with-controls animate-slide-right">
             <button
               onClick={onMenuClick}
-              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] window-no-drag interactive-scale theme-transition"
+              aria-label={t('navigation.toggleMenu')}
+              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] window-no-drag interactive-scale theme-transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onMenuClick();
+                }
+              }}
             >
-              <Bars3Icon className="h-5 w-5" />
+              <Bars3Icon className="h-5 w-5" aria-hidden="true" />
             </button>
             
             <div className="window-no-drag animate-slide-right animate-delay-100">
@@ -55,18 +62,30 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             <button
               onClick={() => void refreshData()}
               disabled={isLoading}
-              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] disabled:opacity-50 interactive-scale theme-transition animate-slide-left animate-delay-200"
-              title={t('common.refresh')}
+              aria-label={isLoading ? t('common.loading') : t('common.refresh')}
+              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] disabled:opacity-50 interactive-scale theme-transition animate-slide-left animate-delay-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && !isLoading) {
+                  e.preventDefault();
+                  void refreshData();
+                }
+              }}
             >
-              <ArrowPathIcon className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+              <ArrowPathIcon className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
             </button>
 
             <button 
               onClick={() => setShowSettings(true)}
-              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] interactive-scale theme-transition animate-slide-left animate-delay-250"
-              title={t('common.settings')}
+              aria-label={t('common.settings')}
+              className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] interactive-scale theme-transition animate-slide-left animate-delay-250 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setShowSettings(true);
+                }
+              }}
             >
-              <CogIcon className="h-5 w-5" />
+              <CogIcon className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
         </div>

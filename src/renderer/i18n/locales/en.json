@@ -91,7 +91,10 @@
     "analytics": "Usage Analytics",
     "businessIntelligence": "Business Intelligence",
     "export": "Export Data",
-    "settings": "Settings"
+    "settings": "Settings",
+    "toggleMenu": "Toggle navigation menu",
+    "closeMenu": "Close navigation menu",
+    "currentPage": "Current page"
   },
   "common": {
     "refresh": "Refresh",

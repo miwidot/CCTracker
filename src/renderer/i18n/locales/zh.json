@@ -91,7 +91,10 @@
     "analytics": "使用分析",
     "businessIntelligence": "商业智能",
     "export": "导出数据",
-    "settings": "设置"
+    "settings": "设置",
+    "toggleMenu": "切换导航菜单",
+    "closeMenu": "关闭导航菜单",
+    "currentPage": "当前页面"
   },
   "common": {
     "refresh": "刷新",

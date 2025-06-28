@@ -50,31 +50,46 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
             </div>
             <button
               onClick={onClose}
-              className="p-1 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] lg:hidden interactive-scale theme-transition"
+              aria-label={t('navigation.closeMenu')}
+              className="p-1 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] lg:hidden interactive-scale theme-transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onClose();
+                }
+              }}
             >
-              <XMarkIcon className="h-5 w-5" />
+              <XMarkIcon className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-6 space-y-3 stagger-children">
+          <nav className="flex-1 p-6 space-y-3 stagger-children" role="navigation" aria-label="Main navigation">
             {menuItems.map((item, index) => (
               <button
                 key={item.label}
                 onClick={() => handleNavigation(item.page)}
-                className={`group w-full flex items-center space-x-4 px-4 py-3 rounded-xl text-left sidebar-item relative transition-all duration-200 ease-out ${
+                aria-current={currentPage === item.page ? 'page' : undefined}
+                aria-label={item.label}
+                className={`group w-full flex items-center space-x-4 px-4 py-3 rounded-xl text-left sidebar-item relative transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
                   currentPage === item.page
                     ? 'bg-[var(--color-primary)] text-white shadow-lg transform scale-[1.02]'
                     : 'text-[var(--text-secondary)] hover:bg-[var(--color-hover)] hover:text-[var(--text-primary)] hover:transform hover:scale-[1.01] hover:shadow-md'
                 } ${item.highlight === true ? 'ring-2 ring-[var(--color-info)] ring-opacity-50 animate-pulse' : ''}`}
                 style={{ animationDelay: `${index * 75}ms` }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleNavigation(item.page);
+                  }
+                }}
               >
                 <div className={`p-2 rounded-lg transition-all duration-200 ${
                   currentPage === item.page
                     ? 'bg-white bg-opacity-20'
                     : 'bg-[var(--bg-tertiary)] group-hover:bg-[var(--color-primary)] group-hover:bg-opacity-10'
                 }`}>
-                  <item.icon className="h-5 w-5 theme-transition" />
+                  <item.icon className="h-5 w-5 theme-transition" aria-hidden="true" />
                 </div>
                 <div className="flex-1">
                   <span className="font-semibold text-sm tracking-wide">{item.label}</span>
