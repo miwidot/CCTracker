@@ -320,7 +320,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
           </div>
           <div className="text-center py-12">
             <ExclamationTriangleIcon className="h-12 w-12 text-[var(--text-warning)] mx-auto mb-4" />
-            <p className="text-[var(--text-secondary)]">Failed to load project details</p>
+            <p className="text-[var(--text-secondary)]">{t('projectDetail.failedToLoad')}</p>
           </div>
         </div>
       </div>
@@ -364,7 +364,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                {range === 'all' ? 'All Time' : range.toUpperCase()}
+                {range === 'all' ? t('dateRange.all') : range.toUpperCase()}
               </button>
             ))}
           </div>
@@ -383,7 +383,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               <CurrencyDollarIcon className="h-8 w-8 text-[var(--color-primary)]" />
             </div>
             <div className="mt-2 text-xs text-[var(--text-secondary)]">
-              Since {format(new Date(project.last_used), 'MMM dd, yyyy')}
+              {t('projectDetail.sinceDate', { date: format(new Date(project.last_used), 'MMM dd, yyyy') })}
             </div>
           </div>
 
@@ -398,7 +398,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               <CpuChipIcon className="h-8 w-8 text-[var(--color-primary)]" />
             </div>
             <div className="mt-2 text-xs text-[var(--text-secondary)]">
-              Across {project.session_count} sessions
+              {t('projectDetail.acrossSessions', { count: project.session_count })}
             </div>
           </div>
 
@@ -413,7 +413,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               <RocketLaunchIcon className="h-8 w-8 text-[var(--color-primary)]" />
             </div>
             <div className="mt-2 text-xs text-[var(--text-secondary)]">
-              {formatTokens(detailedData.cacheStats.totalCacheReads)} cache reads
+              {formatTokens(detailedData.cacheStats.totalCacheReads)} {t('projectDetail.cacheReads')}
             </div>
           </div>
 
@@ -428,7 +428,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               <CalendarDaysIcon className="h-8 w-8 text-[var(--color-primary)]" />
             </div>
             <div className="mt-2 text-xs text-[var(--text-secondary)]">
-              Since first usage
+              {t('projectDetail.sinceFirstUsage')}
             </div>
           </div>
         </div>
@@ -477,7 +477,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               </ResponsiveContainer>
             ) : (
               <div className="h-64 flex items-center justify-center text-[var(--text-secondary)]">
-                No data for selected time range
+                {t('projectDetail.noDataForRange')}
               </div>
             )}
           </div>
@@ -520,7 +520,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               </ResponsiveContainer>
             ) : (
               <div className="h-64 flex items-center justify-center text-[var(--text-secondary)]">
-                No model data available
+                {t('projectDetail.noModelData')}
               </div>
             )}
           </div>
