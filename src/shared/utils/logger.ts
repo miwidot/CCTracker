@@ -4,8 +4,6 @@
  * with configurable log levels and production handling
  */
 
-/* eslint-disable no-console */
-
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -66,18 +64,18 @@ class Logger {
     if (this.isDevelopment) {
       switch (level) {
         case LogLevel.DEBUG:
-          console.debug(formattedMessage);
+          console.debug(formattedMessage); // eslint-disable-line no-console
           break;
         case LogLevel.INFO:
-          console.info(formattedMessage);
+          console.info(formattedMessage); // eslint-disable-line no-console
           break;
         case LogLevel.WARN:
-          console.warn(formattedMessage);
+          console.warn(formattedMessage); // eslint-disable-line no-console
           break;
         case LogLevel.ERROR:
-          console.error(formattedMessage);
+          console.error(formattedMessage); // eslint-disable-line no-console
           if (error) {
-            console.error(error.stack);
+            console.error(error.stack); // eslint-disable-line no-console
           }
           break;
         case LogLevel.NONE:
@@ -85,7 +83,7 @@ class Logger {
           break;
         default:
           // Fallback for any unhandled cases
-          console.log(formattedMessage);
+          console.log(formattedMessage); // eslint-disable-line no-console
           break;
       }
     } else {
@@ -111,9 +109,9 @@ class Logger {
     // For now, just use console for critical errors even in production
     if (entry.level === 'ERROR') {
       const contextStr = (entry.context != null && entry.context !== '') ? ` [${entry.context}]` : '';
-      console.error(`[${entry.timestamp}] ERROR${contextStr}: ${entry.message}`);
+      console.error(`[${entry.timestamp}] ERROR${contextStr}: ${entry.message}`); // eslint-disable-line no-console
       if (entry.error) {
-        console.error(entry.error.stack);
+        console.error(entry.error.stack); // eslint-disable-line no-console
       }
     }
   }
