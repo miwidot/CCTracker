@@ -160,6 +160,11 @@ export class UsageService {
     // Calculate cost using centralized pricing model with separate cache pricing
     const costUsd = calculateCost(model, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens);
 
+    // Filter out zero-cost entries (unknown models or synthetic entries)
+    if (costUsd === 0 || model.includes('<synthetic>')) {
+      return null;
+    }
+
     const entry: UsageEntry = {
       id: data.uuid, // Use Claude's UUID instead of generating new one
       timestamp: data.timestamp,
@@ -198,6 +203,11 @@ export class UsageService {
     const totalTokens = data.usage.total_tokens ?? (inputTokens + outputTokens);
 
     const costUsd = calculateCost(data.model, inputTokens, outputTokens);
+
+    // Filter out zero-cost entries (unknown models or synthetic entries)
+    if (costUsd === 0 || data.model.includes('<synthetic>')) {
+      return null;
+    }
 
     const entry: UsageEntry = {
       id: uuidv4(),
