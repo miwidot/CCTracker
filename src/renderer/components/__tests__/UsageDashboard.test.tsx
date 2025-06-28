@@ -173,7 +173,7 @@ describe('UsageDashboard', () => {
     mockElectronAPI.calculateModelBreakdown.mockResolvedValue({
       'claude-3-5-sonnet-20241022': 0.045,
     });
-    mockElectronAPI.onUsageUpdate.mockImplementation((callback) => {
+    mockElectronAPI.onUsageUpdate.mockImplementation((_callback) => {
       // Return unsubscribe function
       return () => {};
     });

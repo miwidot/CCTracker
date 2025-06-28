@@ -297,6 +297,8 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/require-await': 'off', // Allow async test functions without direct await
+      '@typescript-eslint/naming-convention': 'off', // Allow React component mocking with PascalCase
       'no-console': 'off',
     },
   },
