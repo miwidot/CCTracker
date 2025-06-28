@@ -42,6 +42,8 @@ class Application {
         height: 32
       },
       show: false,
+      backgroundColor: '#ffffff',
+      paintWhenInitiallyHidden: true
     });
 
     const isDev = process.env.NODE_ENV === 'development';
@@ -54,8 +56,33 @@ class Application {
       this.mainWindow.webContents.openDevTools();
     }
 
-    this.mainWindow.once('ready-to-show', () => {
-      this.mainWindow?.show();
+    // Multiple fallback events for window showing (production build issue)
+    let windowShown = false;
+    
+    const showWindow = () => {
+      if (!windowShown && this.mainWindow) {
+        windowShown = true;
+        this.mainWindow.show();
+        this.mainWindow.focus();
+        
+        // Force bring to front on macOS
+        if (process.platform === 'darwin') {
+          app.focus({ steal: true });
+        }
+      }
+    };
+    
+    // Primary method - ready-to-show event
+    this.mainWindow.once('ready-to-show', showWindow);
+    
+    // Fallback method - did-finish-load event  
+    this.mainWindow.webContents.once('did-finish-load', () => {
+      setTimeout(showWindow, 100); // Small delay to ensure rendering
+    });
+    
+    // Emergency fallback - dom-ready event
+    this.mainWindow.webContents.once('dom-ready', () => {
+      setTimeout(showWindow, 500); // Longer delay for complex rendering
     });
 
     this.mainWindow.on('closed', () => {
