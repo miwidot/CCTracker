@@ -170,7 +170,7 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
           <p className="text-[var(--text-secondary)] text-center py-8">{t('businessIntelligence.noAnomalies')}</p>
         ) : (
           <div className="space-y-3">
-            {anomalies.slice(0, 5).map((anomaly, index) => (
+            {anomalies.slice(0, 5).map((anomaly, _index) => (
               <div
                 key={`anomaly-${anomaly.timestamp}-${anomaly.type}-${anomaly.actual_value}`}
                 className={`p-4 rounded-lg border-2 ${severityColors[anomaly.severity]}`}
