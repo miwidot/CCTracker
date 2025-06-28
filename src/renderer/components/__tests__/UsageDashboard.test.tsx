@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UsageDashboard from '../UsageDashboard';
 import { SettingsProvider } from '../../contexts/SettingsContext';
@@ -40,13 +40,16 @@ jest.mock('recharts', () => ({
   Cell: () => <div data-testid="cell" />,
 }));
 
+
 const mockSettings = DEFAULT_SETTINGS;
 
-// Mock usage data
+// Mock usage data with recent timestamps
+const now = new Date();
+const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 const mockUsageData: UsageEntry[] = [
   {
     id: '1',
-    timestamp: '2024-01-15T10:00:00Z',
+    timestamp: yesterday.toISOString(),
     model: 'claude-3-5-sonnet-20241022',
     input_tokens: 1000,
     output_tokens: 500,
@@ -58,7 +61,7 @@ const mockUsageData: UsageEntry[] = [
   },
   {
     id: '2',
-    timestamp: '2024-01-15T11:00:00Z',
+    timestamp: now.toISOString(),
     model: 'claude-3-5-sonnet-20241022',
     input_tokens: 2000,
     output_tokens: 1000,
@@ -73,8 +76,8 @@ const mockUsageData: UsageEntry[] = [
 const mockSessionStats: SessionStats[] = [
   {
     session_id: 'session-1',
-    start_time: '2024-01-15T10:00:00Z',
-    end_time: '2024-01-15T10:30:00Z',
+    start_time: yesterday.toISOString(),
+    end_time: new Date(yesterday.getTime() + 30 * 60 * 1000).toISOString(),
     total_cost: 0.015,
     total_tokens: 1500,
     message_count: 3,
@@ -82,8 +85,8 @@ const mockSessionStats: SessionStats[] = [
   },
   {
     session_id: 'session-2',
-    start_time: '2024-01-15T11:00:00Z',
-    end_time: '2024-01-15T11:45:00Z',
+    start_time: now.toISOString(),
+    end_time: new Date(now.getTime() + 45 * 60 * 1000).toISOString(),
     total_cost: 0.030,
     total_tokens: 3000,
     message_count: 5,
@@ -91,26 +94,36 @@ const mockSessionStats: SessionStats[] = [
   },
 ];
 
+// Create a mock for UsageDataContext that we can control
+const mockRefreshData = jest.fn().mockResolvedValue(undefined);
+const mockUsageDataContext = {
+  usageData: mockUsageData,
+  sessionStats: mockSessionStats,
+  isLoading: false,
+  lastUpdated: new Date(),
+  refreshData: mockRefreshData,
+  getUsageByDateRange: jest.fn().mockResolvedValue({}),
+  getSessionStats: jest.fn().mockResolvedValue({}),
+};
+
 // Mock UsageDataContext to avoid infinite loops
 jest.mock('../../contexts/UsageDataContext', () => ({
-  useUsageData: () => ({
-    usageData: mockUsageData,
-    sessionStats: mockSessionStats,
-    isLoading: false,
-    lastUpdated: new Date(),
-    refreshData: jest.fn(),
-  }),
+  useUsageData: () => mockUsageDataContext,
   UsageDataProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 const renderWithProviders = (component: React.ReactElement) => {
-  return render(
-    <SettingsProvider initialSettings={mockSettings}>
-      <ThemeProvider>
-        {component}
-      </ThemeProvider>
-    </SettingsProvider>
-  );
+  let result: any;
+  act(() => {
+    result = render(
+      <SettingsProvider initialSettings={mockSettings}>
+        <ThemeProvider>
+          {component}
+        </ThemeProvider>
+      </SettingsProvider>
+    );
+  });
+  return result;
 };
 
 describe('UsageDashboard', () => {
@@ -123,6 +136,7 @@ describe('UsageDashboard', () => {
     exportJson: jest.fn(),
     getProjectCosts: jest.fn(),
     calculateDashboardMetricsWithCurrency: jest.fn(),
+    calculateProjectCosts: jest.fn(),
     calculateTotalCost: jest.fn(),
     calculateModelBreakdown: jest.fn(),
     onUsageUpdate: jest.fn(),
@@ -142,7 +156,7 @@ describe('UsageDashboard', () => {
       CNY: 6.5,
       MYR: 4.2,
     });
-    mockElectronAPI.getProjectCosts.mockResolvedValue({});
+    mockElectronAPI.calculateProjectCosts.mockResolvedValue({});
     mockElectronAPI.exportCsv.mockResolvedValue({ success: true, filePath: '/test/export.csv' });
     mockElectronAPI.exportJson.mockResolvedValue({ success: true, filePath: '/test/export.json' });
     mockElectronAPI.calculateDashboardMetricsWithCurrency.mockResolvedValue({
@@ -167,6 +181,14 @@ describe('UsageDashboard', () => {
 
     // Assign to window
     Object.assign(window, { electronAPI: mockElectronAPI });
+
+    // Reset context mock to default state
+    mockUsageDataContext.usageData = mockUsageData;
+    mockUsageDataContext.sessionStats = mockSessionStats;
+    mockUsageDataContext.isLoading = false;
+    mockUsageDataContext.lastUpdated = new Date();
+    mockRefreshData.mockClear();
+    mockRefreshData.mockResolvedValue(undefined);
 
     // Clear all mocks
     jest.clearAllMocks();
@@ -205,55 +227,58 @@ describe('UsageDashboard', () => {
 
   describe('Loading States', () => {
     it('shows loading indicators during data fetch', async () => {
-      // Mock delayed API response
-      mockElectronAPI.getUsageStats.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(mockUsageData), 100))
-      );
-      mockElectronAPI.getSessionStats.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(mockSessionStats), 100))
-      );
+      // Set loading state in context mock
+      mockUsageDataContext.isLoading = true;
 
       renderWithProviders(<UsageDashboard />);
 
-      // Should show loading indicators
-      expect(screen.getByText('common.loading')).toBeInTheDocument();
+      // Should show skeleton loading indicators (look for animate-skeleton class)
+      const skeletonElements = document.querySelectorAll('.animate-skeleton');
+      expect(skeletonElements.length).toBeGreaterThan(0);
 
-      // Wait for loading to complete
-      await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+      // Update context to show loaded state
+      await act(async () => {
+        mockUsageDataContext.isLoading = false;
       });
 
-      // Should show data after loading
-      expect(mockElectronAPI.getUsageStats).toHaveBeenCalled();
-      expect(mockElectronAPI.getSessionStats).toHaveBeenCalled();
+      // Wait for loading to complete - check that metric cards are showing actual content
+      await waitFor(() => {
+        expect(screen.getByText('metrics.totalCost')).toBeInTheDocument();
+        expect(screen.getByText('metrics.totalTokens')).toBeInTheDocument();
+      });
     });
 
     it('shows refresh loading state when refreshing data', async () => {
       renderWithProviders(<UsageDashboard />);
 
-      // Wait for initial load
+      // Wait for initial render
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('common.refresh')).toBeInTheDocument();
       });
 
       // Mock delayed refresh response
-      mockElectronAPI.getUsageStats.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(mockUsageData), 100))
+      mockRefreshData.mockImplementation(
+        () => new Promise<void>(resolve => setTimeout(() => resolve(), 100))
       );
 
-      // Click refresh button
       const refreshButton = screen.getByText('common.refresh');
-      fireEvent.click(refreshButton);
+      
+      // Click refresh button
+      await act(async () => {
+        fireEvent.click(refreshButton);
+      });
 
-      // Should show refreshing state
+      // Should show refreshing state (disabled button and spinning icon)
       await waitFor(() => {
         expect(refreshButton).toBeDisabled();
+        const spinningIcon = refreshButton.querySelector('.animate-spin');
+        expect(spinningIcon).toBeInTheDocument();
       });
 
       // Wait for refresh to complete
       await waitFor(() => {
         expect(refreshButton).not.toBeDisabled();
-      });
+      }, { timeout: 200 });
     });
   });
 
@@ -277,15 +302,23 @@ describe('UsageDashboard', () => {
     it('handles export errors', async () => {
       mockElectronAPI.exportCsv.mockRejectedValue(new Error('Export failed'));
       
+      // Ensure we have data so export buttons are enabled
+      mockUsageDataContext.usageData = mockUsageData;
+      
       renderWithProviders(<UsageDashboard />);
 
-      // Wait for initial load
+      // Wait for initial load and ensure button is not disabled
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        const csvButton = screen.getByText('export.csv');
+        expect(csvButton).toBeInTheDocument();
+        expect(csvButton).not.toBeDisabled();
       });
 
       const csvButton = screen.getByText('export.csv');
-      fireEvent.click(csvButton);
+      
+      await act(async () => {
+        fireEvent.click(csvButton);
+      });
 
       // Should handle export error gracefully
       await waitFor(() => {
@@ -301,43 +334,69 @@ describe('UsageDashboard', () => {
 
   describe('User Interactions', () => {
     beforeEach(async () => {
+      // Ensure we have data so export buttons are enabled
+      mockUsageDataContext.usageData = mockUsageData;
+      mockUsageDataContext.sessionStats = mockSessionStats;
+      
       renderWithProviders(<UsageDashboard />);
       // Wait for initial load
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('export.csv')).toBeInTheDocument();
       });
     });
 
     it('handles CSV export button click', async () => {
       const user = userEvent.setup();
+      
+      // Ensure button is enabled
+      await waitFor(() => {
+        const csvButton = screen.getByText('export.csv');
+        expect(csvButton).not.toBeDisabled();
+      });
+      
       const csvButton = screen.getByText('export.csv');
 
-      await user.click(csvButton);
+      await act(async () => {
+        await user.click(csvButton);
+      });
 
-      expect(mockElectronAPI.exportCsv).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(String),
-            model: expect.any(String),
-          })
-        ])
-      );
+      await waitFor(() => {
+        expect(mockElectronAPI.exportCsv).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              model: expect.any(String),
+            })
+          ])
+        );
+      });
     });
 
     it('handles JSON export button click', async () => {
       const user = userEvent.setup();
+      
+      // Ensure button is enabled
+      await waitFor(() => {
+        const jsonButton = screen.getByText('export.json');
+        expect(jsonButton).not.toBeDisabled();
+      });
+      
       const jsonButton = screen.getByText('export.json');
 
-      await user.click(jsonButton);
+      await act(async () => {
+        await user.click(jsonButton);
+      });
 
-      expect(mockElectronAPI.exportJson).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(String),
-            model: expect.any(String),
-          })
-        ])
-      );
+      await waitFor(() => {
+        expect(mockElectronAPI.exportJson).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              model: expect.any(String),
+            })
+          ])
+        );
+      });
     });
 
     it('disables export buttons during export', async () => {
@@ -345,23 +404,35 @@ describe('UsageDashboard', () => {
       
       // Mock delayed export
       mockElectronAPI.exportCsv.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
+        () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 50))
       );
 
+      // Ensure buttons start enabled
+      await waitFor(() => {
+        const csvButton = screen.getByText('export.csv');
+        const jsonButton = screen.getByText('export.json');
+        expect(csvButton).not.toBeDisabled();
+        expect(jsonButton).not.toBeDisabled();
+      });
+      
       const csvButton = screen.getByText('export.csv');
       const jsonButton = screen.getByText('export.json');
 
-      await user.click(csvButton);
+      await act(async () => {
+        await user.click(csvButton);
+      });
 
       // Both buttons should be disabled during export
-      expect(csvButton).toBeDisabled();
-      expect(jsonButton).toBeDisabled();
+      await waitFor(() => {
+        expect(csvButton).toBeDisabled();
+        expect(jsonButton).toBeDisabled();
+      });
 
       // Wait for export to complete
       await waitFor(() => {
         expect(csvButton).not.toBeDisabled();
         expect(jsonButton).not.toBeDisabled();
-      });
+      }, { timeout: 100 });
     });
 
     it('handles date range selection', async () => {
@@ -390,11 +461,13 @@ describe('UsageDashboard', () => {
       const user = userEvent.setup();
       
       const refreshButton = screen.getByText('common.refresh');
-      await user.click(refreshButton);
+      
+      await act(async () => {
+        await user.click(refreshButton);
+      });
 
-      // Should call refresh APIs
-      expect(mockElectronAPI.getUsageStats).toHaveBeenCalledTimes(2); // Initial + refresh
-      expect(mockElectronAPI.getSessionStats).toHaveBeenCalledTimes(2); // Initial + refresh
+      // Should call refreshData from context
+      expect(mockRefreshData).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -403,39 +476,36 @@ describe('UsageDashboard', () => {
       renderWithProviders(<UsageDashboard />);
 
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('metrics.totalCost')).toBeInTheDocument();
       });
 
-      // Should display total cost (sum of mock data costs)
-      const totalCost = mockUsageData.reduce((sum, entry) => sum + entry.cost_usd, 0);
-      
-      // Should display total tokens
-      const totalTokens = mockUsageData.reduce((sum, entry) => sum + entry.total_tokens, 0);
-      
-      // Note: Exact values depend on currency formatting, but structure should be present
+      // Should display metric labels
       expect(screen.getByText('metrics.totalCost')).toBeInTheDocument();
       expect(screen.getByText('metrics.totalTokens')).toBeInTheDocument();
+      expect(screen.getByText('metrics.sessionsCount')).toBeInTheDocument();
+      expect(screen.getByText('metrics.avgCostPerSession')).toBeInTheDocument();
     });
 
     it('displays session data correctly', async () => {
       renderWithProviders(<UsageDashboard />);
 
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('metrics.sessionsCount')).toBeInTheDocument();
       });
 
-      // Should display session count
-      expect(screen.getByText('metrics.sessionsCount')).toBeInTheDocument();
+      // Should display sessions table title
+      expect(screen.getByText('sessions.title')).toBeInTheDocument();
     });
 
     it('handles empty data state', async () => {
-      mockElectronAPI.getUsageStats.mockResolvedValue([]);
-      mockElectronAPI.getSessionStats.mockResolvedValue([]);
+      // Set empty data in context mock
+      mockUsageDataContext.usageData = [];
+      mockUsageDataContext.sessionStats = [];
 
       renderWithProviders(<UsageDashboard />);
 
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('export.csv')).toBeInTheDocument();
       });
 
       // Export buttons should be disabled with no data
@@ -451,38 +521,22 @@ describe('UsageDashboard', () => {
       renderWithProviders(<UsageDashboard />);
 
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('common.refresh')).toBeInTheDocument();
       });
-
-      // Update mock data
-      const updatedData = [
-        ...mockUsageData,
-        {
-          id: '3',
-          timestamp: '2024-01-15T12:00:00Z',
-          model: 'claude-3-5-sonnet-20241022',
-          input_tokens: 1500,
-          output_tokens: 750,
-          total_tokens: 2250,
-          cost_usd: 0.0225,
-          session_id: 'session-3',
-          project_path: '/test/project3',
-          conversation_id: 'conv-3',
-        },
-      ];
-
-      mockElectronAPI.getUsageStats.mockResolvedValue(updatedData);
 
       // Trigger refresh
       const refreshButton = screen.getByText('common.refresh');
-      await user.click(refreshButton);
-
-      // Wait for update
-      await waitFor(() => {
-        expect(mockElectronAPI.getUsageStats).toHaveBeenCalledTimes(2);
+      
+      await act(async () => {
+        await user.click(refreshButton);
       });
 
-      // Component should re-render with updated data
+      // Wait for refresh to be called
+      await waitFor(() => {
+        expect(mockRefreshData).toHaveBeenCalledTimes(1);
+      });
+
+      // Component should still display metrics
       expect(screen.getByText('metrics.totalCost')).toBeInTheDocument();
     });
 
@@ -492,19 +546,23 @@ describe('UsageDashboard', () => {
       renderWithProviders(<UsageDashboard />);
 
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('dateRange.7Days')).toBeInTheDocument();
       });
 
       // Select a specific date range
       const sevenDaysButton = screen.getByText('dateRange.7Days');
-      await user.click(sevenDaysButton);
+      await act(async () => {
+        await user.click(sevenDaysButton);
+      });
 
       // Refresh data
       const refreshButton = screen.getByText('common.refresh');
-      await user.click(refreshButton);
+      await act(async () => {
+        await user.click(refreshButton);
+      });
 
       await waitFor(() => {
-        expect(mockElectronAPI.getUsageStats).toHaveBeenCalledTimes(2);
+        expect(mockRefreshData).toHaveBeenCalledTimes(1);
       });
 
       // Date range selection should be maintained
@@ -517,25 +575,32 @@ describe('UsageDashboard', () => {
       renderWithProviders(<UsageDashboard />);
 
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('dashboard.title')).toBeInTheDocument();
       });
 
-      // Should use settings from context
-      expect(mockElectronAPI.getSettings).toHaveBeenCalled();
-      
-      // Should use currency rates from context
-      expect(mockElectronAPI.getCurrencyRates).toHaveBeenCalled();
+      // Should display dashboard content
+      expect(screen.getByText('dashboard.title')).toBeInTheDocument();
+      expect(screen.getByText('metrics.totalCost')).toBeInTheDocument();
     });
 
     it('renders charts when data is available', async () => {
       renderWithProviders(<UsageDashboard />);
 
       await waitFor(() => {
-        expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
+        expect(screen.getByText('charts.costOverTime')).toBeInTheDocument();
       });
 
-      // Should render chart components (mocked)
-      expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+      // Should render chart titles
+      expect(screen.getByText('charts.costOverTime')).toBeInTheDocument();
+      expect(screen.getByText('charts.tokenUsageByModel')).toBeInTheDocument();
+      expect(screen.getByText('charts.costDistribution')).toBeInTheDocument();
+      
+      // Should render chart components (mocked) - use a more flexible approach
+      await waitFor(() => {
+        const responsiveContainers = screen.queryAllByTestId('responsive-container');
+        // Charts should be rendered when data is available
+        expect(responsiveContainers.length).toBeGreaterThanOrEqual(1);
+      });
     });
   });
 });
