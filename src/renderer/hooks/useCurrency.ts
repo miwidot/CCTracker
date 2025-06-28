@@ -17,7 +17,7 @@ export const useCurrency = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadCurrencyRates();
+    void loadCurrencyRates();
   }, []);
 
   const loadCurrencyRates = async () => {

@@ -81,7 +81,7 @@ export const UsageDataProvider: React.FC<UsageDataProviderProps> = ({ children }
 
   // Initial data load
   useEffect(() => {
-    refreshData();
+    void refreshData();
   }, [refreshData]);
 
   // Set up real-time updates
@@ -100,7 +100,7 @@ export const UsageDataProvider: React.FC<UsageDataProviderProps> = ({ children }
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
-    const interval = setInterval(refreshData, 30000);
+    const interval = setInterval(() => void refreshData(), 30000);
     return () => clearInterval(interval);
   }, [refreshData]);
 

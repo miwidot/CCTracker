@@ -42,7 +42,7 @@ export function extractProjectName(filePath: string): string {
 /**
  * Format percentage values consistently
  */
-export function formatPercentage(value: number, decimals: number = 1): string {
+export function formatPercentage(value: number, decimals = 1): string {
   return `${value.toFixed(decimals)}%`;
 }
 

@@ -3,7 +3,7 @@
  * Centralized theming with semantic colors, spacing, typography, and component tokens
  */
 
-import type { ThemeConfig } from './types';
+// Removed unused import
 
 // Base color palettes for each theme
 export const COLOR_PALETTES = {

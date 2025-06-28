@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import { UsageService } from './services/UsageService';
 import { FileMonitorService } from './services/FileMonitorService';
@@ -46,7 +46,7 @@ class Application {
     const isDev = process.env.NODE_ENV === 'development';
     
     // Always load from file system - no web server needed
-    this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
+    void this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
     
     if (isDev) {
       this.mainWindow.webContents.openDevTools();

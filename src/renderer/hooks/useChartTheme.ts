@@ -76,7 +76,7 @@ export const useChartTheme = (): ChartTheme => {
     return chartColors.dataColors[index % chartColors.dataColors.length];
   };
 
-  const getContrastColor = (backgroundColor: string): string => {
+  const getContrastColor = (_backgroundColor: string): string => {
     // Simple contrast calculation - in a real app you might want to use a proper color library
     const isDark = theme.name === 'dark' || (theme.name.includes('catppuccin') && theme.name !== 'catppuccin-latte');
     return isDark ? '#ffffff' : '#000000';

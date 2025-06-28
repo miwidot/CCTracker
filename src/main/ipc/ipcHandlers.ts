@@ -149,7 +149,7 @@ export function setupIpcHandlers(services: Services) {
     }
   });
 
-  ipcMain.handle('monitor:status', async () => {
+  ipcMain.handle('monitor:status', () => {
     try {
       return fileMonitorService.getMonitoringStatus();
     } catch (error) {
@@ -161,7 +161,7 @@ export function setupIpcHandlers(services: Services) {
   // Settings handlers
   ipcMain.handle('settings:get', async () => {
     try {
-      return await settingsService.getSettings();
+      return settingsService.getSettings();
     } catch (error) {
       console.error('Error in settings:get:', error);
       throw error;
@@ -230,7 +230,7 @@ export function setupIpcHandlers(services: Services) {
     }
   });
 
-  ipcMain.handle('currency:get-status', async () => {
+  ipcMain.handle('currency:get-status', () => {
     try {
       return currencyService.getCacheStatus();
     } catch (error) {
