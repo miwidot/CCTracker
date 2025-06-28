@@ -28,13 +28,17 @@ export const App: React.FC = () => {
       try {
         // Wait for DOM to be fully ready
         if (document.readyState !== 'complete') {
-          await new Promise(resolve => {
-            window.addEventListener('load', resolve, { once: true });
+          await new Promise<void>(resolve => {
+            window.addEventListener('load', () => resolve(), { once: true });
           });
         }
         
         // Small delay to ensure IPC is ready
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await new Promise<void>(resolve => {
+          setTimeout(() => {
+            resolve();
+          }, 150);
+        });
         
         const appSettings = await window.electronAPI.getSettings();
         setSettings(appSettings);

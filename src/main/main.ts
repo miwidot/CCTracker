@@ -134,7 +134,11 @@ class Application {
       
       // Small delay to ensure IPC handlers are fully registered
       console.log('Waiting for IPC handlers to be ready...');
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise<void>(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 100);
+      });
       
       console.log('Creating window...');
       this.createWindow();

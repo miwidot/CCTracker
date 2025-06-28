@@ -87,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
                   )}
                 </div>
                 {currentPage === item.page && (
-                  <div className="w-1 h-6 bg-white rounded-full opacity-80"></div>
+                  <div className="w-1 h-6 bg-white rounded-full opacity-80" />
                 )}
               </button>
             ))}
