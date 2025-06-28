@@ -4,8 +4,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTimeFormat } from '../hooks/useTimeFormat';
 import { useTranslation } from '../hooks/useTranslation';
-import { THEME_NAMES, getThemeConfig } from '@shared/constants';
+import { THEME_NAMES, getThemeConfig, type COLOR_PALETTES } from '@shared/constants';
 import { log } from '@shared/utils/logger';
+import type { AppSettings } from '@shared/types';
 
 interface Language {
   code: string;
@@ -62,7 +63,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
   useEffect(() => {
     if (isOpen) {
-      loadCurrencyStatus();
+      void loadCurrencyStatus();
     }
   }, [isOpen]);
 
@@ -90,7 +91,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   if (!isOpen) return null;
 
   const handleCurrencyChange = async (currency: string) => {
-    await updateSettings({ currency } as any);
+    await updateSettings({ currency } as Partial<AppSettings>);
   };
 
   return (
@@ -135,7 +136,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               </h4>
               <select
                 value={i18n.language}
-                onChange={(e) => i18n.changeLanguage(e.target.value)}
+                onChange={(e) => {
+                  void i18n.changeLanguage(e.target.value);
+                }}
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition"
               >
                 {getLanguages(t).map((language) => (
@@ -157,7 +160,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               </h4>
               <select
                 value={theme.name}
-                onChange={(e) => setTheme(e.target.value as any)}
+                onChange={(e) => setTheme(e.target.value as keyof typeof COLOR_PALETTES)}
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition"
               >
                 {THEME_NAMES.map((themeName) => {
@@ -181,7 +184,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     {(() => {
                       const themeInfo = getThemeInfo(theme.name);
                       const IconComponent = themeInfo.icon;
-                      const themeOption = getThemeConfig(theme.name as any);
+                      const themeOption = getThemeConfig(theme.name);
                       return (
                         <>
                           <IconComponent className="h-5 w-5 text-[var(--text-primary)]" />
@@ -214,7 +217,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 {['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'].map((currency) => (
                   <button
                     key={currency}
-                    onClick={() => handleCurrencyChange(currency)}
+                    onClick={() => {
+                      void handleCurrencyChange(currency);
+                    }}
                     className={`btn interactive-bounce rounded-lg border-2 p-3 text-center theme-transition animate-slide-up ${
                       settings.currency === currency
                         ? 'border-[var(--color-primary)] bg-[var(--bg-secondary)] text-[var(--color-primary)]'
@@ -240,7 +245,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 ].map((format) => (
                   <button
                     key={format.value}
-                    onClick={() => updateSettings({ time_format: format.value } as any)}
+                    onClick={() => {
+                      void updateSettings({ time_format: format.value } as Partial<AppSettings>);
+                    }}
                     className={`btn interactive-bounce rounded-lg border-2 p-3 text-center theme-transition animate-slide-up ${
                       settings.time_format === format.value
                         ? 'border-[var(--color-primary)] bg-[var(--bg-secondary)] text-[var(--color-primary)]'
@@ -261,7 +268,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   {t('settings.currencyRates')}
                 </h4>
                 <button
-                  onClick={handleForceUpdateCurrency}
+                  onClick={() => {
+                    void handleForceUpdateCurrency();
+                  }}
                   disabled={isUpdatingCurrency}
                   className="btn-primary interactive-scale flex items-center space-x-2 px-3 py-1 text-sm bg-[var(--color-primary)] text-white rounded-md hover:bg-opacity-90 disabled:opacity-50 theme-transition"
                 >
@@ -281,13 +290,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     <div className="flex justify-between">
                       <span className="text-[var(--text-secondary)]">{t('settings.lastUpdated')}:</span>
                       <span className="text-[var(--text-primary)]">
-                        {currencyStatus.lastUpdated ? formatDateTime(currencyStatus.lastUpdated) : t('common.never')}
+                        {(currencyStatus.lastUpdated != null && currencyStatus.lastUpdated !== '') ? formatDateTime(currencyStatus.lastUpdated) : t('common.never')}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[var(--text-secondary)]">{t('settings.nextUpdate')}:</span>
                       <span className="text-[var(--text-primary)]">
-                        {currencyStatus.nextUpdate ? formatDateTime(currencyStatus.nextUpdate) : t('settings.manual')}
+                        {(currencyStatus.nextUpdate != null && currencyStatus.nextUpdate !== '') ? formatDateTime(currencyStatus.nextUpdate) : t('settings.manual')}
                       </span>
                     </div>
                   </div>
