@@ -14,13 +14,18 @@ jest.mock('../../hooks/useTranslation', () => ({
   }),
 }));
 
-// Mock currency hook
+// Mock currency hook with stable references
+const mockConvertFromUSD = jest.fn((amount: number) => amount * 1.2);
+const mockFormatCurrency = jest.fn((amount: number) => `$${amount.toFixed(2)}`);
+const mockFormatCurrencyDetailed = jest.fn((amount: number) => `$${amount.toFixed(6)}`);
+const mockGetCurrencySymbol = jest.fn(() => '$');
+
 jest.mock('../../hooks/useCurrency', () => ({
   useCurrency: () => ({
-    convertFromUSD: (amount: number) => amount * 1.2, // Mock 1.2x conversion rate
-    formatCurrency: (amount: number) => `$${amount.toFixed(2)}`,
-    formatCurrencyDetailed: (amount: number) => `$${amount.toFixed(6)}`,
-    getCurrencySymbol: () => '$',
+    convertFromUSD: mockConvertFromUSD,
+    formatCurrency: mockFormatCurrency,
+    formatCurrencyDetailed: mockFormatCurrencyDetailed,
+    getCurrencySymbol: mockGetCurrencySymbol,
   }),
 }));
 
