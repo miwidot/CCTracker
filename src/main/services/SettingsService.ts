@@ -189,8 +189,8 @@ export class SettingsService {
   /**
    * Update single setting
    */
-  async updateSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K]): Promise<void> {
-    return this.updateSettings({ [key]: value } as Partial<AppSettings>);
+  updateSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K]): void {
+    this.updateSettings({ [key]: value } as Partial<AppSettings>);
   }
 
   /**
@@ -315,7 +315,7 @@ export class SettingsService {
    * Get current theme configuration
    */
   getCurrentTheme() {
-    return getThemeConfig(this.settings.theme) || getThemeConfig('dark');
+    return getThemeConfig(this.settings.theme);
   }
 
   /**
