@@ -19,6 +19,7 @@
     "package:linux": "electron-builder --linux",
     "package:linux:x64": "electron-builder --linux --x64",
     "package:all": "electron-builder --mac --linux",
+    "package:mac:signed": "npm run package:mac && ./scripts/sign-app.sh",
     "test": "jest",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
@@ -110,7 +111,8 @@
           "arch": ["x64", "arm64"]
         }
       ],
-      "identity": null
+      "identity": null,
+      "gatekeeperAssess": false
     },
     "linux": {
       "target": [
