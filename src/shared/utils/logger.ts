@@ -4,6 +4,8 @@
  * with configurable log levels and production handling
  */
 
+/* eslint-disable no-console */
+
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -21,7 +23,7 @@ interface LogEntry {
 }
 
 class Logger {
-  private static instance: Logger;
+  private static instance: Logger | undefined;
   private logLevel: LogLevel = LogLevel.INFO;
   private readonly isDevelopment: boolean = process.env.NODE_ENV !== 'production';
 
@@ -35,9 +37,7 @@ class Logger {
   }
 
   static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
-    }
+    Logger.instance ??= new Logger();
     return Logger.instance;
   }
 
@@ -51,7 +51,7 @@ class Logger {
 
   private formatMessage(level: string, message: string, context?: string): string {
     const timestamp = new Date().toISOString();
-    const contextStr = context ? ` [${context}]` : '';
+    const contextStr = (context != null && context !== '') ? ` [${context}]` : '';
     return `[${timestamp}] ${level}${contextStr}: ${message}`;
   }
 
@@ -80,6 +80,13 @@ class Logger {
             console.error(error.stack);
           }
           break;
+        case LogLevel.NONE:
+          // No logging for NONE level
+          break;
+        default:
+          // Fallback for any unhandled cases
+          console.log(formattedMessage);
+          break;
       }
     } else {
       // In production, could integrate with external logging service
@@ -103,7 +110,8 @@ class Logger {
     // In a real implementation, this could write to file or send to logging service
     // For now, just use console for critical errors even in production
     if (entry.level === 'ERROR') {
-      console.error(`[${entry.timestamp}] ERROR${entry.context ? ` [${entry.context}]` : ''}: ${entry.message}`);
+      const contextStr = (entry.context != null && entry.context !== '') ? ` [${entry.context}]` : '';
+      console.error(`[${entry.timestamp}] ERROR${contextStr}: ${entry.message}`);
       if (entry.error) {
         console.error(entry.error.stack);
       }
@@ -139,8 +147,9 @@ class Logger {
     this.error(`Service error: ${message}`, error, serviceName);
   }
 
-  ipcCall(channel: string, data?: any): void {
-    this.debug(`IPC call to ${channel}${data ? ` with data: ${JSON.stringify(data)}` : ''}`, 'IPC');
+  ipcCall(channel: string, data?: unknown): void {
+    const dataStr = (data != null) ? ` with data: ${JSON.stringify(data)}` : '';
+    this.debug(`IPC call to ${channel}${dataStr}`, 'IPC');
   }
 
   ipcError(channel: string, error: Error): void {
@@ -155,8 +164,9 @@ class Logger {
     this.error(`File ${operation} failed: ${path}`, error, 'FileSystem');
   }
 
-  costCalculation(message: string, details?: any): void {
-    this.debug(`Cost calculation: ${message}${details ? ` - ${JSON.stringify(details)}` : ''}`, 'CostCalculator');
+  costCalculation(message: string, details?: unknown): void {
+    const detailsStr = (details != null) ? ` - ${JSON.stringify(details)}` : '';
+    this.debug(`Cost calculation: ${message}${detailsStr}`, 'CostCalculator');
   }
 
   parsingError(fileName: string, error: Error): void {
@@ -194,7 +204,7 @@ export const log = {
   
   // IPC logging
   ipc: {
-    call: (channel: string, data?: any) => logger.ipcCall(channel, data),
+    call: (channel: string, data?: unknown) => logger.ipcCall(channel, data),
     error: (channel: string, error: Error) => logger.ipcError(channel, error)
   },
   
@@ -206,7 +216,7 @@ export const log = {
   
   // Cost calculations
   cost: {
-    calculation: (message: string, details?: any) => logger.costCalculation(message, details)
+    calculation: (message: string, details?: unknown) => logger.costCalculation(message, details)
   },
   
   // Parsing
