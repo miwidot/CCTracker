@@ -99,16 +99,8 @@
       "!node_modules/**/README.md",
       "!node_modules/**/CHANGELOG.md"
     ],
-    "extraResources": [
-      {
-        "from": "assets/",
-        "to": "assets/",
-        "filter": ["**/*"]
-      }
-    ],
     "mac": {
       "category": "public.app-category.productivity",
-      "icon": "assets/icon.icns",
       "target": [
         {
           "target": "dmg",
@@ -127,7 +119,6 @@
     },
     "dmg": {
       "title": "CCTracker ${version}",
-      "background": "assets/dmg-background.png",
       "iconSize": 80,
       "contents": [
         {
@@ -144,7 +135,6 @@
       ]
     },
     "linux": {
-      "icon": "assets/icon.png",
       "target": [
         {
           "target": "AppImage",
