@@ -98,11 +98,10 @@
     },
     "files": [
       "dist/**/*",
-      "node_modules/**/*",
-      "!node_modules/**/*.map",
-      "!node_modules/**/README.md",
-      "!node_modules/**/CHANGELOG.md",
-      "!node_modules/**/*.{c,mk,a,o,h,Makefile}"
+      "!dist/mac*",
+      "!dist/*.zip",
+      "!dist/*.dmg",
+      "!dist/*.blockmap"
     ],
     "mac": {
       "category": "public.app-category.productivity",
