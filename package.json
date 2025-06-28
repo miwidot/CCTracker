@@ -108,7 +108,7 @@
       "target": [
         {
           "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": ["universal"]
         }
       ],
       "identity": null,
@@ -117,15 +117,7 @@
     "linux": {
       "target": [
         {
-          "target": "AppImage",
-          "arch": ["x64"]
-        },
-        {
           "target": "deb",
-          "arch": ["x64"]
-        },
-        {
-          "target": "rpm",
           "arch": ["x64"]
         },
         {
@@ -135,13 +127,8 @@
       ],
       "category": "Utility"
     },
-    "appImage": {
-    },
     "deb": {
       "depends": ["gconf2", "gconf-service", "libnotify4", "libappindicator1", "libxtst6", "libnss3"]
-    },
-    "rpm": {
-      "depends": ["libXScrnSaver"]
     },
     "publish": {
       "provider": "github",
