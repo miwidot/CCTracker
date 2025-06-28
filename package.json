@@ -33,7 +33,10 @@
     "electron",
     "react"
   ],
-  "author": "Cost Tracker Team",
+  "author": {
+    "name": "Cost Tracker Team",
+    "email": "team@costtracker.dev"
+  },
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.29.0",
