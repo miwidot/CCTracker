@@ -35,7 +35,7 @@ export const App: React.FC = () => {
       }
     };
 
-    initializeApp();
+    void initializeApp();
   }, []);
 
   if (loading) {
