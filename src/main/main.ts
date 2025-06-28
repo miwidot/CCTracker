@@ -46,8 +46,9 @@ class Application {
 
     const isDev = process.env.NODE_ENV === 'development';
     
-    // Always load from file system - no web server needed
-    void this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
+    // Always load from file system - no web server needed  
+    const htmlPath = path.join(__dirname, 'index.html');
+    void this.mainWindow.loadFile(htmlPath);
     
     if (isDev) {
       this.mainWindow.webContents.openDevTools();
