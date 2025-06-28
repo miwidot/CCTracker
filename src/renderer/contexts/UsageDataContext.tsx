@@ -39,11 +39,14 @@ export const UsageDataProvider: React.FC<UsageDataProviderProps> = ({ children }
       // Group by session_id and calculate stats using centralized logic
       const sessionMap = new Map<string, UsageEntry[]>();
       usage.forEach((entry: UsageEntry) => {
-        if (entry.session_id) {
+        if (entry.session_id != null && entry.session_id !== '') {
           if (!sessionMap.has(entry.session_id)) {
             sessionMap.set(entry.session_id, []);
           }
-          sessionMap.get(entry.session_id)!.push(entry);
+          const sessionEntries = sessionMap.get(entry.session_id);
+          if (sessionEntries != null) {
+            sessionEntries.push(entry);
+          }
         }
       });
 

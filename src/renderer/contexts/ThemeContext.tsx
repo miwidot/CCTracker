@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useSettings } from './SettingsContext';
-import { getThemeConfig, COLOR_PALETTES, CHART_PALETTES } from '@shared/constants';
+import { getThemeConfig, COLOR_PALETTES } from '@shared/constants';
+import type { CHART_PALETTES } from '@shared/constants';
 import { getSemanticColor, isDarkTheme, getChartColors } from '@shared/design-tokens';
 import type { ThemeConfig } from '@shared/types';
 
@@ -46,8 +47,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const validatedTheme = validateTheme(settings.theme);
   const theme = getThemeConfig(validatedTheme);
 
-  const setTheme = async (themeName: ThemeConfig['name']) => {
-    await updateSettings({ theme: themeName });
+  const setTheme = (themeName: ThemeConfig['name']) => {
+    // Fire and forget - don't block UI
+    updateSettings({ theme: themeName }).catch(console.error);
   };
 
   // Enhanced theme utilities with safe type assertions

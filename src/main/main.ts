@@ -96,13 +96,12 @@ class Application {
       }
     });
 
-    app.on('before-quit', async () => {
-      try {
-        await this.fileMonitorService.stopMonitoring();
-      } catch (error) {
+    app.on('before-quit', () => {
+      // Fire and forget cleanup - don't block app quit
+      this.fileMonitorService.stopMonitoring().catch((error) => {
         console.error('Failed to stop monitoring during app quit:', error);
         // Continue with quit process even if cleanup fails
-      }
+      });
     });
   }
 }

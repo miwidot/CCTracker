@@ -53,7 +53,7 @@ export const useChartTheme = (): ChartTheme => {
     }
     
     // Fallback colors from design tokens if CSS variables aren't available
-    const fallbackDataColors = getChartColors(theme.name as any);
+    const fallbackDataColors = getChartColors(theme.name as 'light' | 'dark' | 'catppuccin-latte' | 'catppuccin-frappe' | 'catppuccin-macchiato' | 'catppuccin-mocha');
     
     return {
       primary: getCSSVariable('--color-primary') || fallbackDataColors[0],

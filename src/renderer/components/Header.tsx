@@ -13,7 +13,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { t } = useTranslation();
   const { refreshData, isLoading, lastUpdated } = useUsageData();
-  const { theme } = useTheme();
+  const { theme: _theme } = useTheme();
   const { formatTime } = useTimeFormat();
   const [showSettings, setShowSettings] = useState(false);
 
@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             </div>
 
             <button
-              onClick={refreshData}
+              onClick={() => void refreshData()}
               disabled={isLoading}
               className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] disabled:opacity-50 interactive-scale theme-transition animate-slide-left animate-delay-200"
               title={t('common.refresh')}

@@ -258,7 +258,11 @@ describe('UsageDashboard', () => {
 
       // Mock delayed refresh response
       mockRefreshData.mockImplementation(
-        () => new Promise<void>(resolve => setTimeout(() => resolve(), 100))
+        () => new Promise<void>(resolve => {
+          setTimeout(() => {
+            resolve();
+          }, 100);
+        })
       );
 
       const refreshButton = screen.getByText('common.refresh');
@@ -404,7 +408,11 @@ describe('UsageDashboard', () => {
       
       // Mock delayed export
       mockElectronAPI.exportCsv.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 50))
+        () => new Promise(resolve => {
+          setTimeout(() => {
+            resolve({ success: true });
+          }, 50);
+        })
       );
 
       // Ensure buttons start enabled

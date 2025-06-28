@@ -37,7 +37,7 @@ export function convertFromUSD(usdAmount: number, targetCurrency: string): numbe
   }
   
   const rate = currencyRates[targetCurrency as keyof CurrencyRates];
-  return rate ? usdAmount * rate : usdAmount;
+  return (rate != null && rate > 0) ? usdAmount * rate : usdAmount;
 }
 
 /**
@@ -74,7 +74,7 @@ export function calculateCost(
   // Use shared MODEL_PRICING as single source of truth
   const pricing = MODEL_PRICING[model];
   
-  if (!pricing) {
+  if (pricing == null) {
     // Skip logging for synthetic/test models that don't have real pricing
     if (!model.includes('<synthetic>')) {
       console.warn(`Unknown model for cost calculation: ${model}`);
@@ -86,10 +86,10 @@ export function calculateCost(
   let cost = (inputTokens * pricing.input) + (outputTokens * pricing.output);
   
   // Add cache costs if available and provided
-  if (pricing.cache_write && cacheCreationTokens > 0) {
+  if (pricing.cache_write != null && cacheCreationTokens > 0) {
     cost += cacheCreationTokens * pricing.cache_write;
   }
-  if (pricing.cache_read && cacheReadTokens > 0) {
+  if (pricing.cache_read != null && cacheReadTokens > 0) {
     cost += cacheReadTokens * pricing.cache_read;
   }
 
@@ -116,8 +116,9 @@ export function calculateEfficiencyScore(totalCost: number, totalTokens: number)
   
   // Baseline: Claude 3.5 Sonnet average cost per token
   // (Assuming 60% input, 40% output ratio)
-  const baselineInputPrice = MODEL_PRICING['claude-3-5-sonnet-20241022']?.input || 0.000003;
-  const baselineOutputPrice = MODEL_PRICING['claude-3-5-sonnet-20241022']?.output || 0.000015;
+  const baselineModel = MODEL_PRICING['claude-3-5-sonnet-20241022'];
+  const baselineInputPrice = baselineModel?.input ?? 0.000003;
+  const baselineOutputPrice = baselineModel?.output ?? 0.000015;
   const baselineCostPerToken = (baselineInputPrice * 0.6) + (baselineOutputPrice * 0.4);
   
   // Calculate efficiency ratio (lower cost per token = higher efficiency)
@@ -200,13 +201,13 @@ export function calculateProjectAnalytics(
   // Count unique sessions by session_id (matching original Rust logic)
   const uniqueSessionIds = new Set(
     entries
-      .map(entry => entry.session_id || entry.conversation_id || entry.id)
-      .filter(Boolean)
+      .map(entry => entry.session_id ?? entry.conversation_id ?? entry.id)
+      .filter((id): id is string => id != null && id !== '')
   );
   const sessionCount = uniqueSessionIds.size;
 
   return {
-    project_path: entries[0].project_path || '',
+    project_path: entries[0]?.project_path ?? '',
     project_name: projectName,
     total_cost: totalCost,
     total_tokens: totalTokens,
@@ -226,7 +227,10 @@ export function calculateModelEfficiency(entries: UsageEntry[]): ModelEfficiency
     if (!modelGroups.has(entry.model)) {
       modelGroups.set(entry.model, []);
     }
-    modelGroups.get(entry.model)!.push(entry);
+    const modelGroup = modelGroups.get(entry.model);
+    if (modelGroup != null) {
+      modelGroup.push(entry);
+    }
   });
 
   const efficiency: ModelEfficiency[] = [];
@@ -280,10 +284,10 @@ export function calculateSessionStats(sessionId: string, entries: UsageEntry[]):
   // Get most used model in session
   const modelCounts = new Map<string, number>();
   entries.forEach(entry => {
-    modelCounts.set(entry.model, (modelCounts.get(entry.model) || 0) + 1);
+    modelCounts.set(entry.model, (modelCounts.get(entry.model) ?? 0) + 1);
   });
   const model = Array.from(modelCounts.entries())
-    .sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
+    .sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Unknown';
 
   return {
     session_id: sessionId,
@@ -334,7 +338,10 @@ export function calculateUsageTrends(
     if (!periodGroups.has(periodKey)) {
       periodGroups.set(periodKey, []);
     }
-    periodGroups.get(periodKey)!.push(entry);
+    const periodGroup = periodGroups.get(periodKey);
+    if (periodGroup != null) {
+      periodGroup.push(entry);
+    }
   });
 
   // Calculate trends with growth rates
@@ -342,7 +349,8 @@ export function calculateUsageTrends(
   const trends: UsageTrend[] = [];
 
   sortedPeriods.forEach((period, index) => {
-    const periodEntries = periodGroups.get(period)!;
+    const periodEntries = periodGroups.get(period);
+    if (periodEntries == null) return;
     const cost = periodEntries.reduce((sum, entry) => sum + entry.cost_usd, 0);
     const tokens = periodEntries.reduce((sum, entry) => sum + entry.total_tokens, 0);
     const sessions = new Set(periodEntries.map(e => e.session_id).filter(Boolean)).size;
@@ -386,7 +394,7 @@ export function validateCostCalculation(
 } {
   const pricing = MODEL_PRICING[model];
   
-  if (!pricing) {
+  if (pricing == null) {
     return {
       calculated_cost: 0,
       input_cost: 0,
@@ -467,7 +475,7 @@ export function calculateDashboardMetrics(
  */
 export function calculateTotalCost(entries: UsageEntry[], targetCurrency?: string): number {
   const totalUSD = entries.reduce((sum, entry) => sum + entry.cost_usd, 0);
-  return targetCurrency ? convertFromUSD(totalUSD, targetCurrency) : totalUSD;
+  return (targetCurrency != null && targetCurrency !== '') ? convertFromUSD(totalUSD, targetCurrency) : totalUSD;
 }
 
 /**
@@ -512,8 +520,8 @@ export function calculateProjectCostsByName(
 ): Record<string, { costUSD: number; costConverted: number; formatted: string }> {
   // Group by project name and calculate USD totals first
   const projectCostsUSD = entries.reduce((acc, entry) => {
-    const projectName = entry.project_path?.split('/').pop() || 'Unknown';
-    acc[projectName] = (acc[projectName] || 0) + entry.cost_usd;
+    const projectName = entry.project_path?.split('/').pop() ?? 'Unknown';
+    acc[projectName] = (acc[projectName] ?? 0) + entry.cost_usd;
     return acc;
   }, {} as Record<string, number>);
   
@@ -591,7 +599,8 @@ export function calculatePredictiveAnalytics(recentEntries: UsageEntry[], budget
     if (!dailyData.has(date)) {
       dailyData.set(date, { cost: 0, tokens: 0 });
     }
-    const dayData = dailyData.get(date)!;
+    const dayData = dailyData.get(date);
+    if (dayData == null) return;
     dayData.cost += entry.cost_usd;
     dayData.tokens += entry.total_tokens;
   });

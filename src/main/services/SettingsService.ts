@@ -156,7 +156,7 @@ export class SettingsService {
   /**
    * Update settings
    */
-  async updateSettings(updates: Partial<AppSettings>): Promise<void> {
+  updateSettings(updates: Partial<AppSettings>): void {
     try {
       const oldSettings = { ...this.settings };
       

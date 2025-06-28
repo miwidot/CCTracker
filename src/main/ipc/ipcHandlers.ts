@@ -159,7 +159,7 @@ export function setupIpcHandlers(services: Services) {
   });
 
   // Settings handlers
-  ipcMain.handle('settings:get', async () => {
+  ipcMain.handle('settings:get', () => {
     try {
       return settingsService.getSettings();
     } catch (error) {
@@ -249,7 +249,7 @@ export function setupIpcHandlers(services: Services) {
   });
 
   // Centralized cost calculation handlers with currency support
-  ipcMain.handle('cost-calculator:dashboard-metrics', async (_, currentPeriodData: any[], previousPeriodData: any[]) => {
+  ipcMain.handle('cost-calculator:dashboard-metrics', async (_, currentPeriodData: unknown[], previousPeriodData: unknown[]) => {
     try {
       const { calculateDashboardMetrics } = await import('../services/CostCalculatorService');
       return calculateDashboardMetrics(currentPeriodData, previousPeriodData);
@@ -259,7 +259,7 @@ export function setupIpcHandlers(services: Services) {
     }
   });
   
-  ipcMain.handle('cost-calculator:dashboard-metrics-with-currency', async (_, currentPeriodData: any[], previousPeriodData: any[], targetCurrency: string, rates: any) => {
+  ipcMain.handle('cost-calculator:dashboard-metrics-with-currency', async (_, currentPeriodData: unknown[], previousPeriodData: unknown[], targetCurrency: string, rates: unknown) => {
     try {
       const { setCurrencyRates, calculateDashboardMetricsWithCurrency } = await import('../services/CostCalculatorService');
       setCurrencyRates(rates);
@@ -270,7 +270,7 @@ export function setupIpcHandlers(services: Services) {
     }
   });
   
-  ipcMain.handle('cost-calculator:project-costs', async (_, entries: any[], targetCurrency: string, rates: any) => {
+  ipcMain.handle('cost-calculator:project-costs', async (_, entries: unknown[], targetCurrency: string, rates: unknown) => {
     try {
       const { setCurrencyRates, calculateProjectCostsByName } = await import('../services/CostCalculatorService');
       setCurrencyRates(rates);
@@ -281,7 +281,7 @@ export function setupIpcHandlers(services: Services) {
     }
   });
 
-  ipcMain.handle('cost-calculator:total-cost', async (_, entries: any[], targetCurrency?: string) => {
+  ipcMain.handle('cost-calculator:total-cost', async (_, entries: unknown[], targetCurrency?: string) => {
     try {
       const { calculateTotalCost } = await import('../services/CostCalculatorService');
       return calculateTotalCost(entries, targetCurrency);
@@ -291,7 +291,7 @@ export function setupIpcHandlers(services: Services) {
     }
   });
 
-  ipcMain.handle('cost-calculator:model-breakdown', async (_, entries: any[]) => {
+  ipcMain.handle('cost-calculator:model-breakdown', async (_, entries: unknown[]) => {
     try {
       const { calculateModelBreakdown } = await import('../services/CostCalculatorService');
       return calculateModelBreakdown(entries);

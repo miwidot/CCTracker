@@ -1,8 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { 
-  IPCChannels, 
   UsageEntry, 
-  SessionStats, 
   AppSettings, 
   CurrencyRates,
   FileSystemEvent,

@@ -103,30 +103,36 @@ export class CurrencyService {
   /**
    * Validate cached data structure
    */
-  private isValidCacheData(data: any): data is CurrencyCache {
+  private isValidCacheData(data: unknown): data is CurrencyCache {
     return (
-      data &&
+      data != null &&
       typeof data === 'object' &&
-      data.rates &&
-      typeof data.rates === 'object' &&
-      typeof data.lastUpdated === 'number' &&
-      typeof data.ttl === 'number' &&
-      this.isValidRatesData(data.rates)
+      'rates' in data &&
+      (data as Record<string, unknown>).rates != null &&
+      typeof (data as Record<string, unknown>).rates === 'object' &&
+      'lastUpdated' in data &&
+      typeof (data as Record<string, unknown>).lastUpdated === 'number' &&
+      'ttl' in data &&
+      typeof (data as Record<string, unknown>).ttl === 'number' &&
+      this.isValidRatesData((data as Record<string, unknown>).rates)
     );
   }
 
   /**
    * Validate currency rates data
    */
-  private isValidRatesData(rates: any): rates is CurrencyRates {
+  private isValidRatesData(rates: unknown): rates is CurrencyRates {
     const requiredCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'MYR'];
     
     return (
-      rates &&
+      rates != null &&
       typeof rates === 'object' &&
-      requiredCurrencies.every(currency => 
-        currency in rates && typeof rates[currency] === 'number' && rates[currency] > 0
-      )
+      requiredCurrencies.every(currency => {
+        const ratesObj = rates as Record<string, unknown>;
+        return currency in ratesObj && 
+               typeof ratesObj[currency] === 'number' && 
+               (ratesObj[currency] as number) > 0;
+      })
     );
   }
 
@@ -209,19 +215,19 @@ export class CurrencyService {
       {
         name: 'exchangerate-api.com',
         url: 'https://api.exchangerate-api.com/v4/latest/USD',
-        parser: (data: any) => data.rates
+        parser: (data: Record<string, unknown>) => data.rates
       },
       // Fallback API: exchangerate.host (free, no auth)
       {
         name: 'exchangerate.host',
         url: 'https://api.exchangerate.host/latest?base=USD',
-        parser: (data: any) => data.rates
+        parser: (data: Record<string, unknown>) => data.rates
       },
       // Another fallback: freeforexapi.com (free, no auth)
       {
         name: 'freeforexapi.com',
         url: 'https://api.freeforexapi.com/v1/rates?base=USD',
-        parser: (data: any) => data.rates
+        parser: (data: Record<string, unknown>) => data.rates
       }
     ];
 
@@ -250,24 +256,25 @@ export class CurrencyService {
         const data = await response.json();
         const rates = api.parser(data);
         
-        if (!rates || typeof rates !== 'object') {
+        if (rates == null || typeof rates !== 'object') {
           throw new Error('Invalid API response format');
         }
         
         // Convert to our currency format
+        const ratesObj = rates as Record<string, number>;
         const currencyRates: CurrencyRates = {
           USD: 1.0, // USD is always 1.0 as base currency
-          EUR: rates.EUR || this.FALLBACK_RATES.EUR,
-          GBP: rates.GBP || this.FALLBACK_RATES.GBP,
-          JPY: rates.JPY || this.FALLBACK_RATES.JPY,
-          CNY: rates.CNY || this.FALLBACK_RATES.CNY,
-          MYR: rates.MYR || this.FALLBACK_RATES.MYR,
+          EUR: (typeof ratesObj.EUR === 'number' ? ratesObj.EUR : null) ?? this.FALLBACK_RATES.EUR,
+          GBP: (typeof ratesObj.GBP === 'number' ? ratesObj.GBP : null) ?? this.FALLBACK_RATES.GBP,
+          JPY: (typeof ratesObj.JPY === 'number' ? ratesObj.JPY : null) ?? this.FALLBACK_RATES.JPY,
+          CNY: (typeof ratesObj.CNY === 'number' ? ratesObj.CNY : null) ?? this.FALLBACK_RATES.CNY,
+          MYR: (typeof ratesObj.MYR === 'number' ? ratesObj.MYR : null) ?? this.FALLBACK_RATES.MYR,
         };
         
         // Validate rates are reasonable (not zero, not negative, not extreme)
         for (const [currency, rate] of Object.entries(currencyRates)) {
           if (currency === 'USD') continue;
-          if (!rate || rate <= 0 || rate > 1000) {
+          if (rate == null || rate <= 0 || rate > 1000) {
             throw new Error(`Invalid rate for ${currency}: ${rate}`);
           }
         }
@@ -329,7 +336,7 @@ export class CurrencyService {
    * Format currency amount with proper symbol and formatting
    */
   formatCurrency(amount: number, currency: keyof Omit<CurrencyRates, 'monthlyBudget'>): string {
-    const symbol = CURRENCY_SYMBOLS[currency] || currency;
+    const symbol = CURRENCY_SYMBOLS[currency] ?? currency;
     
     // Format based on currency conventions
     if (currency === 'JPY' || currency === 'CNY') {
@@ -358,12 +365,14 @@ export class CurrencyService {
    * Start periodic rate updates
    */
   private startPeriodicUpdates(): void {
-    this.updateInterval = setInterval(async () => {
-      try {
-        await this.updateRates();
-      } catch (error) {
-        console.error('Periodic rate update failed:', error);
-      }
+    this.updateInterval = setInterval(() => {
+      void (async () => {
+        try {
+          await this.updateRates();
+        } catch (error) {
+          console.error('Periodic rate update failed:', error);
+        }
+      })();
     }, this.UPDATE_INTERVAL);
   }
 

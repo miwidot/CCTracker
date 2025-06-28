@@ -38,7 +38,7 @@ export class FileMonitorService extends EventEmitter {
       for (const watchPath of pathsToWatch) {
         try {
           await fs.promises.access(watchPath);
-        } catch (error) {
+        } catch (_error) {
           console.warn(`Path does not exist or is not accessible: ${watchPath}`);
           // Create directory if it doesn't exist (for output directories)
           try {
@@ -76,9 +76,9 @@ export class FileMonitorService extends EventEmitter {
 
       // Set up event listeners
       this.watcher
-        .on('add', (filePath) => this.handleFileEvent('created', filePath))
-        .on('change', (filePath) => this.handleFileEvent('modified', filePath))
-        .on('unlink', (filePath) => this.handleFileEvent('deleted', filePath))
+        .on('add', (filePath) => void this.handleFileEvent('created', filePath))
+        .on('change', (filePath) => void this.handleFileEvent('modified', filePath))
+        .on('unlink', (filePath) => void this.handleFileEvent('deleted', filePath))
         .on('error', (error) => {
           console.error('File watcher error:', error);
           this.emit('error', error);
@@ -148,7 +148,7 @@ export class FileMonitorService extends EventEmitter {
       // Validate path exists
       try {
         await fs.promises.access(watchPath);
-      } catch (error) {
+      } catch (_error) {
         // Try to create the directory
         await fs.promises.mkdir(watchPath, { recursive: true });
       }
@@ -170,7 +170,7 @@ export class FileMonitorService extends EventEmitter {
   /**
    * Remove path from monitoring
    */
-  async removeWatchPath(watchPath: string): Promise<void> {
+  removeWatchPath(watchPath: string): void {
     try {
       if (!this.isMonitoring || !this.watcher) {
         throw new Error('File monitoring is not active');
@@ -413,7 +413,7 @@ export class FileMonitorService extends EventEmitter {
           // This will be picked up by the main process to refresh usage data
         });
         
-      } catch (error) {
+      } catch (_error) {
         console.log('Claude CLI projects directory not found, monitoring disabled');
       }
     } catch (error) {

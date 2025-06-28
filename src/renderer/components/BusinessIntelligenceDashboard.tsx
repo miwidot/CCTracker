@@ -23,16 +23,6 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  LineChart,
-  Line,
 } from 'recharts';
 import { useTranslation } from '../hooks/useTranslation';
 import { useChartTheme, getChartCSSVariables } from '../hooks/useChartTheme';
@@ -240,11 +230,11 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
     if (!biData) return;
     
     try {
-      const result = await window.electronAPI.exportBusinessReport(biData);
+      const _result = await window.electronAPI.exportBusinessReport(biData);
       setExportStatus({type: 'success', message: t('businessIntelligence.exportSuccess')});
       // Clear notification after 3 seconds
       setTimeout(() => setExportStatus({type: null, message: ''}), 3000);
-    } catch (err) {
+    } catch (_err) {
       setExportStatus({type: 'error', message: t('businessIntelligence.exportError')});
       // Clear notification after 5 seconds
       setTimeout(() => setExportStatus({type: null, message: ''}), 5000);
@@ -269,7 +259,7 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
           <ExclamationTriangleIcon className="h-12 w-12 text-[var(--color-error)] mx-auto" />
           <p className="mt-4 text-[var(--color-error)]">{error}</p>
           <button
-            onClick={loadBusinessIntelligence}
+            onClick={() => void loadBusinessIntelligence()}
             className="mt-4 px-4 py-2 bg-[var(--text-accent)] text-white rounded-lg hover:bg-opacity-90"
           >
             {t('analytics.retry')}
@@ -289,7 +279,7 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
     growth: trend.growth_rate,
   }));
 
-  const modelEfficiencyChartData = biData.model_efficiency.slice(0, 6).map(model => ({
+  const _modelEfficiencyChartData = biData.model_efficiency.slice(0, 6).map(model => ({
     name: cleanModelName(model.model),
     efficiency: model.efficiency_score,
     cost: model.totalCost,
@@ -320,14 +310,14 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
             </div>
             <div className="flex space-x-3">
               <button
-                onClick={loadBusinessIntelligence}
+                onClick={() => void loadBusinessIntelligence()}
                 className="px-4 py-2 border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] flex items-center text-[var(--text-primary)]"
               >
                 <BoltIcon className="h-4 w-4 mr-2" />
                 {t('common.refresh')}
               </button>
               <button
-                onClick={exportBusinessReport}
+                onClick={() => void exportBusinessReport()}
                 className="px-4 py-2 bg-[var(--text-accent)] text-white rounded-lg hover:bg-opacity-90 flex items-center"
               >
                 <DocumentArrowDownIcon className="h-4 w-4 mr-2" />

@@ -41,7 +41,7 @@ export const useCurrency = () => {
       }
 
       // Check if rates are available
-      if (!rates || !settings.currency) {
+      if (rates == null || settings.currency == null || settings.currency === '') {
         console.warn('Currency rates or settings not available, returning USD amount');
         return usdAmount;
       }
@@ -55,7 +55,7 @@ export const useCurrency = () => {
       const rate = rates[settings.currency as keyof CurrencyRates];
       
       // Comprehensive rate validation
-      if (rate === undefined || rate === null) {
+      if (rate == null) {
         console.error(`Currency rate not found for ${settings.currency}, falling back to USD`);
         return usdAmount;
       }

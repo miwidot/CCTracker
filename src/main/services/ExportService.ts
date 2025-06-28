@@ -2,7 +2,6 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as XLSX from 'xlsx';
 import type { UsageEntry, SessionStats, CurrencyRates, BusinessIntelligence } from '@shared/types';
-import { DateRangeStats } from '@shared/types';
 import { calculateTotalCost, calculateModelBreakdown } from './CostCalculatorService';
 
 export interface ExportOptions {
@@ -32,7 +31,7 @@ export class ExportService {
 
   constructor(exportDir: string = path.join(process.cwd(), 'exports')) {
     this.exportDir = exportDir;
-    this.ensureExportDirectory();
+    void this.ensureExportDirectory();
   }
 
   private async ensureExportDirectory(): Promise<void> {
@@ -101,7 +100,7 @@ export class ExportService {
       let csvContent = '';
 
       // Add summary if requested
-      if (options.includeSummary) {
+      if (options.includeSummary === true) {
         csvContent += this.generateCSVSummary(data);
         csvContent += '\n\n';
       }
@@ -133,9 +132,9 @@ export class ExportService {
           entry.output_tokens.toString(),
           entry.total_tokens.toString(),
           entry.cost_usd.toFixed(6),
-          this.escapeCSV(entry.session_id || ''),
-          this.escapeCSV(entry.project_path || ''),
-          this.escapeCSV(entry.conversation_id || ''),
+          this.escapeCSV(entry.session_id ?? ''),
+          this.escapeCSV(entry.project_path ?? ''),
+          this.escapeCSV(entry.conversation_id ?? ''),
         ];
         csvContent += `${row.join(',')  }\n`;
       }
@@ -170,7 +169,7 @@ export class ExportService {
     try {
       const processedData = this.processDataForExport(data, options);
       
-      const exportData: any = {
+      const exportData: Record<string, unknown> = {
         exportInfo: {
           timestamp: new Date().toISOString(),
           format: 'json',
@@ -181,7 +180,7 @@ export class ExportService {
       };
 
       // Add summary if requested
-      if (options.includeSummary) {
+      if (options.includeSummary === true) {
         exportData.summary = this.generateJSONSummary(data);
       }
 
@@ -228,10 +227,10 @@ export class ExportService {
       const workbook = XLSX.utils.book_new();
       
       // Prepare data for worksheet
-      const worksheetData: any[][] = [];
+      const worksheetData: unknown[][] = [];
       
       // Add summary section if requested
-      if (options.includeSummary) {
+      if (options.includeSummary === true) {
         worksheetData.push(['USAGE SUMMARY']);
         worksheetData.push(['Total Entries', data.length]);
         worksheetData.push(['Total Cost', `$${calculateTotalCost(data).toFixed(6)}`]);
@@ -264,9 +263,9 @@ export class ExportService {
           entry.output_tokens,
           entry.total_tokens,
           Number(entry.cost_usd.toFixed(6)),
-          entry.session_id || '',
-          entry.project_path || '',
-          entry.conversation_id || '',
+          entry.session_id ?? '',
+          entry.project_path ?? '',
+          entry.conversation_id ?? '',
         ];
         worksheetData.push(row);
       }
@@ -349,7 +348,7 @@ export class ExportService {
 `;
 
       // Add summary if requested
-      if (options.includeSummary) {
+      if (options.includeSummary === true) {
         htmlContent += `
     <div class="summary">
         <h2>Summary</h2>
@@ -387,7 +386,7 @@ export class ExportService {
                 <td>${entry.output_tokens}</td>
                 <td>${entry.total_tokens}</td>
                 <td class="cost">$${entry.cost_usd.toFixed(6)}</td>
-                <td>${this.escapeHTML(entry.session_id || 'N/A')}</td>
+                <td>${this.escapeHTML(entry.session_id ?? 'N/A')}</td>
             </tr>
 `;
       }
@@ -477,7 +476,7 @@ export class ExportService {
   /**
    * Process data before export (filtering, sorting, grouping)
    */
-  private processDataForExport(data: UsageEntry[], options: ExportOptions): UsageEntry[] {
+  private processDataForExport(data: UsageEntry[], _options: ExportOptions): UsageEntry[] {
     const processedData = [...data];
 
     // Sort by timestamp (newest first)
@@ -489,15 +488,15 @@ export class ExportService {
   /**
    * Group data by specified criteria
    */
-  private groupData(data: UsageEntry[], groupBy: string): any {
-    const grouped: any = {};
+  private groupData(data: UsageEntry[], groupBy: string): Record<string, UsageEntry[]> {
+    const grouped: Record<string, UsageEntry[]> = {};
 
     for (const entry of data) {
       let key: string;
       
       switch (groupBy) {
         case 'session':
-          key = entry.session_id || 'unknown';
+          key = entry.session_id ?? 'unknown';
           break;
         case 'model':
           key = entry.model;
@@ -539,7 +538,7 @@ export class ExportService {
   /**
    * Generate JSON summary
    */
-  private generateJSONSummary(data: UsageEntry[]): any {
+  private generateJSONSummary(data: UsageEntry[]): Record<string, unknown> {
     const totalCost = calculateTotalCost(data);
     const models = [...new Set(data.map(d => d.model))];
     const sessions = [...new Set(data.map(d => d.session_id).filter(Boolean))];
