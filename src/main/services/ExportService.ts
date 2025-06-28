@@ -69,6 +69,10 @@ export class ExportService {
         case 'json':
           content = JSON.stringify(processedData, null, 2);
           break;
+        case 'excel':
+          throw new Error('Excel export not supported in save dialog mode');
+        case 'pdf':
+          throw new Error('PDF export not supported in save dialog mode');
         default:
           throw new Error(`Unsupported export format: ${options.format}`);
       }
