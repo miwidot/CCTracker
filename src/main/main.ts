@@ -91,27 +91,56 @@ class Application {
   }
 
   private async setupServices(): Promise<void> {
-    // Initialize services with proper async setup
-    await this.settingsService.initialize();
-    await this.usageService.initialize();
-    await this.currencyService.initialize();
-    
-    // Start Claude CLI monitoring
-    await this.fileMonitorService.startClaudeCliMonitoring();
-    
-    setupIpcHandlers({
-      usageService: this.usageService,
-      fileMonitorService: this.fileMonitorService,
-      settingsService: this.settingsService,
-      currencyService: this.currencyService,
-      exportService: this.exportService,
-    });
+    try {
+      // Initialize services with proper async setup and error handling
+      console.log('Initializing settings service...');
+      await this.settingsService.initialize();
+      
+      console.log('Initializing usage service...');
+      await this.usageService.initialize();
+      
+      console.log('Initializing currency service...');
+      await this.currencyService.initialize();
+      
+      console.log('Starting file monitoring...');
+      await this.fileMonitorService.startClaudeCliMonitoring();
+      
+      console.log('Setting up IPC handlers...');
+      setupIpcHandlers({
+        usageService: this.usageService,
+        fileMonitorService: this.fileMonitorService,
+        settingsService: this.settingsService,
+        currencyService: this.currencyService,
+        exportService: this.exportService,
+      });
+      
+      console.log('Services initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize services:', error);
+      // Continue anyway - don't crash the app
+    }
   }
 
   public async initialize(): Promise<void> {
-    await app.whenReady();
-    await this.setupServices();
-    this.createWindow();
+    try {
+      console.log('Waiting for app ready...');
+      await app.whenReady();
+      
+      console.log('App ready, setting up services...');
+      await this.setupServices();
+      
+      console.log('Creating window...');
+      this.createWindow();
+      
+    } catch (error) {
+      console.error('Failed to initialize application:', error);
+      // Still try to create window even if services fail
+      try {
+        this.createWindow();
+      } catch (windowError) {
+        console.error('Failed to create window:', windowError);
+      }
+    }
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
@@ -135,7 +164,19 @@ class Application {
   }
 }
 
+// Global error handlers to prevent crashes
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Don't exit the process
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit the process
+});
+
 const application = new Application();
 application.initialize().catch((error) => {
-  log.error('Failed to initialize application', error as Error, 'Application');
+  console.error('Failed to initialize application:', error);
+  // Still try to start the app
 });
