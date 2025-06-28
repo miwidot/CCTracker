@@ -13,7 +13,7 @@
     "build:renderer": "webpack --config webpack.renderer.config.js --mode production",
     "start": "electron dist/main.js",
     "package": "electron-builder",
-    "package:mac": "electron-builder --mac",
+    "package:mac": "rm -rf dist/mac* dist/*.zip dist/*.dmg 2>/dev/null || true && electron-builder --mac",
     "package:mac:x64": "electron-builder --mac --x64",
     "package:mac:arm64": "electron-builder --mac --arm64",
     "package:linux": "electron-builder --linux",

@@ -102,9 +102,6 @@ jobs:
     needs: prepare-release
     runs-on: macos-latest
     if: ${{ github.event.inputs.build_targets != 'linux-only' }}
-    strategy:
-      matrix:
-        arch: [x64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -142,26 +139,20 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Package for macOS (${{ matrix.arch }})
+      - name: Package for macOS (Universal)
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-            npm run package:mac:arm64
-          else
-            npm run package:mac:x64
-          fi
+        run: npm run package:mac
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cctracker-mac-${{ matrix.arch }}-${{ needs.prepare-release.outputs.version }}
+          name: cctracker-mac-universal-${{ needs.prepare-release.outputs.version }}
           path: |
             dist/*.dmg
-            dist/*.zip
           retention-days: 30
 
   # Build for Linux
@@ -226,9 +217,7 @@ jobs:
         with:
           name: cctracker-linux-${{ matrix.arch }}-${{ needs.prepare-release.outputs.version }}
           path: |
-            dist/*.AppImage
             dist/*.deb
-            dist/*.rpm
             dist/*.tar.gz
           retention-days: 30
 
@@ -249,7 +238,7 @@ jobs:
       - name: Prepare release assets
         run: |
           mkdir -p release-assets
-          find artifacts -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.tar.gz" | xargs -I {} cp {} release-assets/
+          find artifacts -name "*.dmg" -o -name "*.deb" -o -name "*.tar.gz" | xargs -I {} cp {} release-assets/
           ls -la release-assets/
 
       - name: Generate changelog
@@ -270,14 +259,11 @@ jobs:
           ### 📦 Download Options
           
           **macOS:**
-          - Intel (x64): `CCTracker-mac-x64.dmg`
-          - Apple Silicon (arm64): `CCTracker-mac-arm64.dmg`
+          - Universal (Intel + Apple Silicon): `CCTracker-universal.dmg`
           
           **Linux:**
-          - Intel/AMD (x64): `CCTracker-linux-x64.AppImage`
-          - ARM64: `CCTracker-linux-arm64.AppImage`
-          - Debian/Ubuntu: `.deb` packages
-          - RedHat/Fedora: `.rpm` packages
+          - Debian/Ubuntu: `.deb` package
+          - Other distros: `.tar.gz` archive
           
           ### ⚠️ Note
           ${{ needs.prepare-release.outputs.is_nightly == 'true' && 'This is a nightly development build. Use at your own risk.' || 'This is a manual release build.' }}
