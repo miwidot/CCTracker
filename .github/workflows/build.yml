@@ -233,12 +233,35 @@ jobs:
       - name: Package for Linux DEB
         run: npm run package:linux:deb
 
+      - name: Generate Linux auto-updater metadata
+        run: |
+          # Generate latest-linux.yml for auto-updater
+          DEB_FILE=$(ls dist/*.deb | head -1)
+          DEB_NAME=$(basename "$DEB_FILE")
+          DEB_SIZE=$(stat -c%s "$DEB_FILE")
+          DEB_SHA512=$(sha512sum "$DEB_FILE" | cut -d' ' -f1)
+          
+          cat > dist/latest-linux.yml << EOF
+          version: ${{ needs.prepare-release.outputs.version }}
+          files:
+            - url: ${DEB_NAME}
+              sha512: ${DEB_SHA512}
+              size: ${DEB_SIZE}
+          path: ${DEB_NAME}
+          sha512: ${DEB_SHA512}
+          releaseDate: $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")
+          EOF
+          
+          echo "Generated latest-linux.yml:"
+          cat dist/latest-linux.yml
+
       - name: Upload Linux DEB artifacts
         uses: actions/upload-artifact@v4
         with:
           name: cctracker-linux-deb-${{ needs.prepare-release.outputs.version }}
           path: |
             dist/*.deb
+            dist/latest-linux.yml
           retention-days: 30
 
   # Build for Linux TAR.GZ (Universal Linux)
