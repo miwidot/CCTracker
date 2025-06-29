@@ -1,0 +1,50 @@
+{
+  "extends": null,
+  "appId": "com.costtracker.app",
+  "productName": "CCTracker",
+  "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/mac*",
+    "!dist/*.zip",
+    "!dist/*.dmg",
+    "!dist/*.blockmap",
+    "!dist/*.deb",
+    "!dist/*.tar.gz",
+    "!dist/*unpacked",
+    "!dist/builder-*",
+    "!dist/latest*",
+    "!dist/.icon-*"
+  ],
+  "compression": "maximum",
+  "removePackageScripts": true,
+  "icon": "assets/icons/icon.png",
+  "asarUnpack": [
+    "**/.icon-*"
+  ],
+  "mac": {
+    "category": "public.app-category.productivity",
+    "target": [
+      {
+        "target": "zip",
+        "arch": [
+          "universal"
+        ]
+      }
+    ],
+    "identity": null,
+    "gatekeeperAssess": false,
+    "singleArchFiles": "*",
+    "darkModeSupport": true,
+    "type": "distribution",
+    "icon": "assets/icons/icon.png"
+  },
+  "publish": {
+    "provider": "github",
+    "owner": "miwi-fbsd",
+    "repo": "CCTracker"
+  }
+}
