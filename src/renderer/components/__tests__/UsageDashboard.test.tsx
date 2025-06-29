@@ -600,11 +600,11 @@ describe('UsageDashboard', () => {
       renderWithProviders(<UsageDashboard />);
 
       await waitFor(() => {
-        expect(screen.getByText('charts.costOverTime')).toBeInTheDocument();
+        expect(screen.getByText('📈 Daily Spending Analysis')).toBeInTheDocument();
       });
 
       // Should render chart titles
-      expect(screen.getByText('charts.costOverTime')).toBeInTheDocument();
+      expect(screen.getByText('📈 Daily Spending Analysis')).toBeInTheDocument();
       expect(screen.getByText('charts.tokenUsageByModel')).toBeInTheDocument();
       expect(screen.getByText('charts.costDistribution')).toBeInTheDocument();
       
