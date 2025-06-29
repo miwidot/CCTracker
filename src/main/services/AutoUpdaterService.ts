@@ -181,11 +181,23 @@ export class AutoUpdaterService {
       return;
     }
 
+    // Provide user-friendly error messages for common issues
+    let userMessage = 'An error occurred while checking for updates.';
+    let userDetail = error.message;
+
+    if (error.message.includes('404') && error.message.includes('latest-mac.yml')) {
+      userMessage = 'Update check temporarily unavailable.';
+      userDetail = 'The update service is currently unavailable. Please try again later or check for updates manually.';
+    } else if (error.message.includes('network') || error.message.includes('ENOTFOUND')) {
+      userMessage = 'Network connection issue.';
+      userDetail = 'Unable to connect to the update server. Please check your internet connection.';
+    }
+
     await dialog.showMessageBox(this.mainWindow, {
       type: 'error',
       title: 'Update Error',
-      message: 'An error occurred while checking for updates.',
-      detail: error.message,
+      message: userMessage,
+      detail: userDetail,
       buttons: ['OK']
     });
   }
