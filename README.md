@@ -1,10 +1,10 @@
-# CCTracker - Claude API Cost Monitoring Tool
+# CCTracker - Claude Code CLI Cost Monitoring Tool
 
 <div align="center">
 
 ![CCTracker Logo](https://via.placeholder.com/200x100/6366f1/ffffff?text=CCTracker)
 
-**Professional Claude API usage monitoring and cost analytics**
+**Professional Claude Code CLI usage monitoring and cost analytics**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -17,11 +17,13 @@
 
 ## Overview
 
-CCTracker is a comprehensive desktop application for monitoring Claude API usage and costs. Built with React and Electron, it provides real-time tracking, advanced analytics, and detailed insights into your Claude API consumption patterns.
+CCTracker is a comprehensive desktop application specifically designed for monitoring **Claude Code CLI** usage and costs. Built with React and Electron, it provides real-time tracking, advanced analytics, and detailed insights into your Claude Code command-line tool consumption patterns.
+
+> **Important**: This tool monitors the **Claude Code CLI** (claude.ai/code) usage and costs, not the Claude.ai web interface. CCTracker tracks API usage from the command-line tool that developers use for coding assistance.
 
 ### 🎯 Key Benefits
 
-- **Real-time Monitoring**: Automatically tracks Claude CLI usage with live file monitoring
+- **Real-time Monitoring**: Automatically tracks Claude Code CLI usage with live file monitoring
 - **Cost Analytics**: Detailed cost breakdowns with multi-currency support (USD, EUR, GBP, JPY, CNY, MYR)
 - **Business Intelligence**: Advanced analytics with predictive insights and optimization recommendations
 - **Multi-language Support**: Available in 6 languages (English, German, French, Spanish, Japanese, Chinese)
@@ -30,10 +32,10 @@ CCTracker is a comprehensive desktop application for monitoring Claude API usage
 ## Features
 
 ### 📊 **Dashboard & Analytics**
-- **Real-time Usage Tracking**: Monitor Claude API calls as they happen
+- **Real-time Usage Tracking**: Monitor Claude Code CLI API calls as they happen
 - **Cost Breakdown**: Detailed analysis by model, project, and time period
 - **Token Analytics**: Input/output token tracking with cache optimization metrics
-- **Session Management**: Track conversation sessions and their efficiency
+- **Session Management**: Track coding sessions and their efficiency
 - **Project-level Analytics**: Drill down into specific project usage patterns
 
 ### 💰 **Cost Management**
@@ -69,8 +71,8 @@ CCTracker is a comprehensive desktop application for monitoring Claude API usage
 ### Prerequisites
 
 - **Node.js**: Version 18.0 or higher
-- **Claude CLI**: Installed and configured for API access
-- **Operating System**: macOS 10.14+, Windows 10+, or Linux (Ubuntu 18.04+)
+- **Claude Code CLI**: Installed and configured for API access ([claude.ai/code](https://claude.ai/code))
+- **Operating System**: macOS 10.14+ or Linux (Ubuntu 18.04+)
 
 ### Quick Start
 
@@ -105,7 +107,6 @@ npm run package
 # Build for specific platforms
 npm run package:mac      # macOS (Universal)
 npm run package:linux    # Linux (x64)
-npm run package:windows  # Windows (x64)
 ```
 
 ## Usage
@@ -114,7 +115,7 @@ npm run package:windows  # Windows (x64)
 
 1. **Launch CCTracker**: Open the application after installation
 2. **Configure Settings**: Set your preferred language, theme, and currency
-3. **Start Claude CLI**: Use Claude CLI normally - CCTracker automatically detects usage
+3. **Start Claude Code CLI**: Use Claude Code CLI normally - CCTracker automatically detects usage
 4. **Monitor Usage**: View real-time updates in the dashboard
 
 ### Core Workflows
@@ -141,10 +142,10 @@ npm run package:windows  # Windows (x64)
 
 ### Configuration
 
-CCTracker automatically detects Claude CLI configuration. For manual setup:
+CCTracker automatically detects Claude Code CLI configuration. For manual setup:
 
 1. **Settings Panel**: Access via the gear icon in the header
-2. **Data Location**: CCTracker monitors `~/.claude/projects/` by default
+2. **Data Location**: CCTracker monitors `~/.claude/projects/` by default (Claude Code CLI log files)
 3. **Currency Rates**: Automatically updated with live exchange rates
 4. **Themes & Language**: Customize appearance and localization
 
@@ -164,7 +165,7 @@ CCTracker automatically detects Claude CLI configuration. For manual setup:
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Claude CLI    │───▶│   File System   │───▶│   CCTracker     │
+│ Claude Code CLI │───▶│   File System   │───▶│   CCTracker     │
 │   (JSONL logs)  │    │   Monitoring    │    │   Dashboard     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                               │
@@ -175,7 +176,7 @@ CCTracker automatically detects Claude CLI configuration. For manual setup:
                     └─────────────────┘
 ```
 
-- **File Monitoring**: Real-time JSONL file parsing from Claude CLI
+- **File Monitoring**: Real-time JSONL file parsing from Claude Code CLI
 - **Cost Calculation**: Accurate pricing with cache token optimization
 - **Data Processing**: In-memory caching with persistent storage
 - **IPC Communication**: Secure bridge between main and renderer processes
@@ -268,10 +269,10 @@ CCTracker/
 
 ### Common Issues
 
-**Q: CCTracker not detecting Claude CLI usage**
-- Verify Claude CLI is installed and configured
-- Check that JSONL logging is enabled in Claude CLI
-- Ensure CCTracker has file system permissions
+**Q: CCTracker not detecting Claude Code CLI usage**
+- Verify Claude Code CLI is installed and configured ([claude.ai/code](https://claude.ai/code))
+- Check that JSONL logging is enabled in Claude Code CLI
+- Ensure CCTracker has file system permissions to read `~/.claude/projects/`
 
 **Q: Cost calculations seem incorrect**
 - Verify currency exchange rates are up to date
@@ -305,7 +306,7 @@ CCTracker/
   - Integration with project management tools
 
 - **🚀 v2.0** (Q4 2024)
-  - Multi-AI provider support (OpenAI, Anthropic, etc.)
+  - Enhanced Claude Code CLI integration
   - Advanced machine learning insights
   - Cloud sync option (optional)
 
@@ -332,7 +333,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Built with ❤️ for the Claude AI community**
+**Built with ❤️ for the Claude Code CLI community**
 
 [⭐ Star this repo](https://github.com/yourusername/CCTracker) if you find it helpful!
 
