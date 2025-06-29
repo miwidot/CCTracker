@@ -353,6 +353,17 @@ export class UsageService {
         if (new Date(entry.timestamp) > new Date(session.end_time)) {
           session.end_time = entry.timestamp;
         }
+        
+        // Debug logging for large sessions with same start/end time
+        if (session.message_count > 10 && session.start_time === session.end_time) {
+          console.log(`UsageService: Large session with identical start/end times`, {
+            session_id: session.session_id,
+            message_count: session.message_count,
+            start_time: session.start_time,
+            end_time: session.end_time,
+            current_entry_timestamp: entry.timestamp
+          });
+        }
       });
 
       return {
@@ -400,6 +411,18 @@ export class UsageService {
         message_count: sessionEntries.length,
         model: sessionEntries[0].model, // Use first model as primary
       };
+
+      // Debug logging for sessions with many messages but same start/end time
+      if (stats.message_count > 10 && stats.start_time === stats.end_time) {
+        console.log(`getSessionStats: Large session with identical start/end times`, {
+          session_id: sessionId,
+          message_count: stats.message_count,
+          start_time: stats.start_time,
+          end_time: stats.end_time,
+          timestamps_sample: sessionEntries.slice(0, 5).map(e => e.timestamp),
+          all_same: sessionEntries.every(e => e.timestamp === sessionEntries[0].timestamp)
+        });
+      }
 
       this.sessionCache.set(sessionId, stats);
       return stats;

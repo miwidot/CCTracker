@@ -72,7 +72,7 @@ describe('UsageService', () => {
           content: 'Test response content'
         },
         requestId: 'req-123',
-        version: '1.0.0'
+        version: '1.0.1'
       });
 
       const result = usageService.parseJSONLLine(jsonlLine);
@@ -120,7 +120,7 @@ describe('UsageService', () => {
           role: 'user',
           content: 'User message content'
         },
-        version: '1.0.0'
+        version: '1.0.1'
       });
 
       const result = usageService.parseJSONLLine(userJsonl);
@@ -152,7 +152,7 @@ describe('UsageService', () => {
             content: 'Response 1'
           },
           requestId: 'req-1',
-          version: '1.0.0'
+          version: '1.0.1'
         }),
         JSON.stringify({
           uuid: 'test-uuid-2',
@@ -167,7 +167,7 @@ describe('UsageService', () => {
             content: 'Response 2'
           },
           requestId: 'req-2',
-          version: '1.0.0'
+          version: '1.0.1'
         })
       ].join('\n');
       
@@ -212,7 +212,7 @@ describe('UsageService', () => {
             content: 'Response 1'
           },
           requestId: 'req-1',
-          version: '1.0.0'
+          version: '1.0.1'
         }),
         JSON.stringify({
           uuid: 'test-uuid-2',
@@ -227,7 +227,7 @@ describe('UsageService', () => {
             content: 'Response 2'
           },
           requestId: 'req-2',
-          version: '1.0.0'
+          version: '1.0.1'
         })
       ].join('\n');
       

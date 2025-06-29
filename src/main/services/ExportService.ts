@@ -848,7 +848,7 @@ export class ExportService {
         metadata: {
           data_points_analyzed: data.data_points_analyzed,
           export_timestamp: new Date().toISOString(),
-          report_version: "1.0.0"
+          report_version: "1.0.1"
         }
       };
 
