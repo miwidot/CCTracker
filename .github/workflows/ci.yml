@@ -130,7 +130,9 @@ jobs:
           name: macos-build
           path: |
             dist/*.dmg
+            dist/*.dmg.blockmap
             dist/*.zip
+            dist/latest-mac.yml  # Required for auto-updater functionality
           retention-days: 7
           
       - name: Upload build artifacts (Linux)
@@ -141,6 +143,7 @@ jobs:
           path: |
             dist/*.deb
             dist/*.tar.gz
+            dist/latest-linux.yml  # Required for auto-updater functionality
           retention-days: 7
 
   # ============================================================================
