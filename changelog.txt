@@ -1,3 +1,22 @@
+2025-06-29 23:45:12 +08 - VERSION 1.0.1 RELEASE PREPARATION: Complete feature branch ready for merge
+- SUMMARY: Major UX improvements, critical bug fixes, and comprehensive internationalization
+- SCOPE: Session duration fixes, translation completeness, chart UX improvements, version consistency
+
+RELEASE HIGHLIGHTS:
+• FIXED CRITICAL BUG: Recent Sessions card showing "0m" duration for all sessions
+• FIXED TRANSLATION GAPS: Complete German/Spanish/French/Japanese/Chinese coverage
+• IMPROVED CHART UX: Clean model names in charts (e.g., "sonnet" instead of "claude-sonnet-4-20250514")
+• CONSISTENT VERSIONING: All components updated to v1.0.1
+
+TECHNICAL ACHIEVEMENTS:
+• Root cause analysis and fix of session duration calculation in UsageDataContext
+• Comprehensive translation key coverage for Business Intelligence anomaly types
+• Enhanced chart readability with getCoreModelName() utility function
+• Complete version bump across 13+ files including all translation files
+
+BRANCH STATUS: feature/update-1.1 ready for merge to main
+NEXT STEPS: Create PR → User approval → Merge to main → Tag v1.0.1 → GitHub release
+
 2025-06-29 23:22:33 +08 - TRANSLATION FIX: Complete internationalization coverage for all UI components
 - USER REPORT: German interface showing English text in Business Intelligence anomaly types and project details
 - AFFECTED AREAS: "HIGH • COST_SPIKE" appearing in German instead of "HOCH • KOSTENSPITZE"
