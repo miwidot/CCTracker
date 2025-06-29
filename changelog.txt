@@ -1,3 +1,28 @@
+2025-06-29 23:22:33 +08 - TRANSLATION FIX: Complete internationalization coverage for all UI components
+- USER REPORT: German interface showing English text in Business Intelligence anomaly types and project details
+- AFFECTED AREAS: "HIGH • COST_SPIKE" appearing in German instead of "HOCH • KOSTENSPITZE"
+- AFFECTED AREAS: Missing "All Sessions" and "Select date" translations across multiple languages
+- ROOT CAUSE: Missing translation keys in locale files for recently added anomaly types and UI elements
+
+COMPREHENSIVE TRANSLATION UPDATES:
+• German (de.json): Added "HOCH", "KOSTENSPITZE", "Ungewöhnlich hohe Kosten", "Alle Sitzungen"
+• Spanish (es.json): Added "ALTO", "PICO DE COSTO", "Costo inusualmente alto", "Todas las Sesiones"  
+• French (fr.json): Added "ÉLEVÉ", "PIC DE COÛT", "Coût inhabituellement élevé", "Toutes les Sessions"
+• Japanese (ja.json): Added "高", "コストスパイク", "異常に高いコスト", "すべてのセッション"
+• Chinese (zh.json): Added "高", "成本峰值", "异常高成本", "所有会话"
+
+BUSINESS INTELLIGENCE ANOMALY TYPES:
+• All languages now have complete anomalyTypes section with HIGH, MEDIUM, LOW, COST_SPIKE
+• Proper translations for "unusuallyHighCost", "vs", "avg" across all supported languages
+• Ensures Business Intelligence page displays properly localized anomaly classifications
+
+PROJECT DETAIL ENHANCEMENTS:
+• Added "allSessions" translation key for project overview session display
+• Added "selectDate" translation key for date picker components
+• Complete UI translation coverage preventing English fallbacks
+
+IMPACT: German users (and all non-English users) now see fully localized interface with no English text bleeding through
+
 2025-06-29 23:04:45 +08 - AUTO-UPDATER FIX: Resolved critical auto-updater 404 error and improved CI/CD pipeline
 - USER REPORT: Application showing "Cannot find latest-mac.yml in the latest release artifacts (404)" error preventing update checks
 - ROOT CAUSE ANALYSIS: CI/CD pipeline was only uploading .dmg/.zip files but missing critical auto-updater metadata files
