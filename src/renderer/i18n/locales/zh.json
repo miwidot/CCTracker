@@ -84,7 +84,12 @@
     "catppuccinFrappeDescription": "柔和色彩的静音变体",
     "catppuccinMacchiatoDescription": "温和色彩的中等对比度",
     "catppuccinMochaDescription": "温馨感觉的深色变体",
-    "custom": "自定义主题"
+    "custom": "自定义主题",
+    "system": "系统",
+    "systemDetected": "系统",
+    "followSystem": "跟随系统主题",
+    "followSystemDesc": "根据系统偏好自动在浅色和深色之间切换",
+    "unknown": "未知"
   },
   "navigation": {
     "dashboard": "仪表板",
@@ -127,7 +132,9 @@
     "statusCached": "⏳ 缓存数据",
     "lastUpdated": "最后更新",
     "nextUpdate": "下次更新",
-    "manual": "手动"
+    "manual": "手动",
+    "showOnboarding": "显示欢迎指南",
+    "showOnboardingDesc": "重播设置指南和功能概述"
   },
   "warnings": {
     "noDataFound": "所选日期范围内未找到使用数据。请尝试调整日期范围或检查是否已启用监控。",
@@ -246,5 +253,53 @@
   "errors": {
     "useUsageDataContext": "useUsageData必须在UsageDataProvider内使用",
     "useSettingsContext": "useSettings必须在SettingsProvider内使用"
+  },
+  "onboarding": {
+    "stepOf": "第 {{current}} 步，共 {{total}} 步",
+    "skip": "跳过",
+    "previous": "上一步",
+    "next": "下一步",
+    "getStarted": "开始使用",
+    "goToStep": "转到第 {{step}} 步",
+    "welcome": {
+      "title": "欢迎使用CCTracker",
+      "description": "您的全面Claude Code CLI成本追踪解决方案",
+      "subtitle": "通过实时监控和详细分析来跟踪、分析和优化您的Claude Code CLI API使用。",
+      "note": "CCTracker专为Claude Code CLI设计 - 这是Claude AI开发的强大命令行界面。"
+    },
+    "setup": {
+      "title": "设置和配置",
+      "description": "让我们配置CCTracker来监控您的Claude Code CLI使用情况",
+      "fileLocation": "Claude Code CLI数据位置",
+      "fileLocationDesc": "CCTracker监控由Claude Code CLI自动创建的JSONL使用文件：",
+      "prerequisite": "先决条件",
+      "prerequisiteDesc": "确保您已安装Claude Code CLI并至少运行过一次以生成初始数据文件。",
+      "steps": "设置步骤：",
+      "step1": "如果还没有安装，请从Anthropic安装Claude Code CLI",
+      "step2": "在任何项目中运行Claude Code CLI以生成初始数据文件",
+      "step3": "CCTracker将自动检测并开始监控您的使用情况"
+    },
+    "features": {
+      "title": "主要功能",
+      "description": "发现CCTracker能为您做什么",
+      "realtime": "实时监控",
+      "realtimeDesc": "在您工作时实时跟踪Claude Code CLI使用情况",
+      "analytics": "高级分析",
+      "analyticsDesc": "详细的成本分解、使用模式和项目洞察",
+      "export": "数据导出",
+      "exportDesc": "以多种格式导出使用数据用于报告",
+      "multicurrency": "多货币支持",
+      "multicurrencyDesc": "使用实时汇率以USD、EUR、GBP、JPY、CNY或MYR查看成本"
+    },
+    "complete": {
+      "title": "一切就绪！",
+      "description": "CCTracker已准备好监控您的Claude Code CLI使用情况",
+      "ready": "准备跟踪您的使用情况",
+      "readyDesc": "CCTracker现在将自动监控您的Claude Code CLI使用情况并提供实时洞察。",
+      "nextSteps": "后续步骤：",
+      "step1": "开始在您的项目中使用Claude Code CLI",
+      "step2": "查看仪表板获取实时成本跟踪",
+      "step3": "探索高级分析和导出功能"
+    }
   }
 }

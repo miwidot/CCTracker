@@ -4,6 +4,9 @@ import type { FileMonitorService } from '../services/FileMonitorService';
 import type { SettingsService } from '../services/SettingsService';
 import type { CurrencyService } from '../services/CurrencyService';
 import type { ExportService } from '../services/ExportService';
+import { autoUpdaterService } from '../services/AutoUpdaterService';
+import { fileSystemPermissionService } from '../services/FileSystemPermissionService';
+import { backupService } from '../services/BackupService';
 import type { CurrencyRates, UsageEntry } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
@@ -373,4 +376,166 @@ export function setupIpcHandlers(services: Services) {
       throw error;
     }
   });
+
+  // Auto-updater handlers
+  ipcMain.handle('updater:check-for-updates', async () => {
+    try {
+      return await autoUpdaterService.checkForUpdates();
+    } catch (error) {
+      log.ipc.error('updater:check-for-updates', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('updater:download-update', async () => {
+    try {
+      await autoUpdaterService.downloadAndInstallUpdate();
+      return true;
+    } catch (error) {
+      log.ipc.error('updater:download-update', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('updater:install-update', () => {
+    try {
+      autoUpdaterService.quitAndInstall();
+      return true;
+    } catch (error) {
+      log.ipc.error('updater:install-update', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('updater:get-status', () => {
+    try {
+      return autoUpdaterService.getStatus();
+    } catch (error) {
+      log.ipc.error('updater:get-status', error as Error);
+      throw error;
+    }
+  });
+
+  // File system permission handlers
+  ipcMain.handle('permissions:check-path', async (_, filePath: string) => {
+    try {
+      return await fileSystemPermissionService.checkPermissions(filePath);
+    } catch (error) {
+      log.ipc.error('permissions:check-path', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('permissions:check-claude-access', async () => {
+    try {
+      return await fileSystemPermissionService.validateClaudeCliAccess();
+    } catch (error) {
+      log.ipc.error('permissions:check-claude-access', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('permissions:get-health-report', async () => {
+    try {
+      const { app } = await import('electron');
+      return await fileSystemPermissionService.getFileSystemHealthReport(app.getPath('userData'));
+    } catch (error) {
+      log.ipc.error('permissions:get-health-report', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('permissions:ensure-directory', async (_, dirPath: string) => {
+    try {
+      return await fileSystemPermissionService.ensureDirectoryExists(dirPath);
+    } catch (error) {
+      log.ipc.error('permissions:ensure-directory', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('permissions:test-file-operations', async (_, dirPath: string) => {
+    try {
+      return await fileSystemPermissionService.testFileOperations(dirPath);
+    } catch (error) {
+      log.ipc.error('permissions:test-file-operations', error as Error);
+      throw error;
+    }
+  });
+
+  // Backup service handlers
+  ipcMain.handle('backup:create', async (_, options: unknown) => {
+    try {
+      return await backupService.createBackup(options as any);
+    } catch (error) {
+      log.ipc.error('backup:create', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('backup:restore', async (_, options: unknown) => {
+    try {
+      return await backupService.restoreFromBackup(options as any);
+    } catch (error) {
+      log.ipc.error('backup:restore', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('backup:list', async () => {
+    try {
+      return await backupService.getAvailableBackups();
+    } catch (error) {
+      log.ipc.error('backup:list', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('backup:delete', async (_, backupId: string) => {
+    try {
+      return await backupService.deleteBackup(backupId);
+    } catch (error) {
+      log.ipc.error('backup:delete', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('backup:status', async () => {
+    try {
+      return await backupService.getBackupStatus();
+    } catch (error) {
+      log.ipc.error('backup:status', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('backup:cleanup', async (_, maxBackups?: number) => {
+    try {
+      return await backupService.cleanupOldBackups(maxBackups);
+    } catch (error) {
+      log.ipc.error('backup:cleanup', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('backup:enable-auto', async (_, intervalHours?: number) => {
+    try {
+      backupService.enableAutoBackup(intervalHours);
+      return { success: true };
+    } catch (error) {
+      log.ipc.error('backup:enable-auto', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('backup:disable-auto', async () => {
+    try {
+      backupService.disableAutoBackup();
+      return { success: true };
+    } catch (error) {
+      log.ipc.error('backup:disable-auto', error as Error);
+      throw error;
+    }
+  });
+
 }

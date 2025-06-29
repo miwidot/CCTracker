@@ -84,7 +84,12 @@
     "catppuccinFrappeDescription": "Variante silenciada con colores tenues",
     "catppuccinMacchiatoDescription": "Contraste medio con colores suaves",
     "catppuccinMochaDescription": "Variante oscura con sensación acogedora",
-    "custom": "Tema personalizado"
+    "custom": "Tema personalizado",
+    "system": "Sistema",
+    "systemDetected": "Sistema",
+    "followSystem": "Seguir tema del sistema",
+    "followSystemDesc": "Cambiar automáticamente entre claro y oscuro según las preferencias del sistema",
+    "unknown": "desconocido"
   },
   "navigation": {
     "dashboard": "Panel",
@@ -127,7 +132,9 @@
     "statusCached": "⏳ Datos en Caché",
     "lastUpdated": "Última Actualización",
     "nextUpdate": "Próxima Actualización",
-    "manual": "Manual"
+    "manual": "Manual",
+    "showOnboarding": "Mostrar guía de bienvenida",
+    "showOnboardingDesc": "Reproducir la guía de configuración y resumen de funciones"
   },
   "warnings": {
     "noDataFound": "No se encontraron datos de uso para el rango de fechas seleccionado. Intenta ajustar el rango de fechas o verifica si el monitoreo está habilitado.",
@@ -246,5 +253,53 @@
   "errors": {
     "useUsageDataContext": "useUsageData debe usarse dentro de un UsageDataProvider",
     "useSettingsContext": "useSettings debe usarse dentro de un SettingsProvider"
+  },
+  "onboarding": {
+    "stepOf": "Paso {{current}} de {{total}}",
+    "skip": "Omitir",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "getStarted": "Comenzar",
+    "goToStep": "Ir al paso {{step}}",
+    "welcome": {
+      "title": "Bienvenido a CCTracker",
+      "description": "Su solución integral de seguimiento de costos de Claude Code CLI",
+      "subtitle": "Rastree, analice y optimice su uso de la API de Claude Code CLI con monitoreo en tiempo real y análisis detallados.",
+      "note": "CCTracker está específicamente diseñado para Claude Code CLI - la poderosa interfaz de línea de comandos para el desarrollo de Claude AI."
+    },
+    "setup": {
+      "title": "Configuración e Instalación",
+      "description": "Configuremos CCTracker para monitorear su uso de Claude Code CLI",
+      "fileLocation": "Ubicación de Datos de Claude Code CLI",
+      "fileLocationDesc": "CCTracker monitorea archivos de uso JSONL creados automáticamente por Claude Code CLI:",
+      "prerequisite": "Prerrequisitos",
+      "prerequisiteDesc": "Asegúrese de tener Claude Code CLI instalado y haberlo ejecutado al menos una vez para generar archivos de datos iniciales.",
+      "steps": "Pasos de Configuración:",
+      "step1": "Instale Claude Code CLI de Anthropic si aún no lo ha hecho",
+      "step2": "Ejecute Claude Code CLI en cualquier proyecto para generar archivos de datos iniciales",
+      "step3": "CCTracker detectará automáticamente y comenzará a monitorear su uso"
+    },
+    "features": {
+      "title": "Características Principales",
+      "description": "Descubra lo que CCTracker puede hacer por usted",
+      "realtime": "Monitoreo en Tiempo Real",
+      "realtimeDesc": "Seguimiento en vivo de su uso de Claude Code CLI mientras trabaja",
+      "analytics": "Análisis Avanzados",
+      "analyticsDesc": "Desgloses detallados de costos, patrones de uso e información de proyectos",
+      "export": "Exportación de Datos",
+      "exportDesc": "Exporte sus datos de uso en múltiples formatos para informes",
+      "multicurrency": "Soporte Multi-moneda",
+      "multicurrencyDesc": "Vea costos en USD, EUR, GBP, JPY, CNY o MYR con tasas en vivo"
+    },
+    "complete": {
+      "title": "¡Todo Listo!",
+      "description": "CCTracker está listo para monitorear su uso de Claude Code CLI",
+      "ready": "Listo para Rastrear su Uso",
+      "readyDesc": "CCTracker ahora monitoreará automáticamente su uso de Claude Code CLI y proporcionará información en tiempo real.",
+      "nextSteps": "Próximos Pasos:",
+      "step1": "Comience a usar Claude Code CLI en sus proyectos",
+      "step2": "Consulte el panel para seguimiento de costos en tiempo real",
+      "step3": "Explore análisis avanzados y funciones de exportación"
+    }
   }
 }

@@ -32,10 +32,11 @@ const getLanguages = (t: (key: string) => string): Language[] => [
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onShowOnboarding: () => void;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
-  const { theme, setTheme } = useTheme();
+export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onShowOnboarding }) => {
+  const { theme, setTheme, systemTheme, followsSystemTheme, setFollowSystemTheme } = useTheme();
   const { settings, updateSettings } = useSettings();
   const { formatDateTime } = useTimeFormat();
   const { t, i18n } = useTranslation();
@@ -204,15 +205,54 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
             {/* Theme Section */}
             <div className="mb-8">
-              <h4 className="text-base font-medium text-[var(--text-primary)] mb-4">
-                {t('theme.title')}
-              </h4>
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-base font-medium text-[var(--text-primary)]">
+                  {t('theme.title')}
+                </h4>
+                {systemTheme && (
+                  <span className="text-xs text-[var(--text-secondary)] bg-[var(--bg-tertiary)] px-2 py-1 rounded">
+                    {t('theme.systemDetected')}: {systemTheme === 'dark' ? t('theme.dark') : t('theme.light')}
+                  </span>
+                )}
+              </div>
+              
+              {/* System Theme Toggle */}
+              <div className="mb-4 p-3 bg-[var(--bg-secondary)] rounded-lg">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={followsSystemTheme}
+                    onChange={(e) => setFollowSystemTheme(e.target.checked)}
+                    className="w-4 h-4 text-[var(--color-primary)] bg-[var(--bg-primary)] border-[var(--border-color)] rounded focus:ring-[var(--color-primary)]"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-[var(--text-primary)]">
+                      {t('theme.followSystem')}
+                    </span>
+                    <p className="text-xs text-[var(--text-secondary)]">
+                      {t('theme.followSystemDesc')}
+                    </p>
+                  </div>
+                </label>
+              </div>
+              
               <select
-                value={theme.name}
-                onChange={(e) => setTheme(e.target.value as keyof typeof COLOR_PALETTES)}
+                value={followsSystemTheme ? 'system' : theme.name}
+                onChange={(e) => {
+                  if (e.target.value === 'system') {
+                    setFollowSystemTheme(true);
+                  } else {
+                    setFollowSystemTheme(false);
+                    setTheme(e.target.value as keyof typeof COLOR_PALETTES);
+                  }
+                }}
+                disabled={followsSystemTheme}
                 aria-label={t('theme.title')}
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition"
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <option value="system" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">
+                  {t('theme.system')} ({systemTheme ? (systemTheme === 'dark' ? t('theme.dark') : t('theme.light')) : t('theme.unknown')})
+                </option>
                 {THEME_NAMES.map((themeName) => {
                   const themeNameStr = String(themeName);
                   const themeInfo = getThemeInfo(themeNameStr);
@@ -374,6 +414,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   <span className="text-[var(--text-secondary)]">{t('settings.currency')}:</span>
                   <span className="text-[var(--text-primary)]">{settings.currency}</span>
                 </div>
+              </div>
+              
+              {/* Show Onboarding Button */}
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    onShowOnboarding();
+                    onClose();
+                  }}
+                  className="w-full btn interactive-scale rounded-lg border-2 border-[var(--border-color)] p-3 text-center text-[var(--text-secondary)] hover:border-[var(--border-hover)] hover:bg-[var(--color-hover)] hover:text-[var(--text-primary)] theme-transition"
+                >
+                  <div className="font-medium">{t('settings.showOnboarding')}</div>
+                  <div className="text-xs opacity-75">{t('settings.showOnboardingDesc')}</div>
+                </button>
               </div>
             </div>
           </div>

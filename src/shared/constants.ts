@@ -104,7 +104,7 @@ export const SUPPORTED_LANGUAGES = {
 };
 
 export const DEFAULT_SETTINGS = {
-  theme: 'dark' as const,
+  theme: 'system' as const,
   language: 'en',
   currency: 'USD' as const,
   monitoring_enabled: true,

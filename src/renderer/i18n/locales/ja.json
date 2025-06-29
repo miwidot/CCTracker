@@ -84,7 +84,12 @@
     "catppuccinFrappeDescription": "控えめな色調のバリエーション",
     "catppuccinMacchiatoDescription": "ソフトな色合いの中程度コントラスト",
     "catppuccinMochaDescription": "居心地の良いダークバリエーション",
-    "custom": "カスタムテーマ"
+    "custom": "カスタムテーマ",
+    "system": "システム",
+    "systemDetected": "システム",
+    "followSystem": "システムテーマに従う",
+    "followSystemDesc": "システム設定に基づいてライトとダークを自動切り替え",
+    "unknown": "不明"
   },
   "navigation": {
     "dashboard": "ダッシュボード",
@@ -127,7 +132,9 @@
     "statusCached": "⏳ キャッシュデータ",
     "lastUpdated": "最終更新",
     "nextUpdate": "次回更新",
-    "manual": "手動"
+    "manual": "手動",
+    "showOnboarding": "ウェルカムガイドを表示",
+    "showOnboardingDesc": "設定ガイドと機能概要を再表示"
   },
   "warnings": {
     "noDataFound": "選択した期間の使用データが見つかりません。期間を調整するか、監視が有効になっているかご確認ください。",
@@ -246,5 +253,53 @@
   "errors": {
     "useUsageDataContext": "useUsageDataはUsageDataProvider内で使用する必要があります",
     "useSettingsContext": "useSettingsはSettingsProvider内で使用する必要があります"
+  },
+  "onboarding": {
+    "stepOf": "ステップ {{current}} / {{total}}",
+    "skip": "スキップ",
+    "previous": "戻る",
+    "next": "次へ",
+    "getStarted": "開始する",
+    "goToStep": "ステップ {{step}} へ",
+    "welcome": {
+      "title": "CCTrackerへようこそ",
+      "description": "包括的なClaude Code CLIコスト追跡ソリューション",
+      "subtitle": "リアルタイム監視と詳細な分析でClaude Code CLI APIの使用状況を追跡、分析、最適化します。",
+      "note": "CCTrackerはClaude Code CLI専用に設計されています - Claude AI開発用の強力なコマンドラインインターフェースです。"
+    },
+    "setup": {
+      "title": "セットアップと設定",
+      "description": "Claude Code CLI使用状況を監視するためのCCTrackerを設定しましょう",
+      "fileLocation": "Claude Code CLIデータの場所",
+      "fileLocationDesc": "CCTrackerは、Claude Code CLIによって自動的に作成されるJSONL使用ファイルを監視します：",
+      "prerequisite": "前提条件",
+      "prerequisiteDesc": "Claude Code CLIがインストールされており、初期データファイルを生成するために少なくとも一度実行されていることを確認してください。",
+      "steps": "セットアップ手順：",
+      "step1": "まだの場合は、AnthropicからClaude Code CLIをインストールしてください",
+      "step2": "任意のプロジェクトでClaude Code CLIを実行して初期データファイルを生成してください",
+      "step3": "CCTrackerが自動的に検出し、使用状況の監視を開始します"
+    },
+    "features": {
+      "title": "主要機能",
+      "description": "CCTrackerがあなたのためにできることを発見してください",
+      "realtime": "リアルタイム監視",
+      "realtimeDesc": "作業中のClaude Code CLI使用状況のライブ追跡",
+      "analytics": "高度な分析",
+      "analyticsDesc": "詳細なコスト分析、使用パターン、プロジェクトインサイト",
+      "export": "データエクスポート",
+      "exportDesc": "レポート用に複数の形式で使用データをエクスポート",
+      "multicurrency": "多通貨サポート",
+      "multicurrencyDesc": "USD、EUR、GBP、JPY、CNY、MYRでリアルタイムレートによるコスト表示"
+    },
+    "complete": {
+      "title": "準備完了！",
+      "description": "CCTrackerはClaude Code CLI使用状況の監視準備が整いました",
+      "ready": "使用状況追跡の準備完了",
+      "readyDesc": "CCTrackerは自動的にClaude Code CLI使用状況を監視し、リアルタイムインサイトを提供します。",
+      "nextSteps": "次のステップ：",
+      "step1": "プロジェクトでClaude Code CLIの使用を開始",
+      "step2": "リアルタイムコスト追跡のためのダッシュボードを確認",
+      "step3": "高度な分析とエクスポート機能を探索"
+    }
   }
 }

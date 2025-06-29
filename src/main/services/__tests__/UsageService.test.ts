@@ -53,31 +53,43 @@ describe('UsageService', () => {
   });
 
   describe('parseJsonlLine', () => {
-    it('parses valid legacy JSONL line correctly', () => {
+    it('parses valid Claude Code CLI JSONL line correctly', () => {
       const jsonlLine = JSON.stringify({
+        uuid: 'test-uuid-123',
+        sessionId: 'session-1',
         timestamp: '2024-01-01T00:00:00Z',
-        model: 'claude-3-5-sonnet-20241022',
-        usage: {
-          input_tokens: 100,
-          output_tokens: 50,
-          total_tokens: 150
+        cwd: '/Users/test/project',
+        type: 'assistant',
+        message: {
+          role: 'assistant',
+          model: 'claude-3-5-sonnet-20241022',
+          usage: {
+            input_tokens: 100,
+            output_tokens: 50,
+            cache_creation_input_tokens: 25,
+            cache_read_input_tokens: 10
+          },
+          content: 'Test response content'
         },
-        session_id: 'session-1'
+        requestId: 'req-123',
+        version: '1.0.0'
       });
 
       const result = usageService.parseJSONLLine(jsonlLine);
 
       expect(result).toEqual({
-        id: expect.any(String),
+        id: 'test-uuid-123',
         timestamp: '2024-01-01T00:00:00Z',
         model: 'claude-3-5-sonnet-20241022',
         input_tokens: 100,
         output_tokens: 50,
-        total_tokens: 150,
+        cache_creation_tokens: 25,
+        cache_read_tokens: 10,
+        total_tokens: 185, // 100 + 50 + 25 + 10
         cost_usd: expect.any(Number),
         session_id: 'session-1',
-        project_path: undefined,
-        conversation_id: undefined
+        project_path: '/Users/test/project',
+        conversation_id: 'req-123'
       });
     });
 
@@ -89,11 +101,29 @@ describe('UsageService', () => {
 
     it('returns null for missing required fields', () => {
       const incompleteJsonl = JSON.stringify({
-        id: 'test-id'
-        // missing other required fields
+        uuid: 'test-id'
+        // missing other required fields like timestamp, sessionId, etc.
       });
 
       const result = usageService.parseJSONLLine(incompleteJsonl);
+      expect(result).toBeNull();
+    });
+
+    it('returns null for user messages (no usage data)', () => {
+      const userJsonl = JSON.stringify({
+        uuid: 'test-uuid-123',
+        sessionId: 'session-1',
+        timestamp: '2024-01-01T00:00:00Z',
+        cwd: '/Users/test/project',
+        type: 'user',
+        message: {
+          role: 'user',
+          content: 'User message content'
+        },
+        version: '1.0.0'
+      });
+
+      const result = usageService.parseJSONLLine(userJsonl);
       expect(result).toBeNull();
     });
   });
@@ -110,16 +140,34 @@ describe('UsageService', () => {
     it('returns sorted entries by timestamp descending', async () => {
       const mockContent = [
         JSON.stringify({
+          uuid: 'test-uuid-1',
+          sessionId: 'session-1',
           timestamp: '2024-01-01T00:00:00Z',
-          model: 'claude-3-5-sonnet-20241022',
-          usage: { input_tokens: 100, output_tokens: 50, total_tokens: 150 },
-          session_id: 'session-1'
+          cwd: '/Users/test/project1',
+          type: 'assistant',
+          message: {
+            role: 'assistant',
+            model: 'claude-3-5-sonnet-20241022',
+            usage: { input_tokens: 100, output_tokens: 50 },
+            content: 'Response 1'
+          },
+          requestId: 'req-1',
+          version: '1.0.0'
         }),
         JSON.stringify({
+          uuid: 'test-uuid-2',
+          sessionId: 'session-2',
           timestamp: '2024-01-02T00:00:00Z',
-          model: 'claude-3-5-sonnet-20241022',
-          usage: { input_tokens: 200, output_tokens: 100, total_tokens: 300 },
-          session_id: 'session-2'
+          cwd: '/Users/test/project2',
+          type: 'assistant',
+          message: {
+            role: 'assistant',
+            model: 'claude-3-5-sonnet-20241022',
+            usage: { input_tokens: 200, output_tokens: 100 },
+            content: 'Response 2'
+          },
+          requestId: 'req-2',
+          version: '1.0.0'
         })
       ].join('\n');
       
@@ -152,16 +200,34 @@ describe('UsageService', () => {
     it('calculates correct stats from entries', async () => {
       const mockContent = [
         JSON.stringify({
+          uuid: 'test-uuid-1',
+          sessionId: 'session-1',
           timestamp: '2024-01-01T00:00:00Z',
-          model: 'claude-3-5-sonnet-20241022',
-          usage: { input_tokens: 100, output_tokens: 50, total_tokens: 150 },
-          session_id: 'session-1'
+          cwd: '/Users/test/project1',
+          type: 'assistant',
+          message: {
+            role: 'assistant',
+            model: 'claude-3-5-sonnet-20241022',
+            usage: { input_tokens: 100, output_tokens: 50 },
+            content: 'Response 1'
+          },
+          requestId: 'req-1',
+          version: '1.0.0'
         }),
         JSON.stringify({
+          uuid: 'test-uuid-2',
+          sessionId: 'session-2',
           timestamp: '2024-01-02T00:00:00Z',
-          model: 'claude-3-opus-20240229',
-          usage: { input_tokens: 200, output_tokens: 100, total_tokens: 300 },
-          session_id: 'session-2'
+          cwd: '/Users/test/project2',
+          type: 'assistant',
+          message: {
+            role: 'assistant',
+            model: 'claude-3-opus-20240229',
+            usage: { input_tokens: 200, output_tokens: 100 },
+            content: 'Response 2'
+          },
+          requestId: 'req-2',
+          version: '1.0.0'
         })
       ].join('\n');
       
@@ -171,7 +237,7 @@ describe('UsageService', () => {
       
       expect(stats.totalEntries).toBe(2);
       expect(stats.totalCost).toBeGreaterThan(0); // Cost will be calculated
-      expect(stats.totalTokens).toBe(450);
+      expect(stats.totalTokens).toBe(450); // 150 + 300 (input + output only, no cache tokens in this test)
       expect(stats.uniqueModels).toHaveLength(2);
       expect(stats.uniqueSessions).toBe(2);
       expect(stats.dateRange.earliest).toBe('2024-01-01T00:00:00Z');

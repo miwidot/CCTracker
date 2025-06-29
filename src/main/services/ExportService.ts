@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import type { UsageEntry, SessionStats, CurrencyRates, BusinessIntelligence } from '@shared/types';
 import { calculateTotalCost, calculateModelBreakdown } from './CostCalculatorService';
 import { log } from '@shared/utils/logger';
@@ -291,25 +291,29 @@ export class ExportService {
   }
 
   /**
-   * Export to Excel format using proper XLSX library
+   * Export to Excel format using secure ExcelJS library
    */
   private async exportToExcel(data: UsageEntry[], options: ExportOptions): Promise<ExportResult> {
     try {
       const processedData = this.processDataForExport(data, options);
       
       // Create workbook
-      const workbook = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Usage Data');
       
-      // Prepare data for worksheet
-      const worksheetData: unknown[][] = [];
+      let currentRow = 1;
       
       // Add summary section if requested
       if (options.includeSummary === true) {
-        worksheetData.push(['USAGE SUMMARY']);
-        worksheetData.push(['Total Entries', data.length]);
-        worksheetData.push(['Total Cost', `$${calculateTotalCost(data).toFixed(6)}`]);
-        worksheetData.push(['Export Date', new Date().toISOString()]);
-        worksheetData.push([]); // Empty row separator
+        worksheet.getCell('A1').value = 'USAGE SUMMARY';
+        worksheet.getCell('A1').font = { bold: true, size: 14 };
+        worksheet.getCell('A2').value = 'Total Entries';
+        worksheet.getCell('B2').value = data.length;
+        worksheet.getCell('A3').value = 'Total Cost';
+        worksheet.getCell('B3').value = `$${calculateTotalCost(data).toFixed(6)}`;
+        worksheet.getCell('A4').value = 'Export Date';
+        worksheet.getCell('B4').value = new Date().toISOString();
+        currentRow = 6; // Leave empty row after summary
       }
       
       // Add headers
@@ -325,11 +329,21 @@ export class ExportService {
         'Project Path',
         'Conversation ID',
       ];
-      worksheetData.push(headers);
+      
+      const headerRow = worksheet.getRow(currentRow);
+      headerRow.values = headers;
+      headerRow.font = { bold: true };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF4CAF50' }
+      };
+      currentRow++;
 
       // Add data rows
       for (const entry of processedData) {
-        const row = [
+        const dataRow = worksheet.getRow(currentRow);
+        dataRow.values = [
           entry.id,
           this.formatDate(entry.timestamp, options.dateFormat),
           entry.model,
@@ -341,36 +355,29 @@ export class ExportService {
           entry.project_path ?? '',
           entry.conversation_id ?? '',
         ];
-        worksheetData.push(row);
+        currentRow++;
       }
 
-      // Create worksheet from data
-      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-      
       // Set column widths for better readability
-      const columnWidths = [
-        { wch: 20 }, // ID
-        { wch: 20 }, // Timestamp
-        { wch: 25 }, // Model
-        { wch: 12 }, // Input Tokens
-        { wch: 12 }, // Output Tokens
-        { wch: 12 }, // Total Tokens
-        { wch: 12 }, // Cost USD
-        { wch: 20 }, // Session ID
-        { wch: 30 }, // Project Path
-        { wch: 20 }, // Conversation ID
+      worksheet.columns = [
+        { width: 20 }, // ID
+        { width: 20 }, // Timestamp
+        { width: 25 }, // Model
+        { width: 12 }, // Input Tokens
+        { width: 12 }, // Output Tokens
+        { width: 12 }, // Total Tokens
+        { width: 12 }, // Cost USD
+        { width: 20 }, // Session ID
+        { width: 30 }, // Project Path
+        { width: 20 }, // Conversation ID
       ];
-      worksheet['!cols'] = columnWidths;
-
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Usage Data');
       
       // Generate file
       const fileName = `usage_export_${this.getTimestamp()}.xlsx`;
       const filePath = path.join(this.exportDir, fileName);
       
       // Write workbook to file
-      XLSX.writeFile(workbook, filePath);
+      await workbook.xlsx.writeFile(filePath);
 
       const stats = await fs.stat(filePath);
       

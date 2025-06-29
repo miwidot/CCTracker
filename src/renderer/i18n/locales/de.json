@@ -84,7 +84,12 @@
     "catppuccinFrappeDescription": "Gedämpfte Variante mit subtilen Farben",
     "catppuccinMacchiatoDescription": "Mittlerer Kontrast mit sanften Farben",
     "catppuccinMochaDescription": "Dunkle Variante mit gemütlichem Gefühl",
-    "custom": "Benutzerdefiniertes Design"
+    "custom": "Benutzerdefiniertes Design",
+    "system": "System",
+    "systemDetected": "System",
+    "followSystem": "Systemdesign folgen",
+    "followSystemDesc": "Automatisch zwischen hell und dunkel wechseln basierend auf Ihren Systemeinstellungen",
+    "unknown": "unbekannt"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -127,7 +132,9 @@
     "statusCached": "⏳ Zwischengespeicherte Daten",
     "lastUpdated": "Zuletzt aktualisiert",
     "nextUpdate": "Nächste Aktualisierung",
-    "manual": "Manuell"
+    "manual": "Manuell",
+    "showOnboarding": "Willkommens-Guide anzeigen",
+    "showOnboardingDesc": "Setup-Guide und Funktionsübersicht erneut anzeigen"
   },
   "warnings": {
     "noDataFound": "Keine Nutzungsdaten für den ausgewählten Datumsbereich gefunden. Versuchen Sie, den Datumsbereich anzupassen oder prüfen Sie, ob die Überwachung aktiviert ist.",
@@ -246,5 +253,53 @@
   "errors": {
     "useUsageDataContext": "useUsageData muss innerhalb eines UsageDataProvider verwendet werden",
     "useSettingsContext": "useSettings muss innerhalb eines SettingsProvider verwendet werden"
+  },
+  "onboarding": {
+    "stepOf": "Schritt {{current}} von {{total}}",
+    "skip": "Überspringen",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "getStarted": "Loslegen",
+    "goToStep": "Zu Schritt {{step}}",
+    "welcome": {
+      "title": "Willkommen bei CCTracker",
+      "description": "Ihre umfassende Claude Code CLI Kostenverfolgungs-Lösung",
+      "subtitle": "Verfolgen, analysieren und optimieren Sie Ihre Claude Code CLI API-Nutzung mit Echtzeit-Überwachung und detaillierten Analysen.",
+      "note": "CCTracker ist speziell für Claude Code CLI entwickelt - die leistungsstarke Kommandozeilen-Schnittstelle für Claude AI-Entwicklung."
+    },
+    "setup": {
+      "title": "Einrichtung & Konfiguration",
+      "description": "Lassen Sie uns CCTracker für die Überwachung Ihrer Claude Code CLI-Nutzung konfigurieren",
+      "fileLocation": "Claude Code CLI Datenspeicherort",
+      "fileLocationDesc": "CCTracker überwacht JSONL-Nutzungsdateien, die automatisch von Claude Code CLI erstellt werden:",
+      "prerequisite": "Voraussetzungen",
+      "prerequisiteDesc": "Stellen Sie sicher, dass Sie Claude Code CLI installiert haben und es mindestens einmal ausgeführt haben, um initiale Datendateien zu generieren.",
+      "steps": "Einrichtungsschritte:",
+      "step1": "Installieren Sie Claude Code CLI von Anthropic, falls noch nicht geschehen",
+      "step2": "Führen Sie Claude Code CLI in einem beliebigen Projekt aus, um initiale Datendateien zu generieren",
+      "step3": "CCTracker erkennt automatisch und beginnt mit der Überwachung Ihrer Nutzung"
+    },
+    "features": {
+      "title": "Hauptfunktionen",
+      "description": "Entdecken Sie, was CCTracker für Sie tun kann",
+      "realtime": "Echtzeit-Überwachung",
+      "realtimeDesc": "Live-Verfolgung Ihrer Claude Code CLI-Nutzung während der Arbeit",
+      "analytics": "Erweiterte Analysen",
+      "analyticsDesc": "Detaillierte Kostenaufschlüsselungen, Nutzungsmuster und Projekteinblicke",
+      "export": "Datenexport",
+      "exportDesc": "Exportieren Sie Ihre Nutzungsdaten in mehreren Formaten für Berichte",
+      "multicurrency": "Multi-Währungsunterstützung",
+      "multicurrencyDesc": "Zeigen Sie Kosten in USD, EUR, GBP, JPY, CNY oder MYR mit Live-Kursen an"
+    },
+    "complete": {
+      "title": "Alles bereit!",
+      "description": "CCTracker ist bereit, Ihre Claude Code CLI-Nutzung zu überwachen",
+      "ready": "Bereit zur Verfolgung Ihrer Nutzung",
+      "readyDesc": "CCTracker wird nun automatisch Ihre Claude Code CLI-Nutzung überwachen und Echtzeit-Einblicke bereitstellen.",
+      "nextSteps": "Nächste Schritte:",
+      "step1": "Beginnen Sie mit der Nutzung von Claude Code CLI in Ihren Projekten",
+      "step2": "Überprüfen Sie das Dashboard für Echtzeit-Kostenverfolgung",
+      "step3": "Erkunden Sie erweiterte Analysen und Exportfunktionen"
+    }
   }
 }

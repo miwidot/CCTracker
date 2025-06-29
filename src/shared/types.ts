@@ -61,7 +61,7 @@ export interface ThemeConfig {
 }
 
 export interface AppSettings {
-  theme: ThemeConfig['name'];
+  theme: ThemeConfig['name'] | 'system';
   language: string;
   currency: keyof CurrencyRates;
   monitoring_enabled: boolean;

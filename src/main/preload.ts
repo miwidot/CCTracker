@@ -61,6 +61,12 @@ const api = {
   calculateModelBreakdown: (entries: UsageEntry[]) => 
     ipcRenderer.invoke('cost-calculator:model-breakdown', entries),
 
+  // Auto-updater methods
+  checkForUpdates: () => ipcRenderer.invoke('updater:check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('updater:download-update'),
+  installUpdate: () => ipcRenderer.invoke('updater:install-update'),
+  getUpdateStatus: () => ipcRenderer.invoke('updater:get-status'),
+
   // Event listeners
   onUsageUpdate: (callback: (data: UsageEntry[]) => void) => {
     ipcRenderer.on('usage-updated', (_, data) => callback(data));
@@ -71,6 +77,30 @@ const api = {
     ipcRenderer.on('file-system-event', (_, event) => callback(event));
     return () => ipcRenderer.removeAllListeners('file-system-event');
   },
+
+  onUpdateProgress: (callback: (progressInfo: { percent: number; transferred: number; total: number }) => void) => {
+    ipcRenderer.on('update-download-progress', (_, progressInfo) => callback(progressInfo));
+    return () => ipcRenderer.removeAllListeners('update-download-progress');
+  },
+
+  // File system permission methods
+  checkPermissions: (filePath: string) => ipcRenderer.invoke('permissions:check-path', filePath),
+  checkClaudeAccess: () => ipcRenderer.invoke('permissions:check-claude-access'),
+  getFileSystemHealthReport: () => ipcRenderer.invoke('permissions:get-health-report'),
+  ensureDirectory: (dirPath: string) => ipcRenderer.invoke('permissions:ensure-directory', dirPath),
+  testFileOperations: (dirPath: string) => ipcRenderer.invoke('permissions:test-file-operations', dirPath),
+
+  // Backup methods
+  createBackup: (options: { includeSettings: boolean; includeUsageData: boolean; includeExports: boolean; description?: string; compress: boolean }) => 
+    ipcRenderer.invoke('backup:create', options),
+  restoreFromBackup: (options: { backupId: string; restoreSettings: boolean; restoreUsageData: boolean; restoreExports: boolean; createBackupBeforeRestore: boolean }) => 
+    ipcRenderer.invoke('backup:restore', options),
+  getAvailableBackups: () => ipcRenderer.invoke('backup:list'),
+  deleteBackup: (backupId: string) => ipcRenderer.invoke('backup:delete', backupId),
+  getBackupStatus: () => ipcRenderer.invoke('backup:status'),
+  cleanupOldBackups: (maxBackups?: number) => ipcRenderer.invoke('backup:cleanup', maxBackups),
+  enableAutoBackup: (intervalHours?: number) => ipcRenderer.invoke('backup:enable-auto', intervalHours),
+  disableAutoBackup: () => ipcRenderer.invoke('backup:disable-auto'),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', api);

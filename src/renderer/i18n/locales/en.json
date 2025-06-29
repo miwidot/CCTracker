@@ -84,7 +84,12 @@
     "catppuccinFrappeDescription": "Muted variant with subdued colors",
     "catppuccinMacchiatoDescription": "Medium contrast with gentle colors",
     "catppuccinMochaDescription": "Dark variant with cozy feeling",
-    "custom": "Custom theme"
+    "custom": "Custom theme",
+    "system": "System",
+    "systemDetected": "System",
+    "followSystem": "Follow system theme",
+    "followSystemDesc": "Automatically switch between light and dark based on your system preference",
+    "unknown": "unknown"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -127,7 +132,9 @@
     "statusCached": "⏳ Cached Data",
     "lastUpdated": "Last Updated",
     "nextUpdate": "Next Update",
-    "manual": "Manual"
+    "manual": "Manual",
+    "showOnboarding": "Show Welcome Guide",
+    "showOnboardingDesc": "Replay the setup guide and feature overview"
   },
   "warnings": {
     "noDataFound": "No usage data found for the selected date range. Try adjusting the date range or check if monitoring is enabled.",
@@ -246,5 +253,53 @@
   "errors": {
     "useUsageDataContext": "useUsageData must be used within a UsageDataProvider",
     "useSettingsContext": "useSettings must be used within a SettingsProvider"
+  },
+  "onboarding": {
+    "stepOf": "Step {{current}} of {{total}}",
+    "skip": "Skip",
+    "previous": "Previous",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "goToStep": "Go to step {{step}}",
+    "welcome": {
+      "title": "Welcome to CCTracker",
+      "description": "Your comprehensive Claude Code CLI cost tracking solution",
+      "subtitle": "Track, analyze, and optimize your Claude Code CLI API usage with real-time monitoring and detailed analytics.",
+      "note": "CCTracker is specifically designed for Claude Code CLI - the powerful command-line interface for Claude AI development."
+    },
+    "setup": {
+      "title": "Setup & Configuration",
+      "description": "Let's get CCTracker configured to monitor your Claude Code CLI usage",
+      "fileLocation": "Claude Code CLI Data Location",
+      "fileLocationDesc": "CCTracker monitors JSONL usage files automatically created by Claude Code CLI:",
+      "prerequisite": "Prerequisites",
+      "prerequisiteDesc": "Make sure you have Claude Code CLI installed and have run it at least once to generate initial data files.",
+      "steps": "Setup Steps:",
+      "step1": "Install Claude Code CLI from Anthropic if you haven't already",
+      "step2": "Run Claude Code CLI in any project to generate initial data files",
+      "step3": "CCTracker will automatically detect and start monitoring your usage"
+    },
+    "features": {
+      "title": "Key Features",
+      "description": "Discover what CCTracker can do for you",
+      "realtime": "Real-time Monitoring",
+      "realtimeDesc": "Live tracking of your Claude Code CLI usage as you work",
+      "analytics": "Advanced Analytics",
+      "analyticsDesc": "Detailed cost breakdowns, usage patterns, and project insights",
+      "export": "Data Export",
+      "exportDesc": "Export your usage data in multiple formats for reporting",
+      "multicurrency": "Multi-currency Support",
+      "multicurrencyDesc": "View costs in USD, EUR, GBP, JPY, CNY, or MYR with live rates"
+    },
+    "complete": {
+      "title": "You're All Set!",
+      "description": "CCTracker is ready to monitor your Claude Code CLI usage",
+      "ready": "Ready to Track Your Usage",
+      "readyDesc": "CCTracker will now automatically monitor your Claude Code CLI usage and provide real-time insights.",
+      "nextSteps": "Next Steps:",
+      "step1": "Start using Claude Code CLI in your projects",
+      "step2": "Check the dashboard for real-time cost tracking",
+      "step3": "Explore advanced analytics and export features"
+    }
   }
 }

@@ -5,6 +5,9 @@ import { FileMonitorService } from './services/FileMonitorService';
 import { SettingsService } from './services/SettingsService';
 import { CurrencyService } from './services/CurrencyService';
 import { ExportService } from './services/ExportService';
+import { autoUpdaterService } from './services/AutoUpdaterService';
+import { fileSystemPermissionService } from './services/FileSystemPermissionService';
+import { backupService } from './services/BackupService';
 import { setupIpcHandlers } from './ipc/ipcHandlers';
 import { log } from '@shared/utils/logger';
 
@@ -92,23 +95,50 @@ class Application {
 
   private async setupServices(): Promise<void> {
     try {
+      const userDataPath = app.getPath('userData');
+      
+      // Check file system permissions first
+      log.info('Checking file system permissions', 'Application');
+      const healthReport = await fileSystemPermissionService.getFileSystemHealthReport(userDataPath);
+      
+      if (healthReport.overall === 'critical') {
+        log.error('Critical file system permission issues detected', new Error('File system access denied'), 'Application');
+        for (const recommendation of healthReport.recommendations) {
+          log.warn(recommendation, 'Application');
+        }
+      } else if (healthReport.overall === 'warning') {
+        log.warn('File system permission warnings detected', 'Application');
+        for (const recommendation of healthReport.recommendations) {
+          log.warn(recommendation, 'Application');
+        }
+      } else {
+        log.info('File system permissions are healthy', 'Application');
+      }
+      
+      // Ensure critical directories exist
+      await fileSystemPermissionService.ensureDirectoryExists(userDataPath);
+      await fileSystemPermissionService.ensureDirectoryExists(path.join(userDataPath, 'exports'));
+      
       // Initialize services with proper async setup and error handling
-      console.log('Initializing settings service...');
-      await this.settingsService.initialize(app.getPath('userData'));
+      log.info('Initializing settings service', 'Application');
+      await this.settingsService.initialize(userDataPath);
       
-      console.log('Initializing usage service...');
-      await this.usageService.initialize(app.getPath('userData'));
+      log.info('Initializing usage service', 'Application');
+      await this.usageService.initialize(userDataPath);
       
-      console.log('Initializing currency service...');
-      await this.currencyService.initialize(app.getPath('userData'));
+      log.info('Initializing currency service', 'Application');
+      await this.currencyService.initialize(userDataPath);
       
-      console.log('Starting file monitoring...');
+      log.info('Initializing backup service', 'Application');
+      await backupService.initialize(userDataPath);
+      
+      log.info('Starting file monitoring', 'Application');
       await this.fileMonitorService.startClaudeCliMonitoring();
       
       // Update export service directory  
-      this.exportService.updateExportDirectory(path.join(app.getPath('userData'), 'exports'));
+      this.exportService.updateExportDirectory(path.join(userDataPath, 'exports'));
       
-      console.log('Setting up IPC handlers...');
+      log.info('Setting up IPC handlers', 'Application');
       setupIpcHandlers({
         usageService: this.usageService,
         fileMonitorService: this.fileMonitorService,
@@ -117,45 +147,59 @@ class Application {
         exportService: this.exportService,
       });
       
-      console.log('Services initialized successfully');
+      log.info('Services initialized successfully', 'Application');
     } catch (error) {
-      console.error('Failed to initialize services:', error);
+      log.error('Failed to initialize services', error as Error, 'Application');
       // Continue anyway - don't crash the app
     }
   }
 
   public async initialize(): Promise<void> {
     try {
-      console.log('Waiting for app ready...');
+      log.info('Waiting for app ready', 'Application');
       await app.whenReady();
       
-      console.log('App ready, setting up services...');
+      log.info('App ready, setting up services', 'Application');
       await this.setupServices();
       
       // Small delay to ensure IPC handlers are fully registered
-      console.log('Waiting for IPC handlers to be ready...');
+      log.info('Waiting for IPC handlers to be ready', 'Application');
       await new Promise<void>(resolve => {
         setTimeout(() => {
           resolve();
         }, 100);
       });
       
-      console.log('Creating window...');
+      log.info('Creating window', 'Application');
       this.createWindow();
       
+      // Initialize auto-updater after window is created
+      if (this.mainWindow) {
+        autoUpdaterService.setMainWindow(this.mainWindow);
+        autoUpdaterService.initialize();
+      }
+      
+      log.info('Application initialization complete', 'Application');
+      
     } catch (error) {
-      console.error('Failed to initialize application:', error);
+      log.error('Failed to initialize application', error as Error, 'Application');
       // Still try to create window even if services fail
       try {
         this.createWindow();
+        if (this.mainWindow) {
+          autoUpdaterService.setMainWindow(this.mainWindow);
+        }
       } catch (windowError) {
-        console.error('Failed to create window:', windowError);
+        log.error('Failed to create window', windowError as Error, 'Application');
       }
     }
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
         this.createWindow();
+        if (this.mainWindow) {
+          autoUpdaterService.setMainWindow(this.mainWindow);
+        }
       }
     });
 
@@ -177,17 +221,17 @@ class Application {
 
 // Global error handlers to prevent crashes
 process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
+  log.error('Uncaught Exception', error, 'Application');
   // Don't exit the process
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+process.on('unhandledRejection', (reason, _promise) => {
+  log.error('Unhandled Rejection', reason as Error, 'Application');
   // Don't exit the process
 });
 
 const application = new Application();
 application.initialize().catch((error) => {
-  console.error('Failed to initialize application:', error);
+  log.error('Failed to initialize application', error as Error, 'Application');
   // Still try to start the app
 });

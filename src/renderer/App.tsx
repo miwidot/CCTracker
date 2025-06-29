@@ -7,6 +7,7 @@ import UsageDashboard from './components/UsageDashboard';
 import { BusinessIntelligenceDashboard } from './components/BusinessIntelligenceDashboard';
 import { SimpleUsageAnalytics } from './components/SimpleUsageAnalytics';
 import ProjectDetailView from './components/ProjectDetailView';
+import { Onboarding } from './components/Onboarding';
 import { useTranslation } from './hooks/useTranslation';
 import type { AppSettings, ProjectAnalytics } from '@shared/types';
 import { log } from '@shared/utils/logger';
@@ -24,6 +25,7 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState<CurrentPage>('dashboard');
   const [selectedProject, setSelectedProject] = useState<ProjectAnalytics | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -44,6 +46,11 @@ export const App: React.FC = () => {
         
         const appSettings = await window.electronAPI.getSettings();
         setSettings(appSettings);
+        
+        // Check if user has seen onboarding
+        const hasSeenOnboarding = localStorage.getItem('cctracker-onboarding-completed');
+        const isFirstTime = hasSeenOnboarding === null;
+        setShowOnboarding(isFirstTime);
       } catch (error) {
         log.component.error('App', error as Error);
         // Set default settings if IPC fails
@@ -56,6 +63,11 @@ export const App: React.FC = () => {
           data_retention_days: 90,
           time_format: '24h'
         });
+        
+        // For fallback settings, still check onboarding
+        const hasSeenOnboarding = localStorage.getItem('cctracker-onboarding-completed');
+        const isFirstTime = hasSeenOnboarding === null;
+        setShowOnboarding(isFirstTime);
       } finally {
         setLoading(false);
       }
@@ -98,6 +110,16 @@ export const App: React.FC = () => {
     setCurrentPage('analytics');
   };
 
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('cctracker-onboarding-completed', 'true');
+    setShowOnboarding(false);
+  };
+
+  const handleOnboardingSkip = () => {
+    localStorage.setItem('cctracker-onboarding-completed', 'true');
+    setShowOnboarding(false);
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -124,19 +146,29 @@ export const App: React.FC = () => {
     <SettingsProvider initialSettings={settings}>
       <ThemeProvider>
         <UsageDataProvider>
-          <Layout onNavigate={(page: string) => {
-            if (isValidCurrentPage(page)) {
-              // Reset project selection when navigating away from project detail
-              if (page !== 'project-detail') {
-                setSelectedProject(null);
+          <Layout 
+            onNavigate={(page: string) => {
+              if (isValidCurrentPage(page)) {
+                // Reset project selection when navigating away from project detail
+                if (page !== 'project-detail') {
+                  setSelectedProject(null);
+                }
+                setCurrentPage(page);
+              } else {
+                log.warn(`Invalid page navigation attempt: ${page}. Defaulting to dashboard.`, 'App');
+                setCurrentPage('dashboard');
               }
-              setCurrentPage(page);
-            } else {
-              log.warn(`Invalid page navigation attempt: ${page}. Defaulting to dashboard.`, 'App');
-              setCurrentPage('dashboard');
-            }
-          }} currentPage={currentPage === 'project-detail' ? 'analytics' : currentPage}>
+            }} 
+            currentPage={currentPage === 'project-detail' ? 'analytics' : currentPage}
+            onShowOnboarding={() => setShowOnboarding(true)}
+          >
             {renderCurrentPage()}
+            {showOnboarding && (
+              <Onboarding 
+                onComplete={handleOnboardingComplete}
+                onSkip={handleOnboardingSkip}
+              />
+            )}
           </Layout>
         </UsageDataProvider>
       </ThemeProvider>

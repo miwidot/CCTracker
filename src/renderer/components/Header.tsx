@@ -8,9 +8,10 @@ import { SettingsModal } from './SettingsModal';
 
 interface HeaderProps {
   onMenuClick: () => void;
+  onShowOnboarding: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onMenuClick, onShowOnboarding }) => {
   const { t } = useTranslation();
   const { refreshData, isLoading, lastUpdated } = useUsageData();
   const { theme: _theme } = useTheme();
@@ -96,6 +97,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         <SettingsModal 
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
+          onShowOnboarding={onShowOnboarding}
         />
       )}
     </>

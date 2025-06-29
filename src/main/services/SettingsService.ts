@@ -105,8 +105,9 @@ export class SettingsService {
    * Validate settings values
    */
   private validateSettings(): void {
-    // Validate theme
-    if (!THEME_NAMES.includes(this.settings.theme)) {
+    // Validate theme (include 'system' as valid option)
+    const validThemes = [...THEME_NAMES, 'system'];
+    if (!validThemes.includes(this.settings.theme as any)) {
       log.warn(`Invalid theme: ${this.settings.theme}, using default`, 'SettingsService');
       this.settings.theme = DEFAULT_SETTINGS.theme;
     }
@@ -321,7 +322,12 @@ export class SettingsService {
    * Get current theme configuration
    */
   getCurrentTheme() {
-    return getThemeConfig(this.settings.theme);
+    const theme = this.settings.theme;
+    // Handle system theme by falling back to light theme for config
+    if (theme === 'system') {
+      return getThemeConfig('light');
+    }
+    return getThemeConfig(theme);
   }
 
   /**
