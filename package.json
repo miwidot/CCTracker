@@ -1,0 +1,187 @@
+{
+  "name": "cost-tracker",
+  "version": "1.0.0",
+  "description": "Complete Claude API Cost Monitoring Tool - React/Electron",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:renderer\" \"npm run dev:main\" \"npm run dev:electron\"",
+    "dev:renderer": "webpack --config webpack.renderer.config.js --mode development --watch",
+    "dev:main": "webpack --config webpack.main.config.js --mode development --watch",
+    "dev:electron": "wait-on dist/main.js dist/index.html && cross-env NODE_ENV=development electron dist/main.js",
+    "build": "npm run build:main && npm run build:renderer",
+    "build:main": "webpack --config webpack.main.config.js --mode production",
+    "build:renderer": "webpack --config webpack.renderer.config.js --mode production",
+    "start": "electron dist/main.js",
+    "package": "electron-builder",
+    "package:mac": "rm -rf dist/mac* dist/*.zip dist/*.dmg 2>/dev/null || true && electron-builder --mac",
+    "package:mac:x64": "electron-builder --mac --x64",
+    "package:mac:arm64": "electron-builder --mac --arm64",
+    "package:linux": "electron-builder --linux",
+    "package:linux:x64": "electron-builder --linux --x64",
+    "package:linux:deb": "electron-builder --linux deb",
+    "package:linux:tar": "electron-builder --linux tar.gz",
+    "package:all": "electron-builder --mac --linux",
+    "package:mac:signed": "npm run package:mac && ./scripts/sign-app.sh",
+    "test": "jest",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "type-check": "tsc --noEmit",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "claude",
+    "cost-tracking",
+    "ai-monitoring",
+    "usage-analytics",
+    "electron",
+    "react"
+  ],
+  "author": {
+    "name": "Cost Tracker Team",
+    "email": "miwi@FreeBSD.org"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^29.5.8",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "autoprefixer": "^10.4.16",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "css-loader": "^7.1.2",
+    "electron": "^37.0.0",
+    "electron-builder": "^24.13.3",
+    "eslint": "^9.18.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "html-webpack-plugin": "^5.6.3",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "postcss": "^8.5.2",
+    "postcss-loader": "^8.1.1",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^3.4.0",
+    "ts-jest": "^29.1.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.8.3",
+    "wait-on": "^7.2.0",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@types/react-datepicker": "^6.2.0",
+    "chokidar": "^3.6.0",
+    "date-fns": "^4.1.0",
+    "electron-updater": "^6.6.2",
+    "exceljs": "^4.4.0",
+    "i18next": "^23.7.6",
+    "i18next-browser-languagedetector": "^7.2.0",
+    "react": "^18.3.1",
+    "react-datepicker": "^8.4.0",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^13.5.0",
+    "recharts": "^2.15.0",
+    "uuid": "^10.0.0"
+  },
+  "build": {
+    "appId": "com.costtracker.app",
+    "productName": "CCTracker",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist/**/*",
+      "!dist/mac*",
+      "!dist/*.zip",
+      "!dist/*.dmg",
+      "!dist/*.blockmap",
+      "!dist/*.deb",
+      "!dist/*.tar.gz",
+      "!dist/*unpacked",
+      "!dist/builder-*",
+      "!dist/latest*",
+      "!dist/.icon-*"
+    ],
+    "compression": "maximum",
+    "removePackageScripts": true,
+    "icon": "assets/icons/icon.png",
+    "asarUnpack": [
+      "**/.icon-*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "identity": null,
+      "gatekeeperAssess": false,
+      "singleArchFiles": "*",
+      "darkModeSupport": true,
+      "type": "distribution",
+      "icon": "assets/icons/icon.png"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "tar.gz",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Utility",
+      "desktop": {
+        "Name": "CCTracker",
+        "Comment": "Claude Code CLI Cost Tracking Tool",
+        "GenericName": "Cost Tracker",
+        "Keywords": "claude;ai;cost;tracking;monitoring;api;usage"
+      }
+    },
+    "deb": {
+      "depends": [
+        "gconf2",
+        "gconf-service",
+        "libnotify4",
+        "libappindicator1",
+        "libxtst6",
+        "libnss3"
+      ],
+      "priority": "optional",
+      "fpm": [
+        "--deb-field",
+        "Maintainer: CCTracker Team <miwi@FreeBSD.org>"
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "miwi-fbsd",
+      "repo": "CCTracker"
+    }
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.3.3"
+  }
+}

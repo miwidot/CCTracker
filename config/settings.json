@@ -1,0 +1,9 @@
+{
+  "theme": "light",
+  "language": "en",
+  "currency": "EUR",
+  "monitoring_enabled": true,
+  "refresh_interval": 5000,
+  "data_retention_days": 90,
+  "time_format": "24h"
+}

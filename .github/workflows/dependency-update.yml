@@ -1,0 +1,180 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Check for updates
+        id: updates
+        run: |
+          # Check for outdated packages
+          npm outdated --json > outdated.json || true
+          
+          if [ -s outdated.json ] && [ "$(cat outdated.json)" != "{}" ]; then
+            echo "updates_available=true" >> $GITHUB_OUTPUT
+            echo "Updates available:"
+            cat outdated.json | jq -r 'to_entries[] | "\(.key): \(.value.current) -> \(.value.latest)"'
+          else
+            echo "updates_available=false" >> $GITHUB_OUTPUT
+            echo "All dependencies are up to date"
+          fi
+          
+      - name: Update dependencies
+        if: steps.updates.outputs.updates_available == 'true'
+        run: |
+          # Update packages (excluding major version updates for safety)
+          npx npm-check-updates -u --target minor
+          npm install
+          
+      - name: Run tests after update
+        if: steps.updates.outputs.updates_available == 'true'
+        run: |
+          npm run type-check
+          npm run lint
+          npm test
+          
+      - name: Create Pull Request
+        if: steps.updates.outputs.updates_available == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update dependencies'
+          title: 'chore: update dependencies'
+          body: |
+            ## Automated Dependency Update
+            
+            This PR updates dependencies to their latest minor/patch versions.
+            
+            ### Changes
+            - Updated npm dependencies to latest compatible versions
+            - All tests pass after updates
+            
+            ### Safety
+            - Only minor and patch updates are included (no breaking changes)
+            - Full test suite executed before creating this PR
+            
+            ### Review Notes
+            Please review the changes and merge if everything looks good.
+            Major version updates (potential breaking changes) are excluded and need manual review.
+            
+            ---
+            *This PR was created automatically by the dependency update workflow.*
+          branch: automated/dependency-updates
+          delete-branch: true
+          
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run security audit
+        run: |
+          # Run audit and capture output
+          npm audit --audit-level=moderate --json > audit-results.json || true
+          
+          # Check if there are any vulnerabilities
+          VULN_COUNT=$(cat audit-results.json | jq '.metadata.vulnerabilities.total // 0')
+          
+          if [ "$VULN_COUNT" -gt 0 ]; then
+            echo "Security vulnerabilities found: $VULN_COUNT"
+            
+            # Try to auto-fix
+            npm audit fix --dry-run
+            
+            echo "::warning::Security vulnerabilities detected. Please review and fix manually."
+            
+            # Create an issue if vulnerabilities are found
+            echo "VULNERABILITIES_FOUND=true" >> $GITHUB_ENV
+          else
+            echo "No security vulnerabilities found"
+            echo "VULNERABILITIES_FOUND=false" >> $GITHUB_ENV
+          fi
+          
+      - name: Create security issue
+        if: env.VULNERABILITIES_FOUND == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const auditResults = JSON.parse(fs.readFileSync('audit-results.json', 'utf8'));
+            
+            const vulnerabilities = auditResults.vulnerabilities || {};
+            let issueBody = `## Security Vulnerabilities Detected\n\n`;
+            issueBody += `**Total vulnerabilities found:** ${auditResults.metadata?.vulnerabilities?.total || 0}\n\n`;
+            
+            if (Object.keys(vulnerabilities).length > 0) {
+              issueBody += `### Affected Packages\n\n`;
+              for (const [pkg, details] of Object.entries(vulnerabilities)) {
+                issueBody += `- **${pkg}**: ${details.severity} severity\n`;
+                if (details.via && details.via.length > 0) {
+                  details.via.forEach(via => {
+                    if (typeof via === 'object' && via.title) {
+                      issueBody += `  - ${via.title}\n`;
+                    }
+                  });
+                }
+              }
+            }
+            
+            issueBody += `\n### Next Steps\n\n`;
+            issueBody += `1. Run \`npm audit\` locally to see detailed information\n`;
+            issueBody += `2. Try \`npm audit fix\` to automatically fix vulnerabilities\n`;
+            issueBody += `3. For vulnerabilities that can't be auto-fixed, consider:\n`;
+            issueBody += `   - Updating to newer versions\n`;
+            issueBody += `   - Finding alternative packages\n`;
+            issueBody += `   - Implementing security mitigations\n\n`;
+            issueBody += `---\n`;
+            issueBody += `*This issue was created automatically by the security audit workflow.*`;
+            
+            // Check if a similar issue already exists
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['security', 'dependencies'],
+              state: 'open'
+            });
+            
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Security vulnerabilities detected in dependencies',
+                body: issueBody,
+                labels: ['security', 'dependencies', 'automated']
+              });
+            }
