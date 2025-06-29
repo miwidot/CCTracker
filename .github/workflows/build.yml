@@ -147,12 +147,41 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npm run package:mac
 
+      - name: Generate auto-updater metadata
+        run: |
+          # Generate latest-mac.yml for auto-updater
+          ZIP_FILE=$(ls dist/*.zip | head -1)
+          ZIP_NAME=$(basename "$ZIP_FILE")
+          ZIP_SIZE=$(stat -f%z "$ZIP_FILE")
+          ZIP_SHA512=$(shasum -a 512 "$ZIP_FILE" | cut -d' ' -f1)
+          BLOCKMAP_FILE="${ZIP_FILE}.blockmap"
+          BLOCKMAP_SIZE=$(stat -f%z "$BLOCKMAP_FILE")
+          BLOCKMAP_SHA512=$(shasum -a 512 "$BLOCKMAP_FILE" | cut -d' ' -f1)
+          
+          cat > dist/latest-mac.yml << EOF
+          version: ${{ needs.prepare-release.outputs.version }}
+          files:
+            - url: ${ZIP_NAME}
+              sha512: ${ZIP_SHA512}
+              size: ${ZIP_SIZE}
+              blockMapSize: ${BLOCKMAP_SIZE}
+          path: ${ZIP_NAME}
+          sha512: ${ZIP_SHA512}
+          releaseDate: $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")
+          EOF
+          
+          echo "Generated latest-mac.yml:"
+          cat dist/latest-mac.yml
+
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: cctracker-mac-universal-${{ needs.prepare-release.outputs.version }}
           path: |
             dist/*.dmg
+            dist/*.zip
+            dist/*.blockmap
+            dist/latest-mac.yml
           retention-days: 30
 
   # Build for Linux DEB (Debian/Ubuntu)
@@ -204,12 +233,35 @@ jobs:
       - name: Package for Linux DEB
         run: npm run package:linux:deb
 
+      - name: Generate Linux auto-updater metadata
+        run: |
+          # Generate latest-linux.yml for auto-updater
+          DEB_FILE=$(ls dist/*.deb | head -1)
+          DEB_NAME=$(basename "$DEB_FILE")
+          DEB_SIZE=$(stat -c%s "$DEB_FILE")
+          DEB_SHA512=$(sha512sum "$DEB_FILE" | cut -d' ' -f1)
+          
+          cat > dist/latest-linux.yml << EOF
+          version: ${{ needs.prepare-release.outputs.version }}
+          files:
+            - url: ${DEB_NAME}
+              sha512: ${DEB_SHA512}
+              size: ${DEB_SIZE}
+          path: ${DEB_NAME}
+          sha512: ${DEB_SHA512}
+          releaseDate: $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")
+          EOF
+          
+          echo "Generated latest-linux.yml:"
+          cat dist/latest-linux.yml
+
       - name: Upload Linux DEB artifacts
         uses: actions/upload-artifact@v4
         with:
           name: cctracker-linux-deb-${{ needs.prepare-release.outputs.version }}
           path: |
             dist/*.deb
+            dist/latest-linux.yml
           retention-days: 30
 
   # Build for Linux TAR.GZ (Universal Linux)
