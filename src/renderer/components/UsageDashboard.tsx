@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { format, subDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
-import { formatTokens, cleanModelName, calculateSessionDuration } from '@shared/utils';
+import { formatTokens, cleanModelName, calculateSessionDuration, getCoreModelName } from '@shared/utils';
 import {
   LineChart,
   Line,
@@ -482,7 +482,7 @@ const UsageDashboard: React.FC = () => {
     }, {} as Record<string, number>);
 
     const tokenChartData = Object.entries(tokensByModel).map(([model, tokens]) => ({
-      model: cleanModelName(model),
+      model: getCoreModelName(model),
       tokens,
     }));
 
