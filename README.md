@@ -167,13 +167,17 @@ CCTracker automatically detects Claude Code CLI configuration. For manual setup:
 
 ### Technology Stack
 
-- **Frontend**: React 18.3+ with TypeScript 5.8+
-- **Desktop Framework**: Electron 37.0+
-- **Build System**: Webpack 5.99+ with separate main/renderer configs
-- **Styling**: Tailwind CSS 4.1+ with CSS custom properties
-- **Charts**: Recharts 2.15+ for data visualization
-- **Internationalization**: react-i18next 15.5+
-- **Testing**: Jest 29.7+ with React Testing Library
+- **Frontend**: React 18.3.1 with TypeScript 5.8.3
+- **Desktop Framework**: Electron 37.0.0
+- **Build System**: Webpack 5.99.9 with separate main/renderer configs
+- **Styling**: Tailwind CSS 3.4.0 with CSS custom properties
+- **Charts**: Recharts 2.15.0 for data visualization
+- **Date Picker**: react-datepicker 8.4.0 with custom theming
+- **Internationalization**: react-i18next 13.5.0 with i18next 23.7.6
+- **Icons**: Heroicons 2.2.0 for UI icons
+- **Testing**: Jest 29.7.0 with React Testing Library 14.1.2
+- **File Monitoring**: Chokidar 3.6.0 for real-time file watching
+- **Data Export**: ExcelJS 4.4.0 for Excel file generation
 
 ### Architecture Overview
 
