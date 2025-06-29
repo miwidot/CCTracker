@@ -482,7 +482,7 @@ const UsageDashboard: React.FC = () => {
     }, {} as Record<string, number>);
 
     const tokenChartData = Object.entries(tokensByModel).map(([model, tokens]) => ({
-      model,
+      model: cleanModelName(model),
       tokens,
     }));
 
@@ -495,7 +495,7 @@ const UsageDashboard: React.FC = () => {
       }, {} as Record<string, number>);
 
     const costPieData = Object.entries(costByModel).map(([model, cost]) => ({
-      name: model,
+      name: cleanModelName(model),
       value: cost,
     }));
 
