@@ -67,7 +67,8 @@
     "last90Days": "Last 90 Days",
     "custom": "Custom Range",
     "from": "From",
-    "apply": "Apply"
+    "apply": "Apply",
+    "selectDate": "Select date"
   },
   "theme": {
     "title": "Theme",
@@ -232,7 +233,8 @@
     "reviewSessionStructure": "Review session structure",
     "noDataForRange": "No data for selected time range",
     "noModelData": "No model data available",
-    "failedToLoad": "Failed to load project details"
+    "failedToLoad": "Failed to load project details",
+    "allSessions": "All Sessions"
   },
   "ui": {
     "never": "Never",

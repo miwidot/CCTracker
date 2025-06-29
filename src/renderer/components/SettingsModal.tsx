@@ -4,7 +4,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTimeFormat } from '../hooks/useTimeFormat';
 import { useTranslation } from '../hooks/useTranslation';
-import i18n from '../i18n';
 import { THEME_NAMES, getThemeConfig, type COLOR_PALETTES } from '@shared/constants';
 import { log } from '@shared/utils/logger';
 import type { AppSettings } from '@shared/types';
@@ -80,7 +79,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
     if (settings.language && i18n.language !== settings.language) {
       void i18n.changeLanguage(settings.language);
     }
-  }, [settings.language]);
+  }, [settings.language, i18n]);
 
   // Handle escape key and focus trapping
   useEffect(() => {
@@ -193,11 +192,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
               </h4>
               <select
                 value={settings.language}
-                onChange={async (e) => {
+                onChange={(e) => {
                   const newLanguage = e.target.value;
                   // Update both i18n and settings
-                  await i18n.changeLanguage(newLanguage);
-                  await updateSettings({ language: newLanguage });
+                  void i18n.changeLanguage(newLanguage);
+                  void updateSettings({ language: newLanguage });
                 }}
                 aria-label={t('ui.selectLanguage')}
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent interactive-scale theme-transition"

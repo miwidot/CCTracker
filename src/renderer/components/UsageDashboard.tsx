@@ -32,6 +32,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTranslation } from '../hooks/useTranslation';
 import { useChartTheme } from '../hooks/useChartTheme';
+import { ThemedDatePicker } from './ThemedDatePicker';
 import type { UsageEntry, SessionStats } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
@@ -139,18 +140,16 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         ))}
       </div>
       <div className="flex gap-2 items-center">
-        <input
-          type="date"
-          value={format(startDate, 'yyyy-MM-dd')}
-          onChange={(e) => onDateRangeChange(startOfDay(new Date(e.target.value)), endDate)}
-          className="px-3 py-1 text-sm border border-[var(--border-color)] rounded-md bg-[var(--bg-primary)] text-[var(--text-primary)]"
+        <ThemedDatePicker
+          selected={startDate}
+          onChange={(date) => date && onDateRangeChange(startOfDay(date), endDate)}
+          placeholder={t('dateRange.from')}
         />
         <span className="text-[var(--text-secondary)]">{t('dateRange.to')}</span>
-        <input
-          type="date"
-          value={format(endDate, 'yyyy-MM-dd')}
-          onChange={(e) => onDateRangeChange(startDate, endOfDay(new Date(e.target.value)))}
-          className="px-3 py-1 text-sm border border-[var(--border-color)] rounded-md bg-[var(--bg-primary)] text-[var(--text-primary)]"
+        <ThemedDatePicker
+          selected={endDate}
+          onChange={(date) => date && onDateRangeChange(startDate, endOfDay(date))}
+          placeholder={t('dateRange.to')}
         />
       </div>
     </div>
@@ -282,9 +281,9 @@ const UsageDashboard: React.FC = () => {
   // State for centralized project costs
   const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
   
-  // State for date range filtering - default to today
+  // State for date range filtering - default to last 7 days
   const [dateRange, setDateRange] = useState({
-    start: startOfDay(new Date()),
+    start: startOfDay(subDays(new Date(), 7)),
     end: endOfDay(new Date()),
   });
   
@@ -304,7 +303,8 @@ const UsageDashboard: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   // State for cost chart view type
-  const [costChartView, setCostChartView] = useState<'daily' | 'cumulative'>('daily');
+  // Daily spending analysis state
+  const [showComparison, setShowComparison] = useState(true);
 
   // Filter data based on date range
   const filteredData = useMemo(() => {
@@ -448,10 +448,11 @@ const UsageDashboard: React.FC = () => {
     const costChartData = Object.entries(dailyStats)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, stats], index, array) => {
-        // Calculate cumulative cost
-        const cumulativeCost = array
-          .slice(0, index + 1)
-          .reduce((sum, [, s]) => sum + s.cost, 0);
+        // Calculate day-before comparison
+        const previousDay = index > 0 ? array[index - 1][1] : null;
+        const dayBeforeCost = previousDay ? previousDay.cost : 0;
+        const costChange = dayBeforeCost > 0 ? ((stats.cost - dayBeforeCost) / dayBeforeCost) * 100 : 0;
+        const costDifference = stats.cost - dayBeforeCost;
         
         // Calculate 7-day moving average
         const startIndex = Math.max(0, index - 6);
@@ -461,7 +462,9 @@ const UsageDashboard: React.FC = () => {
         return {
           date,
           dailyCost: stats.cost,
-          cumulativeCost,
+          dayBeforeCost,
+          costChange,
+          costDifference,
           avgCost,
           sessions: stats.sessions.size,
           entries: stats.entries,
@@ -562,7 +565,7 @@ const UsageDashboard: React.FC = () => {
       {/* Date Range Picker */}
       <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)] card theme-transition animate-slide-up animate-delay-100">
         <div className="flex items-center gap-2 mb-3 animate-slide-right">
-          <CalendarDaysIcon className="h-5 w-5 text-[var(--text-secondary)] theme-transition" />
+          <CalendarDaysIcon className="h-5 w-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] theme-transition" />
           <h3 className="text-lg font-semibold text-[var(--text-primary)] theme-transition">{t('dateRange.title')}</h3>
         </div>
         <DateRangePicker
@@ -742,32 +745,22 @@ const UsageDashboard: React.FC = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Enhanced Cost Analysis Chart */}
+        {/* Daily Spending Analysis Chart */}
         <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-              {costChartView === 'daily' ? 'Daily Spending' : 'Total Spending'}
+              📈 Daily Spending Analysis
             </h3>
             <div className="flex gap-2">
               <button
-                onClick={() => setCostChartView('daily')}
+                onClick={() => setShowComparison(!showComparison)}
                 className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  costChartView === 'daily'
+                  showComparison
                     ? 'bg-[var(--color-primary)] text-white'
                     : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--color-hover)]'
                 }`}
               >
-                Daily
-              </button>
-              <button
-                onClick={() => setCostChartView('cumulative')}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  costChartView === 'cumulative'
-                    ? 'bg-[var(--color-primary)] text-white'
-                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--color-hover)]'
-                }`}
-              >
-                Total
+                {showComparison ? '📊 Hide Comparison' : '📊 Show Comparison'}
               </button>
             </div>
           </div>
@@ -791,7 +784,7 @@ const UsageDashboard: React.FC = () => {
                   />
                   <Tooltip
                     content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
+                      if (active && payload?.length) {
                         const data = payload[0].payload;
                         return (
                           <div style={{
@@ -804,7 +797,15 @@ const UsageDashboard: React.FC = () => {
                             <p className="font-medium">{format(new Date(label), 'MMM dd, yyyy')}</p>
                             <div className="mt-2 space-y-1">
                               <p>💰 Daily Cost: <span className="font-medium">{formatCurrencyDetailed(data.dailyCost, 4)}</span></p>
-                              <p>📈 Total Spent: <span className="font-medium">{formatCurrencyDetailed(data.cumulativeCost, 4)}</span></p>
+                              {data.dayBeforeCost > 0 && (
+                                <>
+                                  <p>📅 Previous Day: <span className="font-medium">{formatCurrencyDetailed(data.dayBeforeCost, 4)}</span></p>
+                                  <p className={`${data.costChange >= 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                    {data.costChange >= 0 ? '📈' : '📉'} Change: <span className="font-medium">{data.costChange >= 0 ? '+' : ''}{data.costChange.toFixed(1)}%</span>
+                                    {' '}({data.costDifference >= 0 ? '+' : ''}{formatCurrencyDetailed(data.costDifference, 4)})
+                                  </p>
+                                </>
+                              )}
                               <p>📊 7-day Avg: <span className="font-medium">{formatCurrencyDetailed(data.avgCost, 4)}</span></p>
                               <p>🔧 Sessions: <span className="font-medium">{data.sessions}</span></p>
                               <p>💸 Cost/Session: <span className="font-medium">{formatCurrencyDetailed(data.costPerSession, 4)}</span></p>
@@ -815,43 +816,38 @@ const UsageDashboard: React.FC = () => {
                       return null;
                     }}
                   />
-                  {costChartView === 'daily' ? (
-                    <>
-                      <Line
-                        type="monotone"
-                        dataKey="dailyCost"
-                        stroke={chartTheme.primary}
-                        strokeWidth={3}
-                        dot={{ fill: chartTheme.primary, strokeWidth: 2, r: 4 }}
-                        activeDot={{ r: 6, stroke: chartTheme.primary, strokeWidth: 2 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="avgCost"
-                        stroke={chartTheme.secondary}
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={false}
-                      />
-                    </>
-                  ) : (
+                  <Line
+                    type="monotone"
+                    dataKey="dailyCost"
+                    stroke={chartTheme.primary}
+                    strokeWidth={3}
+                    dot={{ fill: chartTheme.primary, strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: chartTheme.primary, strokeWidth: 2 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="avgCost"
+                    stroke={chartTheme.secondary}
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={false}
+                  />
+                  {showComparison && (
                     <Line
                       type="monotone"
-                      dataKey="cumulativeCost"
-                      stroke={chartTheme.primary}
-                      strokeWidth={3}
-                      dot={{ fill: chartTheme.primary, strokeWidth: 2, r: 4 }}
-                      activeDot={{ r: 6, stroke: chartTheme.primary, strokeWidth: 2 }}
+                      dataKey="dayBeforeCost"
+                      stroke={chartTheme.info}
+                      strokeWidth={2}
+                      strokeDasharray="3 3"
+                      dot={{ fill: chartTheme.info, strokeWidth: 1, r: 3 }}
                     />
                   )}
                 </LineChart>
               </ResponsiveContainer>
               <div className="mt-3 flex justify-between text-sm text-[var(--text-secondary)]">
                 <span>
-                  {costChartView === 'daily' 
-                    ? '💡 Solid line shows daily spending, dashed line shows 7-day average'
-                    : '💡 Shows cumulative total spending over time'
-                  }
+                  💡 Solid line: daily spending | Long dash: 7-day average
+                  {showComparison && ' | Short dash: previous day comparison'}
                 </span>
               </div>
             </>

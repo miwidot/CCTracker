@@ -27,6 +27,9 @@ import {
   BeakerIcon,
   RocketLaunchIcon,
   PresentationChartLineIcon,
+  ChatBubbleLeftRightIcon,
+  TableCellsIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTranslation } from '../hooks/useTranslation';
@@ -590,6 +593,101 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* All Sessions List */}
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg border border-[var(--border-color)] mb-8">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center">
+            <ChatBubbleLeftRightIcon className="h-5 w-5 mr-2" />
+            {t('projectDetail.allSessions')} ({detailedData.sessions.length})
+          </h3>
+          {detailedData.sessions.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-[var(--border-color)]">
+                <thead className="bg-[var(--bg-secondary)]">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      {t('sessions.sessionId')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      {t('sessions.startTime')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      {t('sessions.model')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      {t('sessions.duration')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      {t('sessions.messages')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      {t('sessions.tokens')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      {t('sessions.cost')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-[var(--bg-primary)] divide-y divide-[var(--border-color)]">
+                  {detailedData.sessions
+                    .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+                    .map((session) => {
+                      const duration = Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60));
+                      return (
+                        <tr key={session.session_id} className="hover:bg-[var(--color-hover)] transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-[var(--text-primary)]">
+                            <div className="flex items-center">
+                              <ChatBubbleLeftRightIcon className="h-4 w-4 text-[var(--text-secondary)] mr-2" />
+                              {session.session_id.substring(0, 8)}...
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                            <div className="flex items-center">
+                              <ClockIcon className="h-4 w-4 text-[var(--text-secondary)] mr-2" />
+                              {format(new Date(session.start_time), 'MMM dd, HH:mm')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-primary)]">
+                              {session.model.replace('claude-', '').replace('-20250514', '')}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                            {duration > 60 ? `${Math.floor(duration / 60)}h ${duration % 60}m` : `${duration}m`}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                            <div className="flex items-center">
+                              <div className="w-2 h-2 bg-[var(--color-primary)] rounded-full mr-2" />
+                              {session.message_count}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                            <div className="flex items-center">
+                              <CpuChipIcon className="h-4 w-4 text-[var(--text-secondary)] mr-2" />
+                              {formatTokens(session.total_tokens)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex items-center">
+                              <CurrencyDollarIcon className="h-4 w-4 text-[var(--color-success)] mr-2" />
+                              <span className="text-[var(--color-success)]">
+                                {formatCurrencyDetailed(convertFromUSD(session.total_cost), 4)}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-[var(--text-secondary)]">
+              <TableCellsIcon className="h-12 w-12 mx-auto mb-2 opacity-50 text-[var(--text-muted)]" />
+              <p>{t('warnings.noSessionsFound')}</p>
+            </div>
+          )}
         </div>
 
         {/* Insights & Recommendations */}
