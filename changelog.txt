@@ -1,3 +1,28 @@
+2025-06-29 23:04:45 +08 - AUTO-UPDATER FIX: Resolved critical auto-updater 404 error and improved CI/CD pipeline
+- USER REPORT: Application showing "Cannot find latest-mac.yml in the latest release artifacts (404)" error preventing update checks
+- ROOT CAUSE ANALYSIS: CI/CD pipeline was only uploading .dmg/.zip files but missing critical auto-updater metadata files
+- IMMEDIATE FIX FOR V1.0.0:
+  * Manually uploaded missing latest-mac.yml (363 bytes) to v1.0.0 GitHub release
+  * Uploaded CCTracker-1.0.0-mac-universal.dmg.blockmap (206KB) for efficient updates
+  * Auto-updater functionality restored for existing v1.0.0 installations
+- CI/CD PIPELINE IMPROVEMENTS (.github/workflows/ci.yml):
+  * Added latest-mac.yml to macOS build artifacts upload
+  * Added *.dmg.blockmap files for efficient update patches
+  * Added latest-linux.yml for Linux auto-updater support
+  * Added comments explaining auto-updater file requirements
+- AUTO-UPDATER SERVICE ENHANCEMENTS (AutoUpdaterService.ts):
+  * Improved error handling with user-friendly messages instead of technical HTTP errors
+  * Added specific 404 error messaging: "Update check temporarily unavailable"
+  * Added network error detection with helpful guidance
+  * Better user experience during update failures
+- TECHNICAL UNDERSTANDING:
+  * electron-updater requires latest-mac.yml metadata file for version checking
+  * .blockmap files enable differential updates (faster downloads)
+  * Missing metadata files cause 404 errors and break auto-update functionality
+- FUTURE PREVENTION: All subsequent releases will automatically include complete auto-updater file set
+- BUILD VERIFICATION: ✅ Branch ready for v1.1.0 testing and PR creation
+- BRANCH: feature/update-1.1 (committed but not merged, awaiting further fixes)
+
 2025-06-29 21:46:30 +08 - PRE-RELEASE V1.0.0 READY: Complete audit and fixes for first stable release
 - USER REQUEST: "ok u as my expert anything else we need to settle fix before we release our first version" + "Fix the @README.md also add the screenshot from @img/ to have a showcase xD" - FULLY COMPLETED!
 - README.MD SHOWCASE TRANSFORMATION:
