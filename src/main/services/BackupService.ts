@@ -1,6 +1,5 @@
-import { promises as fs } from 'fs';
+import { promises as fs, createReadStream, createWriteStream } from 'fs';
 import * as path from 'path';
-import { createReadStream, createWriteStream } from 'fs';
 import { pipeline } from 'stream/promises';
 import { createGzip, createGunzip } from 'zlib';
 import { log } from '@shared/utils/logger';
@@ -44,8 +43,8 @@ export interface BackupStatus {
 }
 
 export class BackupService {
-  private userDataPath: string = '';
-  private backupDirectory: string = '';
+  private userDataPath = '';
+  private backupDirectory = '';
   private isBackupRunning = false;
   private autoBackupInterval: NodeJS.Timeout | null = null;
 
@@ -88,7 +87,7 @@ export class BackupService {
         id: backupId,
         timestamp: new Date().toISOString(),
         version: '1.0.0', // TODO: Get from package.json
-        description: options.description || 'Manual backup',
+        description: options.description ?? 'Manual backup',
         size: 0,
         files: {
           settings: false,
@@ -288,7 +287,7 @@ export class BackupService {
   /**
    * Clean up old backups based on retention policy
    */
-  async cleanupOldBackups(maxBackups: number = 10): Promise<{ deletedCount: number; error?: string }> {
+  async cleanupOldBackups(maxBackups = 10): Promise<{ deletedCount: number; error?: string }> {
     try {
       const backups = await this.getAvailableBackups();
       
@@ -318,13 +317,14 @@ export class BackupService {
   /**
    * Enable automatic backups
    */
-  enableAutoBackup(intervalHours: number = 24): void {
+  enableAutoBackup(intervalHours = 24): void {
     this.disableAutoBackup(); // Clear existing interval
     
     const intervalMs = intervalHours * 60 * 60 * 1000;
     
-    this.autoBackupInterval = setInterval(async () => {
-      log.info('Running scheduled backup', 'BackupService');
+    this.autoBackupInterval = setInterval(() => {
+      void (async () => {
+        log.info('Running scheduled backup', 'BackupService');
       
       const result = await this.createBackup({
         includeSettings: true,
@@ -341,6 +341,9 @@ export class BackupService {
       } else {
         log.error(`Scheduled backup failed: ${result.error}`, new Error(result.error), 'BackupService');
       }
+      })().catch((error) => {
+        log.error('Auto backup failed', error as Error, 'BackupService');
+      });
     }, intervalMs);
     
     log.info(`Auto backup enabled (every ${intervalHours} hours)`, 'BackupService');
@@ -371,7 +374,7 @@ export class BackupService {
       }
       
       return true;
-    } catch (error) {
+    } catch (_error) {
       log.warn('Failed to backup settings', 'BackupService');
       return false;
     }
@@ -384,7 +387,7 @@ export class BackupService {
       
       await this.copyDirectory(usageDataPath, backupUsageDataPath, compress);
       return true;
-    } catch (error) {
+    } catch (_error) {
       log.warn('Failed to backup usage data', 'BackupService');
       return false;
     }
@@ -397,7 +400,7 @@ export class BackupService {
       
       await this.copyDirectory(exportsPath, backupExportsPath, compress);
       return true;
-    } catch (error) {
+    } catch (_error) {
       log.warn('Failed to backup exports', 'BackupService');
       return false;
     }

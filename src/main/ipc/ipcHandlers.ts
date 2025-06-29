@@ -6,7 +6,7 @@ import type { CurrencyService } from '../services/CurrencyService';
 import type { ExportService } from '../services/ExportService';
 import { autoUpdaterService } from '../services/AutoUpdaterService';
 import { fileSystemPermissionService } from '../services/FileSystemPermissionService';
-import { backupService } from '../services/BackupService';
+import { backupService, type BackupOptions, type RestoreOptions } from '../services/BackupService';
 import type { CurrencyRates, UsageEntry } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
@@ -466,7 +466,7 @@ export function setupIpcHandlers(services: Services) {
   // Backup service handlers
   ipcMain.handle('backup:create', async (_, options: unknown) => {
     try {
-      return await backupService.createBackup(options as any);
+      return await backupService.createBackup(options as BackupOptions);
     } catch (error) {
       log.ipc.error('backup:create', error as Error);
       throw error;
@@ -475,7 +475,7 @@ export function setupIpcHandlers(services: Services) {
 
   ipcMain.handle('backup:restore', async (_, options: unknown) => {
     try {
-      return await backupService.restoreFromBackup(options as any);
+      return await backupService.restoreFromBackup(options as RestoreOptions);
     } catch (error) {
       log.ipc.error('backup:restore', error as Error);
       throw error;
@@ -518,7 +518,7 @@ export function setupIpcHandlers(services: Services) {
     }
   });
 
-  ipcMain.handle('backup:enable-auto', async (_, intervalHours?: number) => {
+  ipcMain.handle('backup:enable-auto', (_, intervalHours?: number) => {
     try {
       backupService.enableAutoBackup(intervalHours);
       return { success: true };
@@ -528,7 +528,7 @@ export function setupIpcHandlers(services: Services) {
     }
   });
 
-  ipcMain.handle('backup:disable-auto', async () => {
+  ipcMain.handle('backup:disable-auto', () => {
     try {
       backupService.disableAutoBackup();
       return { success: true };

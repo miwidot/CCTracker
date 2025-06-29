@@ -77,7 +77,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     // Handle 'system' theme setting
     const themeStr = String(themeValue);
     if (themeStr === 'system') {
-      return systemTheme || 'light';
+      return systemTheme ?? 'light';
     }
     
     // Check if theme value is a valid key in COLOR_PALETTES
@@ -86,7 +86,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
     
     log.warn(`Invalid theme value: ${themeValue}, falling back to system or light`, 'ThemeContext');
-    return systemTheme || 'light'; // Safe fallback to system or light
+    return systemTheme ?? 'light'; // Safe fallback to system or light
   };
   
   const validatedTheme = validateTheme(settings.theme);
@@ -107,7 +107,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       });
     } else {
       // Set to current actual theme
-      const currentTheme = systemTheme || 'light';
+      const currentTheme = systemTheme ?? 'light';
       updateSettings({ theme: currentTheme }).catch((error) => {
         log.error('Failed to disable system theme following', error as Error, 'ThemeContext');
       });
