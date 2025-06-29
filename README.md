@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![CCTracker Logo](https://via.placeholder.com/200x100/6366f1/ffffff?text=CCTracker)
+![CCTracker Dashboard](img/gh_img.png)
 
 **Professional Claude Code CLI usage monitoring and cost analytics**  
 *CCTracker = Claude Code Tracker*
@@ -12,7 +12,7 @@
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Electron](https://img.shields.io/badge/Electron-191970?logo=Electron&logoColor=white)](https://www.electronjs.org/)
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Screenshots](#screenshots) • [Contributing](#contributing)
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Screenshots](#screenshots) • [Technical Architecture](#technical-architecture) • [Contributing](#contributing)
 
 </div>
 
@@ -79,7 +79,7 @@ CCTracker (Claude Code Tracker) is a comprehensive desktop application specifica
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/CCTracker.git
+   git clone https://github.com/miwi-fbsd/CCTracker.git
    cd CCTracker
    ```
 
@@ -109,6 +109,47 @@ npm run package
 npm run package:mac      # macOS (Universal)
 npm run package:linux    # Linux (x64)
 ```
+
+## Screenshots
+
+### Dashboard Overview
+![CCTracker Main Dashboard](img/gh_img.png)
+
+The main dashboard provides real-time monitoring of your Claude Code CLI usage with:
+- **Live Cost Tracking**: Real-time cost updates with multi-currency support
+- **Usage Analytics**: Token consumption and session statistics
+- **Visual Charts**: Daily spending analysis and model usage breakdown
+- **Theme Support**: 6 professional themes including dark mode and Catppuccin variants
+- **Export Capabilities**: CSV and JSON export with comprehensive data filtering
+
+### Key Features Showcase
+
+**📊 Real-time Monitoring**
+- Automatic detection of Claude Code CLI usage
+- Live file monitoring with instant dashboard updates
+- Session tracking with detailed analytics
+
+**💰 Advanced Cost Analytics**
+- Multi-currency support (USD, EUR, GBP, JPY, CNY, MYR)
+- Cache token optimization tracking
+- Budget forecasting and trend analysis
+
+**🎨 Professional Themes**
+- Light and Dark themes
+- 4 Catppuccin theme variants (Latte, Frappé, Macchiato, Mocha)
+- System theme detection and automatic switching
+- Smooth CSS transitions between themes
+
+**🌍 Multi-language Support**
+- 6 languages: English, German, French, Spanish, Japanese, Chinese
+- Cultural localization with proper date/time formatting
+- RTL support ready for right-to-left languages
+
+**📈 Business Intelligence**
+- Project-level cost breakdown and analytics
+- Model efficiency comparison across Claude variants
+- Usage pattern analysis with optimization recommendations
+- Historical data analysis with growth projections
 
 ## Usage
 
@@ -326,9 +367,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Community
 
-- **GitHub**: [CCTracker Repository](https://github.com/yourusername/CCTracker)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/CCTracker/discussions)
-- **Issues**: [Bug Reports](https://github.com/yourusername/CCTracker/issues)
+- **GitHub**: [CCTracker Repository](https://github.com/miwi-fbsd/CCTracker)
+- **Discussions**: [GitHub Discussions](https://github.com/miwi-fbsd/CCTracker/discussions)
+- **Issues**: [Bug Reports](https://github.com/miwi-fbsd/CCTracker/issues)
 
 ---
 
@@ -336,6 +377,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ for the Claude Code CLI community**
 
-[⭐ Star this repo](https://github.com/yourusername/CCTracker) if you find it helpful!
+[⭐ Star this repo](https://github.com/miwi-fbsd/CCTracker) if you find it helpful!
 
 </div>

@@ -107,7 +107,7 @@ export class SettingsService {
   private validateSettings(): void {
     // Validate theme (include 'system' as valid option)
     const validThemes = [...THEME_NAMES, 'system'];
-    if (!validThemes.includes(this.settings.theme as string)) {
+    if (!validThemes.includes(this.settings.theme)) {
       log.warn(`Invalid theme: ${this.settings.theme}, using default`, 'SettingsService');
       this.settings.theme = DEFAULT_SETTINGS.theme;
     }
