@@ -122,34 +122,6 @@ The main dashboard provides real-time monitoring of your Claude Code CLI usage w
 - **Theme Support**: 6 professional themes including dark mode and Catppuccin variants
 - **Export Capabilities**: CSV and JSON export with comprehensive data filtering
 
-### Key Features Showcase
-
-**📊 Real-time Monitoring**
-- Automatic detection of Claude Code CLI usage
-- Live file monitoring with instant dashboard updates
-- Session tracking with detailed analytics
-
-**💰 Advanced Cost Analytics**
-- Multi-currency support (USD, EUR, GBP, JPY, CNY, MYR)
-- Cache token optimization tracking
-- Budget forecasting and trend analysis
-
-**🎨 Professional Themes**
-- Light and Dark themes
-- 4 Catppuccin theme variants (Latte, Frappé, Macchiato, Mocha)
-- System theme detection and automatic switching
-- Smooth CSS transitions between themes
-
-**🌍 Multi-language Support**
-- 6 languages: English, German, French, Spanish, Japanese, Chinese
-- Cultural localization with proper date/time formatting
-- RTL support ready for right-to-left languages
-
-**📈 Business Intelligence**
-- Project-level cost breakdown and analytics
-- Model efficiency comparison across Claude variants
-- Usage pattern analysis with optimization recommendations
-- Historical data analysis with growth projections
 
 ## Usage
 
@@ -333,24 +305,6 @@ CCTracker/
 - **File Monitoring**: Optimized for minimal CPU usage
 - **UI Rendering**: Virtualized lists for large data sets
 
-## Roadmap
-
-### Upcoming Features
-
-- **🔄 v1.1** (Q2 2024)
-  - Automated backup and restore
-  - Advanced filtering and search
-  - Custom dashboard widgets
-
-- **🎯 v1.2** (Q3 2024)
-  - Team collaboration features
-  - API usage quotas and alerts
-  - Integration with project management tools
-
-- **🚀 v2.0** (Q4 2024)
-  - Enhanced Claude Code CLI integration
-  - Advanced machine learning insights
-  - Cloud sync option (optional)
 
 ## License
 
