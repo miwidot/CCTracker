@@ -302,6 +302,9 @@ const UsageDashboard: React.FC = () => {
   
   // State for real-time updates
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // State for cost chart view type
+  const [costChartView, setCostChartView] = useState<'daily' | 'cumulative'>('daily');
 
   // Filter data based on date range
   const filteredData = useMemo(() => {
@@ -428,16 +431,43 @@ const UsageDashboard: React.FC = () => {
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    // Cost over time (daily aggregation)
-    const costOverTime = filteredData.reduce((acc, entry) => {
+    // Cost over time (daily aggregation with enhanced data)
+    const dailyStats = filteredData.reduce((acc, entry) => {
       const date = format(new Date(entry.timestamp), 'yyyy-MM-dd');
-      acc[date] = (acc[date] || 0) + convertFromUSD(entry.cost_usd);
+      if (!acc[date]) {
+        acc[date] = { cost: 0, sessions: new Set(), entries: 0 };
+      }
+      acc[date].cost += convertFromUSD(entry.cost_usd);
+      if (entry.session_id) {
+        acc[date].sessions.add(entry.session_id);
+      }
+      acc[date].entries += 1;
       return acc;
-    }, {} as Record<string, number>);
+    }, {} as Record<string, { cost: number; sessions: Set<string>; entries: number }>);
 
-    const costChartData = Object.entries(costOverTime)
+    const costChartData = Object.entries(dailyStats)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, cost]) => ({ date, cost }));
+      .map(([date, stats], index, array) => {
+        // Calculate cumulative cost
+        const cumulativeCost = array
+          .slice(0, index + 1)
+          .reduce((sum, [, s]) => sum + s.cost, 0);
+        
+        // Calculate 7-day moving average
+        const startIndex = Math.max(0, index - 6);
+        const recentDays = array.slice(startIndex, index + 1);
+        const avgCost = recentDays.reduce((sum, [, s]) => sum + s.cost, 0) / recentDays.length;
+        
+        return {
+          date,
+          dailyCost: stats.cost,
+          cumulativeCost,
+          avgCost,
+          sessions: stats.sessions.size,
+          entries: stats.entries,
+          costPerSession: stats.sessions.size > 0 ? stats.cost / stats.sessions.size : 0,
+        };
+      });
 
     // Token usage by model
     const tokensByModel = filteredData.reduce((acc, entry) => {
@@ -712,48 +742,119 @@ const UsageDashboard: React.FC = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Cost Over Time Chart */}
+        {/* Enhanced Cost Analysis Chart */}
         <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
-            {t('charts.costOverTime')}
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+              {costChartView === 'daily' ? 'Daily Spending' : 'Total Spending'}
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCostChartView('daily')}
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  costChartView === 'daily'
+                    ? 'bg-[var(--color-primary)] text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--color-hover)]'
+                }`}
+              >
+                Daily
+              </button>
+              <button
+                onClick={() => setCostChartView('cumulative')}
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  costChartView === 'cumulative'
+                    ? 'bg-[var(--color-primary)] text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--color-hover)]'
+                }`}
+              >
+                Total
+              </button>
+            </div>
+          </div>
           {isLoading ? (
             <div className="h-64 bg-[var(--bg-skeleton)] rounded animate-pulse" />
           ) : chartData.costOverTime.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData.costOverTime}>
-                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                <XAxis 
-                  dataKey="date" 
-                  stroke={chartTheme.axis}
-                  fontSize={12}
-                  tickFormatter={(value) => format(new Date(value), 'MMM dd')}
-                />
-                <YAxis 
-                  stroke={chartTheme.axis}
-                  fontSize={12}
-                  tickFormatter={(value) => formatCurrency(value)}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: chartTheme.tooltipBackground,
-                    border: `1px solid ${chartTheme.tooltipBorder}`,
-                    borderRadius: '8px',
-                    color: chartTheme.text,
-                  }}
-                  formatter={(value: number) => [formatCurrencyDetailed(value, 4), 'Cost']}
-                  labelFormatter={(label) => format(new Date(label), 'MMM dd, yyyy')}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="cost"
-                  stroke={chartTheme.primary}
-                  strokeWidth={2}
-                  dot={{ fill: chartTheme.primary, strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: chartTheme.primary, strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <>
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={chartData.costOverTime}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke={chartTheme.axis}
+                    fontSize={12}
+                    tickFormatter={(value) => format(new Date(value), 'MMM dd')}
+                  />
+                  <YAxis 
+                    stroke={chartTheme.axis}
+                    fontSize={12}
+                    tickFormatter={(value) => formatCurrency(value)}
+                  />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div style={{
+                            backgroundColor: chartTheme.tooltipBackground,
+                            border: `1px solid ${chartTheme.tooltipBorder}`,
+                            borderRadius: '8px',
+                            padding: '12px',
+                            color: chartTheme.text,
+                          }}>
+                            <p className="font-medium">{format(new Date(label), 'MMM dd, yyyy')}</p>
+                            <div className="mt-2 space-y-1">
+                              <p>💰 Daily Cost: <span className="font-medium">{formatCurrencyDetailed(data.dailyCost, 4)}</span></p>
+                              <p>📈 Total Spent: <span className="font-medium">{formatCurrencyDetailed(data.cumulativeCost, 4)}</span></p>
+                              <p>📊 7-day Avg: <span className="font-medium">{formatCurrencyDetailed(data.avgCost, 4)}</span></p>
+                              <p>🔧 Sessions: <span className="font-medium">{data.sessions}</span></p>
+                              <p>💸 Cost/Session: <span className="font-medium">{formatCurrencyDetailed(data.costPerSession, 4)}</span></p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  {costChartView === 'daily' ? (
+                    <>
+                      <Line
+                        type="monotone"
+                        dataKey="dailyCost"
+                        stroke={chartTheme.primary}
+                        strokeWidth={3}
+                        dot={{ fill: chartTheme.primary, strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: chartTheme.primary, strokeWidth: 2 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="avgCost"
+                        stroke={chartTheme.secondary}
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        dot={false}
+                      />
+                    </>
+                  ) : (
+                    <Line
+                      type="monotone"
+                      dataKey="cumulativeCost"
+                      stroke={chartTheme.primary}
+                      strokeWidth={3}
+                      dot={{ fill: chartTheme.primary, strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, stroke: chartTheme.primary, strokeWidth: 2 }}
+                    />
+                  )}
+                </LineChart>
+              </ResponsiveContainer>
+              <div className="mt-3 flex justify-between text-sm text-[var(--text-secondary)]">
+                <span>
+                  {costChartView === 'daily' 
+                    ? '💡 Solid line shows daily spending, dashed line shows 7-day average'
+                    : '💡 Shows cumulative total spending over time'
+                  }
+                </span>
+              </div>
+            </>
           ) : (
             <div className="h-64 flex items-center justify-center text-[var(--text-secondary)]">
               <div className="text-center">
