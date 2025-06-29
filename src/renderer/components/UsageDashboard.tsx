@@ -249,7 +249,10 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency: _curren
                 {session.model}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                {calculateSessionDuration(session.start_time, session.end_time)} {t('ui.minutes')}
+                {(() => {
+                  const duration = calculateSessionDuration(session.start_time, session.end_time);
+                  return duration > 60 ? `${Math.floor(duration / 60)}h ${duration % 60}m` : `${duration}m`;
+                })()}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                 {session.message_count}
