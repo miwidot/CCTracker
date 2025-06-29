@@ -47,6 +47,13 @@ export const App: React.FC = () => {
         const appSettings = await window.electronAPI.getSettings();
         setSettings(appSettings);
         
+        // Sync i18n with settings language
+        if (appSettings.language) {
+          await import('./i18n').then(({ default: i18n }) => {
+            void i18n.changeLanguage(appSettings.language);
+          });
+        }
+        
         // Check if user has seen onboarding
         const hasSeenOnboarding = localStorage.getItem('cctracker-onboarding-completed');
         const isFirstTime = hasSeenOnboarding === null;
