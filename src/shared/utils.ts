@@ -74,3 +74,29 @@ export function capitalizeWords(str: string): string {
 export function generateColor(index: number): string {
   return `var(--chart-color-${(index % 10) + 1})`;
 }
+
+/**
+ * Calculate session duration in minutes, ensuring positive values
+ * Handles edge cases like invalid timestamps or zero duration
+ */
+export function calculateSessionDuration(startTime: string, endTime: string): number {
+  try {
+    const start = new Date(startTime).getTime();
+    const end = new Date(endTime).getTime();
+    
+    // Check for invalid dates
+    if (isNaN(start) || isNaN(end)) {
+      return 0;
+    }
+    
+    // Calculate duration in minutes
+    const durationMs = end - start;
+    const durationMinutes = Math.round(durationMs / (1000 * 60));
+    
+    // Return positive duration or 0 if negative/invalid
+    return Math.max(0, durationMinutes);
+  } catch (error) {
+    // Return 0 for any parsing errors
+    return 0;
+  }
+}

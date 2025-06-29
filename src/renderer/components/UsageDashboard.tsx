@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { format, subDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
-import { formatTokens, cleanModelName } from '@shared/utils';
+import { formatTokens, cleanModelName, calculateSessionDuration } from '@shared/utils';
 import {
   LineChart,
   Line,
@@ -249,7 +249,7 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency: _curren
                 {session.model}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                {Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60))} {t('ui.minutes')}
+                {calculateSessionDuration(session.start_time, session.end_time)} {t('ui.minutes')}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                 {session.message_count}
