@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { log } from '@shared/utils/logger';
 
 export interface PermissionCheckResult {
@@ -85,8 +86,8 @@ export class FileSystemPermissionService {
       userDataPath, // App data directory
       path.join(userDataPath, 'exports'), // Export directory
       path.dirname(userDataPath), // Parent directory
-      path.join(require('os').homedir(), '.claude'), // Claude CLI directory
-      path.join(require('os').homedir(), '.claude', 'projects'), // Claude projects directory
+      path.join(os.homedir(), '.claude'), // Claude CLI directory
+      path.join(os.homedir(), '.claude', 'projects'), // Claude projects directory
     ];
 
     const results: DirectoryPermissions[] = [];
@@ -159,7 +160,7 @@ export class FileSystemPermissionService {
     projectsDir: PermissionCheckResult;
     recommendations: string[];
   }> {
-    const claudeDir = path.join(require('os').homedir(), '.claude');
+    const claudeDir = path.join(os.homedir(), '.claude');
     const projectsDir = path.join(claudeDir, 'projects');
 
     const claudeDirResult = await this.checkPermissions(claudeDir);

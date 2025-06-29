@@ -1,68 +1,64 @@
-/home/runner/work/CCTracker/CCTracker/src/main/services/CostCalculatorService.ts
-Warning:    78:7   warning  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
-Warning:   121:30  warning  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
-Warning:   121:43  warning  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
-Warning:   122:31  warning  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
-Warning:   122:44  warning  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
-Warning:   206:37  warning  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
-Warning:   398:7   warning  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
+In .github/workflows/dependency-update.yml at line 61, the GitHub Action version
+for peter-evans/create-pull-request is outdated and unsupported. Update the
+version tag from v5 to the latest supported stable version by checking the
+official repository or marketplace for the current recommended version and
+replace the version string accordingly.
 
-/home/runner/work/CCTracker/CCTracker/src/main/services/ExportService.ts
-Warning:   512:11  warning  Unnecessary conditional, value is always falsy                        @typescript-eslint/no-unnecessary-condition
-Warning:   512:12  warning  Unexpected object value in conditional. The condition is always true  @typescript-eslint/strict-boolean-expressions
+In .github/workflows/ci.yml at line 181, the GitHub action
+softprops/action-gh-release is pinned to an outdated version v1. Update the
+version to the latest stable release by changing the version tag from v1 to the
+most recent version available on the action's repository to ensure compatibility
+with newer GitHub runners.
 
-/home/runner/work/CCTracker/CCTracker/src/main/services/UsageService.ts
-Warning:    110:12  warning  Unexpected any value in conditional. An explicit comparison or type conversion is required         @typescript-eslint/strict-boolean-expressions
-Warning:    116:11  warning  Unexpected any value in conditional. An explicit comparison or type conversion is required         @typescript-eslint/strict-boolean-expressions
-Warning:    116:24  warning  Unexpected any value in conditional. An explicit comparison or type conversion is required         @typescript-eslint/strict-boolean-expressions
-Warning:    116:42  warning  Unexpected any value in conditional. An explicit comparison or type conversion is required         @typescript-eslint/strict-boolean-expressions
-Warning:    121:11  warning  Unexpected any value in conditional. An explicit comparison or type conversion is required         @typescript-eslint/strict-boolean-expressions
-Warning:    138:42  warning  Unnecessary conditional, value is always falsy                                                     @typescript-eslint/no-unnecessary-condition
-Warning:    138:43  warning  Unexpected object value in conditional. The condition is always true                               @typescript-eslint/strict-boolean-expressions
-Warning:    144:62  warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly  @typescript-eslint/strict-boolean-expressions
-Warning:    183:10  warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly  @typescript-eslint/strict-boolean-expressions
-Warning:    183:40  warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly  @typescript-eslint/strict-boolean-expressions
-Warning:    185:32  warning  Unnecessary conditional, value is always truthy                                                    @typescript-eslint/no-unnecessary-condition
-Warning:    185:32  warning  Unexpected object value in conditional. The condition is always true                               @typescript-eslint/strict-boolean-expressions
-Warning:    317:14  warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly  @typescript-eslint/strict-boolean-expressions
-Warning:    331:25  warning  Forbidden non-null assertion                                                                       @typescript-eslint/no-non-null-assertion
-Warning:    365:16  warning  Forbidden non-null assertion                                                                       @typescript-eslint/no-non-null-assertion
-Warning:    946:49  warning  Unexpected value in conditional. A boolean expression is required                                  @typescript-eslint/strict-boolean-expressions
-Warning:   1022:9   warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly  @typescript-eslint/strict-boolean-expressions
-Warning:   1029:9   warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly  @typescript-eslint/strict-boolean-expressions
-Warning:   1075:9   warning  Forbidden non-null assertion                                                                       @typescript-eslint/no-non-null-assertion
-Warning:   1152:25  warning  Forbidden non-null assertion                                                                       @typescript-eslint/no-non-null-assertion
-Warning:   1201:13  warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly  @typescript-eslint/strict-boolean-expressions
-Warning:   1205:11  warning  Forbidden non-null assertion                                                                       @typescript-eslint/no-non-null-assertion
-Warning:   1275:24  warning  Forbidden non-null assertion                                                                       @typescript-eslint/no-non-null-assertion
-Warning:   1276:21  warning  Forbidden non-null assertion                                                                       @typescript-eslint/no-non-null-assertion
+In src/main/services/FileSystemPermissionService.ts at the top (lines 1-6) and
+also around lines 88-89 and 162-163, replace all instances of require('os') with
+an ES module import statement like "import os from 'os';" at the top of the
+file. Then update all usages of the os module accordingly to use the imported
+"os" object instead of the require call. This will ensure consistent ES module
+style imports throughout the file.
 
-/home/runner/work/CCTracker/CCTracker/src/renderer/components/BusinessIntelligenceDashboard.tsx
-Warning:   175:22  warning  Do not use Array index in keys  react/no-array-index-key
+In src/main/services/SettingsService.ts around lines 109 to 113, remove the
+unnecessary 'as any' type cast on this.settings.theme in the includes check.
+Instead, ensure that this.settings.theme is properly typed or use a type-safe
+comparison without casting to maintain TypeScript's type safety.
 
-/home/runner/work/CCTracker/CCTracker/src/renderer/components/LanguageSelector.tsx
-Error:   28:5  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+In src/main/services/BackupService.ts around lines 326 to 344, the current use
+of an async callback inside setInterval can cause overlapping backup executions
+and unhandled promise rejections. Replace setInterval with a self-scheduling
+pattern using setTimeout that waits for the backup operation to complete before
+scheduling the next one. Implement a method that performs the backup inside a
+try-catch block, logs errors properly, and then calls itself recursively with
+setTimeout to ensure sequential execution without overlap.
 
-/home/runner/work/CCTracker/CCTracker/src/renderer/components/Sidebar.tsx
-Warning:   69:21  warning  Unexpected nullable boolean value in conditional. Please handle the nullish case explicitly  @typescript-eslint/strict-boolean-expressions
-Warning:   74:18  warning  Unexpected nullable boolean value in conditional. Please handle the nullish case explicitly  @typescript-eslint/strict-boolean-expressions
+In src/main/services/BackupService.ts at lines 149, 250, 424, and 438, replace
+all uses of the deprecated fs.rmdir method with the recursive option by using
+fs.rm instead. Update each call from fs.rmdir(path, { recursive: true }) to
+fs.rm(path, { recursive: true, force: true }) to ensure proper removal of
+directories without deprecation warnings.
 
-/home/runner/work/CCTracker/CCTracker/src/renderer/components/SimpleUsageAnalytics.tsx
-Warning:   139:6   warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                              react-hooks/exhaustive-deps
-Error:   142:5   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-Warning:   159:7   warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly                                                                   @typescript-eslint/strict-boolean-expressions
-Error:   170:23  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
-Error:   201:23  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
-Warning:   321:24  warning  Do not use Array index in keys                                                                                                                                      react/no-array-index-key
+In src/main/services/BackupService.ts at line 91, replace the logical OR
+operator (||) with the nullish coalescing operator (??) when assigning the
+default value to description. This change ensures that only null or undefined
+values trigger the default 'Manual backup', allowing empty strings to be used as
+valid descriptions.
 
-/home/runner/work/CCTracker/CCTracker/src/renderer/components/UsageDashboard.tsx
-Warning:   405:6  warning  React Hook useEffect has a missing dependency: 'convertFromUSD'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
-Warning:   471:6  warning  React Hook useMemo has a missing dependency: 'convertFromUSD'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+In src/main/services/BackupService.ts at lines 1 to 3, the fs module is imported
+twice using different syntaxes. Remove the duplicate import by keeping only one
+consistent import statement for fs, preferably the one using 'promises as fs' if
+asynchronous file operations are needed, and remove the other import to avoid
+redundancy.
 
-/home/runner/work/CCTracker/CCTracker/src/renderer/hooks/useCurrency.ts
-Warning:   45:28  warning  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
-Warning:   59:11  warning  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+/Users/runner/work/CCTracker/CCTracker/src/main/services/BackupService.ts
+Error:     3:1   error    'fs' import is duplicated                                                                                  no-duplicate-imports
+Error:    47:3   error    Type string trivially inferred from a string literal, remove type annotation                               @typescript-eslint/no-inferrable-types
+Error:    48:3   error    Type string trivially inferred from a string literal, remove type annotation                               @typescript-eslint/no-inferrable-types
+Warning:    91:22  warning  Unexpected nullable string value in conditional. Please handle the nullish/empty cases explicitly          @typescript-eslint/strict-boolean-expressions
+Error:    91:42  error    Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+Error:   291:27  error    Type number trivially inferred from a number literal, remove type annotation                               @typescript-eslint/no-inferrable-types
+Error:   321:20  error    Type number trivially inferred from a number literal, remove type annotation                               @typescript-eslint/no-inferrable-types
+Error:   326:43  error    Promise returned in function argument where a void return was expected                                     @typescript-eslint/no-misused-promises
+Error:   374:14  error    'error' is defined but never used. Allowed unused caught errors must match /^_/u                           @typescript-eslint/no-unused-vars
+Error:   387:14  error    'error' is defined but never used. Allowed unused caught errors must match /^_/u                           @typescript-eslint/no-unused-vars
+Error:   400:14  error    'error' is defined but never used. Allowed unused caught errors must match /^_/u                           @typescript-eslint/no-unused-vars
 
-/home/runner/work/CCTracker/CCTracker/src/setupTests.ts
-Warning:   4:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
+please run local lint so we can fix the build

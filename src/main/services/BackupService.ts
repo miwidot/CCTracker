@@ -145,7 +145,7 @@ export class BackupService {
       
       // Clean up failed backup
       try {
-        await fs.rmdir(backupPath, { recursive: true });
+        await fs.rm(backupPath, { recursive: true, force: true });
       } catch {
         // Ignore cleanup errors
       }
@@ -246,7 +246,7 @@ export class BackupService {
     const backupPath = path.join(this.backupDirectory, backupId);
     
     try {
-      await fs.rmdir(backupPath, { recursive: true });
+      await fs.rm(backupPath, { recursive: true, force: true });
       log.info(`Backup deleted: ${backupId}`, 'BackupService');
       return { success: true };
     } catch (error) {
@@ -322,29 +322,49 @@ export class BackupService {
     
     const intervalMs = intervalHours * 60 * 60 * 1000;
     
-    this.autoBackupInterval = setInterval(() => {
-      void (async () => {
-        log.info('Running scheduled backup', 'BackupService');
-      
-      const result = await this.createBackup({
-        includeSettings: true,
-        includeUsageData: true,
-        includeExports: false, // Don't backup exports automatically
-        description: 'Automatic scheduled backup',
-        compress: true
-      });
-      
-      if (result.success) {
-        log.info(`Scheduled backup completed: ${result.backupId}`, 'BackupService');
-        // Clean up old backups to maintain retention policy
-        await this.cleanupOldBackups(10);
-      } else {
-        log.error(`Scheduled backup failed: ${result.error}`, new Error(result.error), 'BackupService');
-      }
-      })().catch((error) => {
-        log.error('Auto backup failed', error as Error, 'BackupService');
-      });
-    }, intervalMs);
+    // Use self-scheduling pattern to prevent overlapping backups
+    const scheduleNextBackup = () => {
+      this.autoBackupInterval = setTimeout(() => {
+        void (async () => {
+        try {
+          if (this.isBackupRunning) {
+            log.warn('Skipping scheduled backup - another backup is already running', 'BackupService');
+            scheduleNextBackup(); // Schedule next attempt
+            return;
+          }
+
+          log.info('Running scheduled backup', 'BackupService');
+          
+          const result = await this.createBackup({
+            includeSettings: true,
+            includeUsageData: true,
+            includeExports: false, // Don't backup exports automatically
+            description: 'Automatic scheduled backup',
+            compress: true
+          });
+          
+          if (result.success) {
+            log.info(`Scheduled backup completed: ${result.backupId}`, 'BackupService');
+            // Clean up old backups to maintain retention policy
+            await this.cleanupOldBackups(10);
+          } else {
+            log.error(`Scheduled backup failed: ${result.error}`, new Error(result.error), 'BackupService');
+          }
+        } catch (error) {
+          log.error('Auto backup failed', error as Error, 'BackupService');
+        } finally {
+          // Schedule next backup after completion
+          scheduleNextBackup();
+        }
+        })().catch((error) => {
+          log.error('Auto backup failed in timeout', error as Error, 'BackupService');
+          scheduleNextBackup(); // Continue scheduling even if backup fails
+        });
+      }, intervalMs);
+    };
+    
+    // Start the scheduling
+    scheduleNextBackup();
     
     log.info(`Auto backup enabled (every ${intervalHours} hours)`, 'BackupService');
   }
@@ -354,7 +374,7 @@ export class BackupService {
    */
   disableAutoBackup(): void {
     if (this.autoBackupInterval) {
-      clearInterval(this.autoBackupInterval);
+      clearTimeout(this.autoBackupInterval);
       this.autoBackupInterval = null;
       log.info('Auto backup disabled', 'BackupService');
     }
@@ -424,7 +444,7 @@ export class BackupService {
     
     // Remove existing usage data
     try {
-      await fs.rmdir(usageDataPath, { recursive: true });
+      await fs.rm(usageDataPath, { recursive: true, force: true });
     } catch {
       // Ignore if directory doesn't exist
     }
@@ -438,7 +458,7 @@ export class BackupService {
     
     // Remove existing exports
     try {
-      await fs.rmdir(exportsPath, { recursive: true });
+      await fs.rm(exportsPath, { recursive: true, force: true });
     } catch {
       // Ignore if directory doesn't exist
     }
