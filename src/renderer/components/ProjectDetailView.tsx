@@ -35,7 +35,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useTranslation } from '../hooks/useTranslation';
 import { useChartTheme } from '../hooks/useChartTheme';
 import type { ProjectAnalytics, UsageEntry, SessionStats } from '@shared/types';
-import { formatTokens } from '@shared/utils';
+import { formatTokens, calculateSessionDuration } from '@shared/utils';
 import { log } from '@shared/utils/logger';
 
 interface ProjectDetailViewProps {
@@ -633,7 +633,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
                   {detailedData.sessions
                     .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
                     .map((session) => {
-                      const duration = Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60));
+                      const duration = calculateSessionDuration(session.start_time, session.end_time);
                       return (
                         <tr key={session.session_id} className="hover:bg-[var(--color-hover)] transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-[var(--text-primary)]">

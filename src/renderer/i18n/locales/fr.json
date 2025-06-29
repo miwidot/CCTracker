@@ -67,7 +67,8 @@
     "last90Days": "90 Derniers Jours",
     "custom": "Plage Personnalisée",
     "from": "De",
-    "apply": "Appliquer"
+    "apply": "Appliquer",
+    "selectDate": "Sélectionner une date"
   },
   "theme": {
     "title": "Thème",
@@ -205,7 +206,16 @@
     "tokensPerHour": "tokens/heure",
     "sessions": "sessions",
     "cost": "Coût",
-    "usage": "Usage"
+    "usage": "Usage",
+    "anomalyTypes": {
+      "HIGH": "ÉLEVÉ",
+      "COST_SPIKE": "PIC DE COÛT",
+      "MEDIUM": "MOYEN",
+      "LOW": "FAIBLE",
+      "unusuallyHighCost": "Coût inhabituellement élevé",
+      "vs": "vs",
+      "avg": "moy"
+    }
   },
   "projectDetail": {
     "title": "Détails du Projet",
@@ -232,14 +242,15 @@
     "reviewSessionStructure": "Examiner la structure des sessions",
     "noDataForRange": "Aucune donnée pour la plage sélectionnée",
     "noModelData": "Aucune donnée de modèle disponible",
-    "failedToLoad": "Échec du chargement des détails du projet"
+    "failedToLoad": "Échec du chargement des détails du projet",
+    "allSessions": "Toutes les Sessions"
   },
   "ui": {
     "never": "Jamais",
     "status": "Statut :",
     "selectLanguage": "Sélectionner la langue",
     "minutes": "min",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "invalidDate": "Date Invalide"
   },
   "languages": {

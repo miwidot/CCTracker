@@ -86,7 +86,7 @@ export class BackupService {
       const metadata: BackupMetadata = {
         id: backupId,
         timestamp: new Date().toISOString(),
-        version: '1.0.0', // TODO: Get from package.json
+        version: '1.0.1', // TODO: Get from package.json
         description: options.description ?? 'Manual backup',
         size: 0,
         files: {

@@ -67,7 +67,8 @@
     "last90Days": "Letzten 90 Tage",
     "custom": "Benutzerdefinierter Bereich",
     "from": "Von",
-    "apply": "Anwenden"
+    "apply": "Anwenden",
+    "selectDate": "Datum auswählen"
   },
   "theme": {
     "title": "Design",
@@ -205,7 +206,16 @@
     "tokensPerHour": "Tokens/Stunde",
     "sessions": "Sitzungen",
     "cost": "Kosten",
-    "usage": "Nutzung"
+    "usage": "Nutzung",
+    "anomalyTypes": {
+      "HIGH": "HOCH",
+      "COST_SPIKE": "KOSTENSPITZE",
+      "MEDIUM": "MITTEL",
+      "LOW": "NIEDRIG",
+      "unusuallyHighCost": "Ungewöhnlich hohe Kosten",
+      "vs": "vs",
+      "avg": "Ø"
+    }
   },
   "projectDetail": {
     "title": "Projektdetails",
@@ -232,14 +242,15 @@
     "reviewSessionStructure": "Sitzungsstruktur überprüfen",
     "noDataForRange": "Keine Daten für den ausgewählten Zeitraum",
     "noModelData": "Keine Modelldaten verfügbar",
-    "failedToLoad": "Laden der Projektdetails fehlgeschlagen"
+    "failedToLoad": "Laden der Projektdetails fehlgeschlagen",
+    "allSessions": "Alle Sitzungen"
   },
   "ui": {
     "never": "Nie",
     "status": "Status:",
     "selectLanguage": "Sprache auswählen",
     "minutes": "Min",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "invalidDate": "Ungültiges Datum"
   },
   "languages": {

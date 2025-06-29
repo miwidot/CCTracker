@@ -23,6 +23,24 @@ export function cleanModelName(model: string): string {
 }
 
 /**
+ * Extract core model name for charts (just the main model name)
+ * Example: "claude-sonnet-4-20250514" -> "sonnet"
+ */
+export function getCoreModelName(model: string): string {
+  // First clean version suffixes
+  const cleaned = cleanModelName(model);
+  
+  // Extract core name from patterns like "claude-sonnet-4" -> "sonnet"
+  const match = cleaned.match(/^claude-([^-]+)/);
+  if (match) {
+    return match[1];
+  }
+  
+  // Fallback: if not a claude model, just clean and return
+  return cleaned.replace(/^claude-/, '').replace(/-\d+$/, '');
+}
+
+/**
  * Extract project name from file path
  */
 export function extractProjectName(filePath: string): string {
@@ -73,4 +91,43 @@ export function capitalizeWords(str: string): string {
  */
 export function generateColor(index: number): string {
   return `var(--chart-color-${(index % 10) + 1})`;
+}
+
+/**
+ * Calculate session duration in minutes, ensuring positive values
+ * Handles edge cases like invalid timestamps or zero duration
+ */
+export function calculateSessionDuration(startTime: string, endTime: string): number {
+  try {
+    const start = new Date(startTime).getTime();
+    const end = new Date(endTime).getTime();
+    
+    // Check for invalid dates
+    if (isNaN(start) || isNaN(end)) {
+      console.warn('calculateSessionDuration: Invalid timestamps', { startTime, endTime });
+      return 0;
+    }
+    
+    // Calculate duration in minutes
+    const durationMs = end - start;
+    const durationMinutes = Math.round(durationMs / (1000 * 60));
+    
+    // Debug logging for sessions with many messages but 0 duration
+    if (durationMinutes === 0 && startTime === endTime) {
+      console.log('calculateSessionDuration: Same start/end time detected', { 
+        startTime, 
+        endTime, 
+        durationMs,
+        start: new Date(startTime).toISOString(),
+        end: new Date(endTime).toISOString()
+      });
+    }
+    
+    // Return positive duration or 0 if negative/invalid
+    return Math.max(0, durationMinutes);
+  } catch (error) {
+    console.error('calculateSessionDuration: Error parsing timestamps', { startTime, endTime, error });
+    // Return 0 for any parsing errors
+    return 0;
+  }
 }

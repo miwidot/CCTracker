@@ -1,7 +1,7 @@
 # CCTracker Development Status
 
 **Last Updated**: December 27, 2025  
-**Version**: 1.0.0  
+**Version**: 1.0.1  
 **Architecture**: React/Electron Desktop Application  
 **Translation Status**: ✅ 100% Complete (6 Languages)
 **Code Quality**: ✅ 100% Clean (Zero Hardcoded Strings)

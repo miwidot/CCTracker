@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { format, subDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
-import { formatTokens, cleanModelName } from '@shared/utils';
+import { formatTokens, cleanModelName, calculateSessionDuration, getCoreModelName } from '@shared/utils';
 import {
   LineChart,
   Line,
@@ -249,7 +249,10 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, currency: _curren
                 {session.model}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                {Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60))} {t('ui.minutes')}
+                {(() => {
+                  const duration = calculateSessionDuration(session.start_time, session.end_time);
+                  return duration > 60 ? `${Math.floor(duration / 60)}h ${duration % 60}m` : `${duration}m`;
+                })()}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                 {session.message_count}
@@ -479,7 +482,7 @@ const UsageDashboard: React.FC = () => {
     }, {} as Record<string, number>);
 
     const tokenChartData = Object.entries(tokensByModel).map(([model, tokens]) => ({
-      model,
+      model: getCoreModelName(model),
       tokens,
     }));
 
@@ -492,7 +495,7 @@ const UsageDashboard: React.FC = () => {
       }, {} as Record<string, number>);
 
     const costPieData = Object.entries(costByModel).map(([model, cost]) => ({
-      name: model,
+      name: cleanModelName(model),
       value: cost,
     }));
 

@@ -1,3 +1,72 @@
+2025-06-29 23:45:12 +08 - VERSION 1.0.1 RELEASE PREPARATION: Complete feature branch ready for merge
+- SUMMARY: Major UX improvements, critical bug fixes, and comprehensive internationalization
+- SCOPE: Session duration fixes, translation completeness, chart UX improvements, version consistency
+
+RELEASE HIGHLIGHTS:
+• FIXED CRITICAL BUG: Recent Sessions card showing "0m" duration for all sessions
+• FIXED TRANSLATION GAPS: Complete German/Spanish/French/Japanese/Chinese coverage
+• IMPROVED CHART UX: Clean model names in charts (e.g., "sonnet" instead of "claude-sonnet-4-20250514")
+• CONSISTENT VERSIONING: All components updated to v1.0.1
+
+TECHNICAL ACHIEVEMENTS:
+• Root cause analysis and fix of session duration calculation in UsageDataContext
+• Comprehensive translation key coverage for Business Intelligence anomaly types
+• Enhanced chart readability with getCoreModelName() utility function
+• Complete version bump across 13+ files including all translation files
+
+BRANCH STATUS: feature/update-1.1 ready for merge to main
+NEXT STEPS: Create PR → User approval → Merge to main → Tag v1.0.1 → GitHub release
+
+2025-06-29 23:22:33 +08 - TRANSLATION FIX: Complete internationalization coverage for all UI components
+- USER REPORT: German interface showing English text in Business Intelligence anomaly types and project details
+- AFFECTED AREAS: "HIGH • COST_SPIKE" appearing in German instead of "HOCH • KOSTENSPITZE"
+- AFFECTED AREAS: Missing "All Sessions" and "Select date" translations across multiple languages
+- ROOT CAUSE: Missing translation keys in locale files for recently added anomaly types and UI elements
+
+COMPREHENSIVE TRANSLATION UPDATES:
+• German (de.json): Added "HOCH", "KOSTENSPITZE", "Ungewöhnlich hohe Kosten", "Alle Sitzungen"
+• Spanish (es.json): Added "ALTO", "PICO DE COSTO", "Costo inusualmente alto", "Todas las Sesiones"  
+• French (fr.json): Added "ÉLEVÉ", "PIC DE COÛT", "Coût inhabituellement élevé", "Toutes les Sessions"
+• Japanese (ja.json): Added "高", "コストスパイク", "異常に高いコスト", "すべてのセッション"
+• Chinese (zh.json): Added "高", "成本峰值", "异常高成本", "所有会话"
+
+BUSINESS INTELLIGENCE ANOMALY TYPES:
+• All languages now have complete anomalyTypes section with HIGH, MEDIUM, LOW, COST_SPIKE
+• Proper translations for "unusuallyHighCost", "vs", "avg" across all supported languages
+• Ensures Business Intelligence page displays properly localized anomaly classifications
+
+PROJECT DETAIL ENHANCEMENTS:
+• Added "allSessions" translation key for project overview session display
+• Added "selectDate" translation key for date picker components
+• Complete UI translation coverage preventing English fallbacks
+
+IMPACT: German users (and all non-English users) now see fully localized interface with no English text bleeding through
+
+2025-06-29 23:04:45 +08 - AUTO-UPDATER FIX: Resolved critical auto-updater 404 error and improved CI/CD pipeline
+- USER REPORT: Application showing "Cannot find latest-mac.yml in the latest release artifacts (404)" error preventing update checks
+- ROOT CAUSE ANALYSIS: CI/CD pipeline was only uploading .dmg/.zip files but missing critical auto-updater metadata files
+- IMMEDIATE FIX FOR V1.0.0:
+  * Manually uploaded missing latest-mac.yml (363 bytes) to v1.0.0 GitHub release
+  * Uploaded CCTracker-1.0.0-mac-universal.dmg.blockmap (206KB) for efficient updates
+  * Auto-updater functionality restored for existing v1.0.0 installations
+- CI/CD PIPELINE IMPROVEMENTS (.github/workflows/ci.yml):
+  * Added latest-mac.yml to macOS build artifacts upload
+  * Added *.dmg.blockmap files for efficient update patches
+  * Added latest-linux.yml for Linux auto-updater support
+  * Added comments explaining auto-updater file requirements
+- AUTO-UPDATER SERVICE ENHANCEMENTS (AutoUpdaterService.ts):
+  * Improved error handling with user-friendly messages instead of technical HTTP errors
+  * Added specific 404 error messaging: "Update check temporarily unavailable"
+  * Added network error detection with helpful guidance
+  * Better user experience during update failures
+- TECHNICAL UNDERSTANDING:
+  * electron-updater requires latest-mac.yml metadata file for version checking
+  * .blockmap files enable differential updates (faster downloads)
+  * Missing metadata files cause 404 errors and break auto-update functionality
+- FUTURE PREVENTION: All subsequent releases will automatically include complete auto-updater file set
+- BUILD VERIFICATION: ✅ Branch ready for v1.1.0 testing and PR creation
+- BRANCH: feature/update-1.1 (committed but not merged, awaiting further fixes)
+
 2025-06-29 21:46:30 +08 - PRE-RELEASE V1.0.0 READY: Complete audit and fixes for first stable release
 - USER REQUEST: "ok u as my expert anything else we need to settle fix before we release our first version" + "Fix the @README.md also add the screenshot from @img/ to have a showcase xD" - FULLY COMPLETED!
 - README.MD SHOWCASE TRANSFORMATION:

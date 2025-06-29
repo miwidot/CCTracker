@@ -67,7 +67,8 @@
     "last90Days": "過去90日間",
     "custom": "カスタム期間",
     "from": "開始",
-    "apply": "適用"
+    "apply": "適用",
+    "selectDate": "日付を選択"
   },
   "theme": {
     "title": "テーマ",
@@ -205,7 +206,16 @@
     "tokensPerHour": "トークン/時",
     "sessions": "セッション",
     "cost": "コスト",
-    "usage": "使用量"
+    "usage": "使用量",
+    "anomalyTypes": {
+      "HIGH": "高",
+      "COST_SPIKE": "コストスパイク",
+      "MEDIUM": "中",
+      "LOW": "低",
+      "unusuallyHighCost": "異常に高いコスト",
+      "vs": "対",
+      "avg": "平均"
+    }
   },
   "projectDetail": {
     "title": "プロジェクトの詳細",
@@ -232,14 +242,15 @@
     "reviewSessionStructure": "セッション構造を確認",
     "noDataForRange": "選択した期間のデータがありません",
     "noModelData": "モデルデータがありません",
-    "failedToLoad": "プロジェクト詳細の読み込みに失敗"
+    "failedToLoad": "プロジェクト詳細の読み込みに失敗",
+    "allSessions": "すべてのセッション"
   },
   "ui": {
     "never": "なし",
     "status": "ステータス：",
     "selectLanguage": "言語を選択",
     "minutes": "分",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "invalidDate": "無効な日付"
   },
   "languages": {

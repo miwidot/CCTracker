@@ -51,13 +51,17 @@ export const UsageDataProvider: React.FC<UsageDataProviderProps> = ({ children }
         }
       });
 
-      // Calculate session stats using centralized calculation
+      // Calculate session stats with proper timestamp sorting
       const sessions = Array.from(sessionMap.entries()).map(([sessionId, entries]) => {
-        // Use centralized calculation logic (we'll need to call the service)
+        // Sort entries by timestamp to get correct start/end times
+        const sortedEntries = entries.sort((a, b) => 
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        
         return {
           session_id: sessionId,
-          start_time: entries[0].timestamp,
-          end_time: entries[entries.length - 1].timestamp,
+          start_time: sortedEntries[0].timestamp,
+          end_time: sortedEntries[sortedEntries.length - 1].timestamp,
           total_cost: entries.reduce((sum, entry) => sum + entry.cost_usd, 0),
           total_tokens: entries.reduce((sum, entry) => sum + entry.total_tokens, 0),
           message_count: entries.length,
