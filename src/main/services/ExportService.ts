@@ -3,6 +3,7 @@ import * as path from 'path';
 import ExcelJS from 'exceljs';
 import type { UsageEntry, SessionStats, CurrencyRates, BusinessIntelligence } from '@shared/types';
 import { calculateTotalCost, calculateModelBreakdown } from './CostCalculatorService';
+import { calculateSessionDuration } from '@shared/utils';
 import { log } from '@shared/utils/logger';
 
 export interface ExportOptions {
@@ -650,13 +651,13 @@ export class ExportService {
     let csv = `${headers.join(',')  }\n`;
     
     for (const session of sessions) {
-      const duration = (new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60);
+      const duration = calculateSessionDuration(session.start_time, session.end_time);
       
       const row = [
         this.escapeCSV(session.session_id),
         this.escapeCSV(session.start_time),
         this.escapeCSV(session.end_time),
-        duration.toFixed(2),
+        duration.toString(),
         session.total_cost.toFixed(6),
         session.total_tokens.toString(),
         session.message_count.toString(),
