@@ -111,11 +111,15 @@
       "!dist/*.tar.gz",
       "!dist/*unpacked",
       "!dist/builder-*",
-      "!dist/latest*"
+      "!dist/latest*",
+      "!dist/.icon-*"
     ],
     "compression": "maximum",
     "removePackageScripts": true,
-    "icon": "assets/icons/icon",
+    "icon": "assets/icons/icon.png",
+    "asarUnpack": [
+      "**/.icon-*"
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
@@ -130,7 +134,8 @@
       "gatekeeperAssess": false,
       "singleArchFiles": "*",
       "darkModeSupport": true,
-      "type": "distribution"
+      "type": "distribution",
+      "icon": "assets/icons/icon.png"
     },
     "linux": {
       "target": [
