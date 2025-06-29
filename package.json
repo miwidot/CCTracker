@@ -143,6 +143,26 @@
       "type": "distribution",
       "icon": "assets/icons/icon.png"
     },
+    "dmg": {
+      "format": "ULFO",
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 140,
+          "y": 200,
+          "type": "file"
+        },
+        {
+          "x": 400,
+          "y": 200,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
     "linux": {
       "target": [
         {
