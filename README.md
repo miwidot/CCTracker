@@ -1,10 +1,11 @@
-# CCTracker - Claude Code CLI Cost Monitoring Tool
+# CCTracker - Claude Code Tracker
 
 <div align="center">
 
 ![CCTracker Logo](https://via.placeholder.com/200x100/6366f1/ffffff?text=CCTracker)
 
-**Professional Claude Code CLI usage monitoring and cost analytics**
+**Professional Claude Code CLI usage monitoring and cost analytics**  
+*CCTracker = Claude Code Tracker*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -17,7 +18,7 @@
 
 ## Overview
 
-CCTracker is a comprehensive desktop application specifically designed for monitoring **Claude Code CLI** usage and costs. Built with React and Electron, it provides real-time tracking, advanced analytics, and detailed insights into your Claude Code command-line tool consumption patterns.
+CCTracker (Claude Code Tracker) is a comprehensive desktop application specifically designed for monitoring **Claude Code CLI** usage and costs. Built with React and Electron, it provides real-time tracking, advanced analytics, and detailed insights into your Claude Code command-line tool consumption patterns.
 
 > **Important**: This tool monitors the **Claude Code CLI** (claude.ai/code) usage and costs, not the Claude.ai web interface. CCTracker tracks API usage from the command-line tool that developers use for coding assistance.
 
