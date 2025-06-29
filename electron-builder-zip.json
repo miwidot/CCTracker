@@ -42,9 +42,11 @@
     "type": "distribution",
     "icon": "assets/icons/icon.png"
   },
-  "publish": {
-    "provider": "github",
-    "owner": "miwi-fbsd",
-    "repo": "CCTracker"
-  }
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "miwi-fbsd",
+      "repo": "CCTracker"
+    }
+  ]
 }
