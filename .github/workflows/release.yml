@@ -196,7 +196,7 @@ jobs:
           # Find all files
           ZIP_FILE=$(ls CCTracker-*-mac-universal.zip 2>/dev/null | head -1 || echo "")
           DMG_FILE=$(ls CCTracker-*-mac-universal.dmg 2>/dev/null | head -1 || echo "")
-          DEB_FILE=$(ls CCTracker-*-linux-x64.deb 2>/dev/null | head -1 || echo "")
+          DEB_FILE=$(ls CCTracker-*-linux-amd64.deb 2>/dev/null | head -1 || echo "")
           TAR_FILE=$(ls CCTracker-*-linux-x64.tar.gz 2>/dev/null | head -1 || echo "")
           BLOCKMAP_FILE=$(ls CCTracker-*-mac-universal.zip.blockmap 2>/dev/null | head -1 || echo "")
           
