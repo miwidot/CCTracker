@@ -6,6 +6,10 @@ on:
     tags: ['v*']
   pull_request:
     branches: [ main ]
+
+permissions:
+  contents: write
+  packages: read
   schedule:
     # Nightly build at 2:00 AM UTC for main branch
     - cron: '0 2 * * *'
@@ -377,10 +381,12 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Upload to existing release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.prepare-release.outputs.tag }}
           files: release-assets/*
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Cleanup old nightly releases
         if: ${{ needs.prepare-release.outputs.is_nightly == 'true' }}
