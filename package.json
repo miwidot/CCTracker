@@ -183,11 +183,6 @@
         "Maintainer: CCTracker Team <miwi@FreeBSD.org>"
       ]
     },
-    "publish": {
-      "provider": "github",
-      "owner": "miwi-fbsd",
-      "repo": "CCTracker"
-    }
   },
   "optionalDependencies": {
     "fsevents": "^2.3.3"
