@@ -63,6 +63,7 @@ const api = {
 
   // Auto-updater methods
   checkForUpdates: () => ipcRenderer.invoke('updater:check-for-updates'),
+  checkForUpdatesManually: () => ipcRenderer.invoke('updater:check-manually'),
   downloadUpdate: () => ipcRenderer.invoke('updater:download-update'),
   installUpdate: () => ipcRenderer.invoke('updater:install-update'),
   getUpdateStatus: () => ipcRenderer.invoke('updater:get-status'),

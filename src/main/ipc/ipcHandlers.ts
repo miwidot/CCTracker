@@ -416,6 +416,15 @@ export function setupIpcHandlers(services: Services) {
     }
   });
 
+  ipcMain.handle('updater:check-manually', async () => {
+    try {
+      return await autoUpdaterService.checkForUpdatesManually();
+    } catch (error) {
+      log.ipc.error('updater:check-manually', error as Error);
+      throw error;
+    }
+  });
+
   // File system permission handlers
   ipcMain.handle('permissions:check-path', async (_, filePath: string) => {
     try {
