@@ -1,0 +1,4 @@
+owner: miwi-fbsd
+repo: CCTracker
+provider: github
+updaterCacheDirName: cost-tracker-updater

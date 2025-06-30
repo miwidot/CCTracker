@@ -26,8 +26,12 @@ export class AutoUpdaterService {
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = true;
     
-    // In development, disable auto-updater
-    if (process.env.NODE_ENV === 'development') {
+    // DEVELOPMENT FIX: Force development mode to bypass macOS code signature validation
+    // This solves "code object is not signed at all" error during development
+    autoUpdater.forceDevUpdateConfig = true;
+    
+    // In development, only skip event handlers if forceDevUpdateConfig is not enabled
+    if (process.env.NODE_ENV === 'development' && !autoUpdater.forceDevUpdateConfig) {
       return;
     }
 
@@ -75,7 +79,8 @@ export class AutoUpdaterService {
    * Check for updates manually
    */
   async checkForUpdates(): Promise<boolean> {
-    if (process.env.NODE_ENV === 'development') {
+    // Allow update checks in development when forceDevUpdateConfig is enabled
+    if (process.env.NODE_ENV === 'development' && !autoUpdater.forceDevUpdateConfig) {
       log.info('Auto-updater disabled in development mode', 'AutoUpdater');
       return false;
     }
@@ -98,7 +103,8 @@ export class AutoUpdaterService {
    * Download and install update
    */
   async downloadAndInstallUpdate(): Promise<void> {
-    if (process.env.NODE_ENV === 'development') {
+    // Allow downloads in development when forceDevUpdateConfig is enabled
+    if (process.env.NODE_ENV === 'development' && !autoUpdater.forceDevUpdateConfig) {
       return;
     }
 
@@ -206,9 +212,15 @@ export class AutoUpdaterService {
    * Initialize auto-updater after app is ready
    */
   initialize(): void {
-    if (process.env.NODE_ENV === 'development') {
+    // Allow initialization in development when forceDevUpdateConfig is enabled
+    if (process.env.NODE_ENV === 'development' && !autoUpdater.forceDevUpdateConfig) {
       log.info('Auto-updater skipped in development mode', 'AutoUpdater');
       return;
+    }
+
+    // Log development mode status
+    if (autoUpdater.forceDevUpdateConfig) {
+      log.info('Auto-updater initialized in development mode with forceDevUpdateConfig', 'AutoUpdater');
     }
 
     // Wait a bit after app startup before checking for updates
