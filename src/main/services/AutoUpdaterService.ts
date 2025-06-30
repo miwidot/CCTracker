@@ -1,12 +1,11 @@
-import { autoUpdater } from 'electron-updater';
 import { dialog, shell, type BrowserWindow } from 'electron';
 import { log } from '@shared/utils/logger';
 import { getVersion } from '@shared/utils/version';
 
 export class AutoUpdaterService {
   private mainWindow: BrowserWindow | null = null;
-  private updateCheckInProgress = false;
-  private updateDownloaded = false;
+  private readonly updateCheckInProgress = false;
+  private readonly updateDownloaded = false;
   private readonly repoOwner = 'miwi-fbsd';
   private readonly repoName = 'CCTracker';
   private lastManualCheckTime = 0;
@@ -46,9 +45,9 @@ export class AutoUpdaterService {
   /**
    * Download and install update (disabled - manual only)
    */
-  async downloadAndInstallUpdate(): Promise<void> {
+  downloadAndInstallUpdate(): Promise<void> {
     log.info('Auto-download disabled - please use manual update check', 'AutoUpdater');
-    throw new Error('Automatic downloads disabled. Please use manual update check.');
+    return Promise.reject(new Error('Automatic downloads disabled. Please use manual update check.'));
   }
 
   /**
