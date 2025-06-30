@@ -1,11 +1,16 @@
 import { autoUpdater } from 'electron-updater';
-import { dialog, type BrowserWindow } from 'electron';
+import { dialog, shell, type BrowserWindow } from 'electron';
 import { log } from '@shared/utils/logger';
+import { getVersion } from '@shared/utils/version';
 
 export class AutoUpdaterService {
   private mainWindow: BrowserWindow | null = null;
   private updateCheckInProgress = false;
   private updateDownloaded = false;
+  private readonly repoOwner = 'miwi-fbsd';
+  private readonly repoName = 'CCTracker';
+  private lastManualCheckTime = 0;
+  private readonly manualCheckCooldown = 5 * 60 * 1000; // 5 minutes cooldown
 
   constructor() {
     this.setupAutoUpdater();
@@ -55,7 +60,14 @@ export class AutoUpdaterService {
     autoUpdater.on('error', (error) => {
       log.error('Auto-updater error', error, 'AutoUpdater');
       this.updateCheckInProgress = false;
-      void this.handleUpdateError(error);
+      
+      // Check if this is a signature validation error
+      if (this.isSignatureError(error)) {
+        log.info('Signature validation error detected, trying manual update check', 'AutoUpdater');
+        void this.fallbackToManualUpdateCheck();
+      } else {
+        void this.handleUpdateError(error);
+      }
     });
 
     autoUpdater.on('download-progress', (progressObj) => {
@@ -251,6 +263,238 @@ export class AutoUpdaterService {
       updateAvailable: false, // Will be set via events
       updateDownloaded: this.updateDownloaded
     };
+  }
+
+  /**
+   * Manual update check using GitHub API (fallback for signature issues)
+   */
+  async checkForUpdatesManually(): Promise<boolean> {
+    // Rate limiting: only allow manual checks every 5 minutes
+    const now = Date.now();
+    if (now - this.lastManualCheckTime < this.manualCheckCooldown) {
+      log.info('Manual update check rate limited', 'AutoUpdater');
+      return false;
+    }
+    this.lastManualCheckTime = now;
+
+    try {
+      log.info('Checking for updates manually via GitHub API', 'AutoUpdater');
+      const latestRelease = await this.fetchLatestRelease();
+      
+      if (!latestRelease) {
+        log.info('No release information available', 'AutoUpdater');
+        return false;
+      }
+
+      const currentVersion = getVersion();
+      const latestVersion = latestRelease.tag_name.replace(/^v/, ''); // Remove 'v' prefix if present
+      
+      if (this.isNewerVersion(latestVersion, currentVersion)) {
+        log.info(`Manual update available: ${latestVersion} (current: ${currentVersion})`, 'AutoUpdater');
+        await this.showManualUpdateDialog(latestRelease);
+        return true;
+      } else {
+        log.info(`No manual updates available. Latest: ${latestVersion}, Current: ${currentVersion}`, 'AutoUpdater');
+        await this.showNoUpdatesDialog();
+        return false;
+      }
+    } catch (error) {
+      log.error('Manual update check failed', error as Error, 'AutoUpdater');
+      await this.showManualUpdateError(error as Error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if error is related to code signature validation
+   */
+  private isSignatureError(error: Error): boolean {
+    const signatureErrors = [
+      'code object is not signed',
+      'signature validation',
+      'code signature',
+      'gatekeeper',
+      'developer cannot be verified'
+    ];
+    
+    return signatureErrors.some(errorType => 
+      error.message.toLowerCase().includes(errorType.toLowerCase())
+    );
+  }
+
+  /**
+   * Fallback to manual update check when auto-updater fails with signature error
+   */
+  private async fallbackToManualUpdateCheck(): Promise<void> {
+    try {
+      const latestRelease = await this.fetchLatestRelease();
+      
+      if (!latestRelease) {
+        await this.showSignatureErrorWithoutUpdate();
+        return;
+      }
+
+      const currentVersion = getVersion();
+      const latestVersion = latestRelease.tag_name.replace(/^v/, '');
+      
+      if (this.isNewerVersion(latestVersion, currentVersion)) {
+        await this.showSignatureErrorWithUpdate(latestRelease);
+      } else {
+        await this.showSignatureErrorWithoutUpdate();
+      }
+    } catch (error) {
+      log.error('Fallback manual update check failed', error as Error, 'AutoUpdater');
+      await this.showSignatureErrorWithoutUpdate();
+    }
+  }
+
+  /**
+   * Fetch latest release from GitHub API
+   */
+  private async fetchLatestRelease(): Promise<any> {
+    const url = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/releases/latest`;
+    
+    try {
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      log.error('Failed to fetch latest release', error as Error, 'AutoUpdater');
+      throw error;
+    }
+  }
+
+  /**
+   * Compare version strings (semantic versioning)
+   */
+  private isNewerVersion(latest: string, current: string): boolean {
+    const latestParts = latest.split('.').map(Number);
+    const currentParts = current.split('.').map(Number);
+    
+    for (let i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
+      const latestPart = latestParts[i] || 0;
+      const currentPart = currentParts[i] || 0;
+      
+      if (latestPart > currentPart) return true;
+      if (latestPart < currentPart) return false;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Show manual update dialog when update is available
+   */
+  private async showManualUpdateDialog(release: any): Promise<void> {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+      return;
+    }
+
+    const releaseUrl = release.html_url;
+    const version = release.tag_name;
+    const publishedDate = new Date(release.published_at).toLocaleDateString();
+
+    const response = await dialog.showMessageBox(this.mainWindow, {
+      type: 'info',
+      title: 'Update Available',
+      message: `CCTracker ${version} is now available!`,
+      detail: `A new version was published on ${publishedDate}. Click "Download Now" to visit the GitHub releases page and download the latest version manually.`,
+      buttons: ['Download Now', 'View Release Notes', 'Later'],
+      defaultId: 0,
+      cancelId: 2
+    });
+
+    if (response.response === 0) {
+      // Download Now - open releases page
+      await shell.openExternal(releaseUrl);
+    } else if (response.response === 1) {
+      // View Release Notes - open releases page
+      await shell.openExternal(releaseUrl);
+    }
+    // Response 2 = Later, do nothing
+  }
+
+  /**
+   * Show dialog when no updates are available
+   */
+  private async showNoUpdatesDialog(): Promise<void> {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+      return;
+    }
+
+    const currentVersion = getVersion();
+
+    await dialog.showMessageBox(this.mainWindow, {
+      type: 'info',
+      title: 'No Updates Available',
+      message: 'You have the latest version!',
+      detail: `CCTracker ${currentVersion} is the most recent version available.`,
+      buttons: ['OK']
+    });
+  }
+
+  /**
+   * Show error dialog for manual update check failures
+   */
+  private async showManualUpdateError(error: Error): Promise<void> {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+      return;
+    }
+
+    await dialog.showMessageBox(this.mainWindow, {
+      type: 'error',
+      title: 'Update Check Failed',
+      message: 'Unable to check for updates',
+      detail: `Failed to connect to GitHub releases. Please check your internet connection or try again later.\n\nError: ${error.message}`,
+      buttons: ['OK']
+    });
+  }
+
+  /**
+   * Show signature error dialog when update is available
+   */
+  private async showSignatureErrorWithUpdate(release: any): Promise<void> {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+      return;
+    }
+
+    const releaseUrl = release.html_url;
+    const version = release.tag_name;
+
+    const response = await dialog.showMessageBox(this.mainWindow, {
+      type: 'warning',
+      title: 'Update Available - Manual Download Required',
+      message: `CCTracker ${version} is available!`,
+      detail: `Automatic updates are not available due to code signing requirements. Please download the latest version manually from GitHub releases.`,
+      buttons: ['Download Now', 'Later'],
+      defaultId: 0,
+      cancelId: 1
+    });
+
+    if (response.response === 0) {
+      await shell.openExternal(releaseUrl);
+    }
+  }
+
+  /**
+   * Show signature error dialog when no update is available
+   */
+  private async showSignatureErrorWithoutUpdate(): Promise<void> {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+      return;
+    }
+
+    await dialog.showMessageBox(this.mainWindow, {
+      type: 'warning',
+      title: 'Update Check Complete',
+      message: 'Automatic updates unavailable',
+      detail: 'Automatic updates are not available due to code signing requirements, but you already have the latest version.',
+      buttons: ['OK']
+    });
   }
 }
 

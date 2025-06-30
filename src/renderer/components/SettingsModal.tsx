@@ -42,6 +42,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
   const { t, i18n } = useTranslation();
   const [currencyStatus, setCurrencyStatus] = useState<CurrencyStatus | null>(null);
   const [isUpdatingCurrency, setIsUpdatingCurrency] = useState(false);
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -137,6 +138,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
       log.component.error('SettingsModal', error as Error);
     } finally {
       setIsUpdatingCurrency(false);
+    }
+  };
+
+  const handleCheckForUpdates = async () => {
+    setIsCheckingUpdates(true);
+    try {
+      // Try manual update check (shows dialogs directly)
+      await window.electronAPI.checkForUpdatesManually();
+    } catch (error) {
+      log.component.error('SettingsModal', error as Error);
+    } finally {
+      setIsCheckingUpdates(false);
     }
   };
 
@@ -426,8 +439,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                 </div>
               </div>
               
+              {/* Update Check Button */}
+              <div className="mt-4 flex space-x-3">
+                <button
+                  onClick={() => void handleCheckForUpdates()}
+                  disabled={isCheckingUpdates}
+                  className="flex-1 btn-primary interactive-scale flex items-center justify-center space-x-2 px-3 py-2 text-sm bg-[var(--color-primary)] text-white rounded-md hover:bg-opacity-90 disabled:opacity-50 theme-transition"
+                >
+                  <ArrowPathIcon className={`h-4 w-4 ${isCheckingUpdates ? 'animate-spin' : ''}`} />
+                  <span>{isCheckingUpdates ? 'Checking...' : 'Check for Updates'}</span>
+                </button>
+              </div>
+              
               {/* Show Onboarding Button */}
-              <div className="mt-4">
+              <div className="mt-3">
                 <button
                   onClick={() => {
                     onShowOnboarding();
