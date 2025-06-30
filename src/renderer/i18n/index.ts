@@ -2,12 +2,21 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-import en from './locales/en.json';
-import de from './locales/de.json';
-import fr from './locales/fr.json';
-import es from './locales/es.json';
-import ja from './locales/ja.json';
-import zh from './locales/zh.json';
+import enRaw from './locales/en.json';
+import deRaw from './locales/de.json';
+import frRaw from './locales/fr.json';
+import esRaw from './locales/es.json';
+import jaRaw from './locales/ja.json';
+import zhRaw from './locales/zh.json';
+import { injectVersionIntoTranslations } from './versionInjector';
+
+// Inject version into all translations
+const en = injectVersionIntoTranslations(enRaw);
+const de = injectVersionIntoTranslations(deRaw);
+const fr = injectVersionIntoTranslations(frRaw);
+const es = injectVersionIntoTranslations(esRaw);
+const ja = injectVersionIntoTranslations(jaRaw);
+const zh = injectVersionIntoTranslations(zhRaw);
 
 const resources = {
   en: { translation: en },

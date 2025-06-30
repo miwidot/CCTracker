@@ -250,7 +250,7 @@
     "status": "Estado:",
     "selectLanguage": "Seleccionar idioma",
     "minutes": "min",
-    "version": "1.0.1",
+    "version": "{{version}}",
     "invalidDate": "Fecha Inválida"
   },
   "languages": {

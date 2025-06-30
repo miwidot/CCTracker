@@ -250,7 +250,7 @@
     "status": "ステータス：",
     "selectLanguage": "言語を選択",
     "minutes": "分",
-    "version": "1.0.1",
+    "version": "{{version}}",
     "invalidDate": "無効な日付"
   },
   "languages": {
