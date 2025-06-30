@@ -27,227 +27,50 @@ export class AutoUpdaterService {
    * Configure auto-updater settings and event handlers
    */
   private setupAutoUpdater(): void {
-    // Configure auto-updater
-    autoUpdater.autoDownload = false;
-    autoUpdater.autoInstallOnAppQuit = true;
+    // DISABLED: Auto-updater disabled due to lack of code signing
+    // Using manual notification system as primary update method
+    log.info('Auto-updater disabled - using manual notification system', 'AutoUpdater');
     
-    // DEVELOPMENT FIX: Force development mode to bypass macOS code signature validation
-    // This solves "code object is not signed at all" error during development
-    autoUpdater.forceDevUpdateConfig = true;
-    
-    // In development, only skip event handlers if forceDevUpdateConfig is not enabled
-    if (process.env.NODE_ENV === 'development' && !autoUpdater.forceDevUpdateConfig) {
-      return;
-    }
-
-    // Set up event handlers
-    autoUpdater.on('checking-for-update', () => {
-      log.info('Checking for updates', 'AutoUpdater');
-      this.updateCheckInProgress = true;
-    });
-
-    autoUpdater.on('update-available', (info) => {
-      log.info(`Update available: ${info.version}`, 'AutoUpdater');
-      this.updateCheckInProgress = false;
-      void this.handleUpdateAvailable(info);
-    });
-
-    autoUpdater.on('update-not-available', (info) => {
-      log.info(`No updates available. Current version: ${info.version}`, 'AutoUpdater');
-      this.updateCheckInProgress = false;
-    });
-
-    autoUpdater.on('error', (error) => {
-      log.error('Auto-updater error', error, 'AutoUpdater');
-      this.updateCheckInProgress = false;
-      
-      // Check if this is a signature validation error
-      if (this.isSignatureError(error)) {
-        log.info('Signature validation error detected, trying manual update check', 'AutoUpdater');
-        void this.fallbackToManualUpdateCheck();
-      } else {
-        void this.handleUpdateError(error);
-      }
-    });
-
-    autoUpdater.on('download-progress', (progressObj) => {
-      const logMessage = `Download progress: ${progressObj.percent.toFixed(2)}% (${progressObj.transferred}/${progressObj.total} bytes)`;
-      log.info(logMessage, 'AutoUpdater');
-      
-      // Send progress to renderer process
-      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-        this.mainWindow.webContents.send('update-download-progress', progressObj);
-      }
-    });
-
-    autoUpdater.on('update-downloaded', (info) => {
-      log.info(`Update downloaded: ${info.version}`, 'AutoUpdater');
-      this.updateDownloaded = true;
-      void this.handleUpdateDownloaded(info);
-    });
+    // Note: Auto-updater completely disabled to prevent signature validation errors
+    // All update functionality uses manual GitHub API checks via checkForUpdatesManually()
   }
 
   /**
-   * Check for updates manually
+   * Check for updates manually (redirects to manual system)
    */
   async checkForUpdates(): Promise<boolean> {
-    // Allow update checks in development when forceDevUpdateConfig is enabled
-    if (process.env.NODE_ENV === 'development' && !autoUpdater.forceDevUpdateConfig) {
-      log.info('Auto-updater disabled in development mode', 'AutoUpdater');
-      return false;
-    }
-
-    if (this.updateCheckInProgress) {
-      log.info('Update check already in progress', 'AutoUpdater');
-      return false;
-    }
-
-    try {
-      const result = await autoUpdater.checkForUpdates();
-      return result !== null;
-    } catch (error) {
-      log.error('Failed to check for updates', error as Error, 'AutoUpdater');
-      return false;
-    }
+    log.info('Auto-updater disabled - redirecting to manual update check', 'AutoUpdater');
+    return this.checkForUpdatesManually();
   }
 
   /**
-   * Download and install update
+   * Download and install update (disabled - manual only)
    */
   async downloadAndInstallUpdate(): Promise<void> {
-    // Allow downloads in development when forceDevUpdateConfig is enabled
-    if (process.env.NODE_ENV === 'development' && !autoUpdater.forceDevUpdateConfig) {
-      return;
-    }
-
-    try {
-      await autoUpdater.downloadUpdate();
-    } catch (error) {
-      log.error('Failed to download update', error as Error, 'AutoUpdater');
-      throw error;
-    }
+    log.info('Auto-download disabled - please use manual update check', 'AutoUpdater');
+    throw new Error('Automatic downloads disabled. Please use manual update check.');
   }
 
   /**
-   * Install update and restart app
+   * Install update and restart app (disabled - manual only)
    */
   quitAndInstall(): void {
-    if (!this.updateDownloaded) {
-      log.error('No update downloaded to install', new Error('No update available'), 'AutoUpdater');
-      return;
-    }
-
-    log.info('Installing update and restarting app', 'AutoUpdater');
-    autoUpdater.quitAndInstall();
+    log.info('Auto-install disabled - please download manually from GitHub', 'AutoUpdater');
+    throw new Error('Automatic installation disabled. Please download manually from GitHub.');
   }
 
-  /**
-   * Handle update available event
-   */
-  private async handleUpdateAvailable(info: { version: string }): Promise<void> {
-    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
-      return;
-    }
-
-    const response = await dialog.showMessageBox(this.mainWindow, {
-      type: 'info',
-      title: 'Update Available',
-      message: `A new version (${info.version}) is available. Would you like to download it now?`,
-      detail: 'The update will be downloaded in the background. You can continue using the app.',
-      buttons: ['Download Update', 'Later'],
-      defaultId: 0,
-      cancelId: 1
-    });
-
-    if (response.response === 0) {
-      try {
-        await this.downloadAndInstallUpdate();
-      } catch (error) {
-        log.error('Failed to start update download', error as Error, 'AutoUpdater');
-      }
-    }
-  }
+  // Note: Auto-updater event handlers removed since auto-updater is disabled
+  // All update functionality now uses manual GitHub API system
 
   /**
-   * Handle update downloaded event
-   */
-  private async handleUpdateDownloaded(info: { version: string }): Promise<void> {
-    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
-      return;
-    }
-
-    const response = await dialog.showMessageBox(this.mainWindow, {
-      type: 'info',
-      title: 'Update Ready',
-      message: `Update (${info.version}) has been downloaded and is ready to install.`,
-      detail: 'The app will restart to complete the installation.',
-      buttons: ['Restart Now', 'Restart Later'],
-      defaultId: 0,
-      cancelId: 1
-    });
-
-    if (response.response === 0) {
-      this.quitAndInstall();
-    }
-  }
-
-  /**
-   * Handle update error
-   */
-  private async handleUpdateError(error: Error): Promise<void> {
-    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
-      return;
-    }
-
-    // Provide user-friendly error messages for common issues
-    let userMessage = 'An error occurred while checking for updates.';
-    let userDetail = error.message;
-
-    if (error.message.includes('404') && error.message.includes('latest-mac.yml')) {
-      userMessage = 'Update check temporarily unavailable.';
-      userDetail = 'The update service is currently unavailable. Please try again later or check for updates manually.';
-    } else if (error.message.includes('network') || error.message.includes('ENOTFOUND')) {
-      userMessage = 'Network connection issue.';
-      userDetail = 'Unable to connect to the update server. Please check your internet connection.';
-    }
-
-    await dialog.showMessageBox(this.mainWindow, {
-      type: 'error',
-      title: 'Update Error',
-      message: userMessage,
-      detail: userDetail,
-      buttons: ['OK']
-    });
-  }
-
-  /**
-   * Initialize auto-updater after app is ready
+   * Initialize update system (manual notification only)
    */
   initialize(): void {
-    // Allow initialization in development when forceDevUpdateConfig is enabled
-    if (process.env.NODE_ENV === 'development' && !autoUpdater.forceDevUpdateConfig) {
-      log.info('Auto-updater skipped in development mode', 'AutoUpdater');
-      return;
-    }
-
-    // Log development mode status
-    if (autoUpdater.forceDevUpdateConfig) {
-      log.info('Auto-updater initialized in development mode with forceDevUpdateConfig', 'AutoUpdater');
-    }
-
-    // Wait a bit after app startup before checking for updates
-    setTimeout(() => {
-      this.checkForUpdates().catch((error) => {
-        log.error('Initial update check failed', error as Error, 'AutoUpdater');
-      });
-    }, 10000); // Wait 10 seconds after startup
-
-    // Set up periodic checks (every 4 hours)
-    setInterval(() => {
-      this.checkForUpdates().catch((error) => {
-        log.error('Periodic update check failed', error as Error, 'AutoUpdater');
-      });
-    }, 4 * 60 * 60 * 1000);
+    log.info('Update system initialized - manual notification mode only', 'AutoUpdater');
+    
+    // No automatic background checks since we use manual system
+    // Users can check for updates via Settings > About > Check for Updates
+    // This prevents background signature validation errors
   }
 
   /**
@@ -305,48 +128,7 @@ export class AutoUpdaterService {
     }
   }
 
-  /**
-   * Check if error is related to code signature validation
-   */
-  private isSignatureError(error: Error): boolean {
-    const signatureErrors = [
-      'code object is not signed',
-      'signature validation',
-      'code signature',
-      'gatekeeper',
-      'developer cannot be verified'
-    ];
-    
-    return signatureErrors.some(errorType => 
-      error.message.toLowerCase().includes(errorType.toLowerCase())
-    );
-  }
-
-  /**
-   * Fallback to manual update check when auto-updater fails with signature error
-   */
-  private async fallbackToManualUpdateCheck(): Promise<void> {
-    try {
-      const latestRelease = await this.fetchLatestRelease();
-      
-      if (!latestRelease) {
-        await this.showSignatureErrorWithoutUpdate();
-        return;
-      }
-
-      const currentVersion = getVersion();
-      const latestVersion = latestRelease.tag_name.replace(/^v/, '');
-      
-      if (this.isNewerVersion(latestVersion, currentVersion)) {
-        await this.showSignatureErrorWithUpdate(latestRelease);
-      } else {
-        await this.showSignatureErrorWithoutUpdate();
-      }
-    } catch (error) {
-      log.error('Fallback manual update check failed', error as Error, 'AutoUpdater');
-      await this.showSignatureErrorWithoutUpdate();
-    }
-  }
+  // Note: Signature error detection removed since auto-updater is completely disabled
 
   /**
    * Fetch latest release from GitHub API
@@ -454,48 +236,7 @@ export class AutoUpdaterService {
     });
   }
 
-  /**
-   * Show signature error dialog when update is available
-   */
-  private async showSignatureErrorWithUpdate(release: any): Promise<void> {
-    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
-      return;
-    }
-
-    const releaseUrl = release.html_url;
-    const version = release.tag_name;
-
-    const response = await dialog.showMessageBox(this.mainWindow, {
-      type: 'warning',
-      title: 'Update Available - Manual Download Required',
-      message: `CCTracker ${version} is available!`,
-      detail: `Automatic updates are not available due to code signing requirements. Please download the latest version manually from GitHub releases.`,
-      buttons: ['Download Now', 'Later'],
-      defaultId: 0,
-      cancelId: 1
-    });
-
-    if (response.response === 0) {
-      await shell.openExternal(releaseUrl);
-    }
-  }
-
-  /**
-   * Show signature error dialog when no update is available
-   */
-  private async showSignatureErrorWithoutUpdate(): Promise<void> {
-    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
-      return;
-    }
-
-    await dialog.showMessageBox(this.mainWindow, {
-      type: 'warning',
-      title: 'Update Check Complete',
-      message: 'Automatic updates unavailable',
-      detail: 'Automatic updates are not available due to code signing requirements, but you already have the latest version.',
-      buttons: ['OK']
-    });
-  }
+  // Note: Signature error dialogs removed since we use manual-only update system
 }
 
 export const autoUpdaterService = new AutoUpdaterService();
