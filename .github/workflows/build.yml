@@ -6,6 +6,7 @@ on:
     tags: ['v*']
   pull_request:
     branches: [ main ]
+
   schedule:
     # Nightly build at 2:00 AM UTC for main branch
     - cron: '0 2 * * *'
@@ -376,11 +377,11 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Upload to existing release
-        uses: softprops/action-gh-release@v1
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ needs.prepare-release.outputs.tag }}
-          files: release-assets/*
+          name: release-assets-${{ needs.prepare-release.outputs.version }}
+          path: release-assets/*
 
       - name: Cleanup old nightly releases
         if: ${{ needs.prepare-release.outputs.is_nightly == 'true' }}
