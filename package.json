@@ -182,7 +182,7 @@
         "--deb-field",
         "Maintainer: CCTracker Team <miwi@FreeBSD.org>"
       ]
-    },
+    }
   },
   "optionalDependencies": {
     "fsevents": "^2.3.3"
