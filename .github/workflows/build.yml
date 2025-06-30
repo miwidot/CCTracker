@@ -77,29 +77,6 @@ jobs:
       - name: Package macOS ZIP
         run: npm run package:mac:zip
         
-      - name: Generate auto-updater metadata
-        run: |
-          ZIP_FILE=$(ls dist/*.zip | head -1)
-          ZIP_NAME=$(basename "$ZIP_FILE")
-          ZIP_SIZE=$(stat -f%z "$ZIP_FILE")
-          ZIP_SHA512=$(shasum -a 512 "$ZIP_FILE" | cut -d' ' -f1)
-          BLOCKMAP_FILE="${ZIP_FILE}.blockmap"
-          BLOCKMAP_SIZE=$(stat -f%z "$BLOCKMAP_FILE" 2>/dev/null || echo "0")
-          
-          cat > dist/latest-mac.yml << EOF
-          version: ${{ needs.prepare.outputs.version }}
-          files:
-            - url: ${ZIP_NAME}
-              sha512: ${ZIP_SHA512}
-              size: ${ZIP_SIZE}
-              blockMapSize: ${BLOCKMAP_SIZE}
-          path: ${ZIP_NAME}
-          sha512: ${ZIP_SHA512}
-          releaseDate: $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")
-          EOF
-          
-          echo "Generated latest-mac.yml:"
-          cat dist/latest-mac.yml
         
       - name: Upload ZIP artifacts
         uses: actions/upload-artifact@v4
@@ -108,7 +85,6 @@ jobs:
           path: |
             dist/*.zip
             dist/*.blockmap
-            dist/latest-mac.yml
           retention-days: 7
 
   build-linux-deb:
@@ -139,26 +115,6 @@ jobs:
       - name: Package Linux DEB
         run: npm run package:linux:deb
         
-      - name: Generate Linux auto-updater metadata
-        run: |
-          DEB_FILE=$(ls dist/*.deb | head -1)
-          DEB_NAME=$(basename "$DEB_FILE")
-          DEB_SIZE=$(stat -c%s "$DEB_FILE")
-          DEB_SHA512=$(sha512sum "$DEB_FILE" | cut -d' ' -f1)
-          
-          cat > dist/latest-linux.yml << EOF
-          version: ${{ needs.prepare.outputs.version }}
-          files:
-            - url: ${DEB_NAME}
-              sha512: ${DEB_SHA512}
-              size: ${DEB_SIZE}
-          path: ${DEB_NAME}
-          sha512: ${DEB_SHA512}
-          releaseDate: $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")
-          EOF
-          
-          echo "Generated latest-linux.yml:"
-          cat dist/latest-linux.yml
         
       - name: Upload DEB artifacts
         uses: actions/upload-artifact@v4
@@ -166,7 +122,6 @@ jobs:
           name: linux-deb-${{ needs.prepare.outputs.version }}
           path: |
             dist/*.deb
-            dist/latest-linux.yml
           retention-days: 7
 
   build-linux-tar:
