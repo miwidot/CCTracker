@@ -376,22 +376,11 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Delete existing release if exists
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release delete "${{ needs.prepare-release.outputs.tag }}" --yes || true
-
-      - name: Create Release
+      - name: Upload to existing release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.prepare-release.outputs.tag }}
-          name: CCTracker ${{ needs.prepare-release.outputs.version }}
-          body: ${{ steps.changelog.outputs.CHANGELOG }}
           files: release-assets/*
-          draft: false
-          prerelease: ${{ needs.prepare-release.outputs.is_nightly == 'true' }}
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
