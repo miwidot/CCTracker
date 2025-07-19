@@ -284,9 +284,9 @@ const UsageDashboard: React.FC = () => {
   // State for centralized project costs
   const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
   
-  // State for date range filtering - default to last 7 days
+  // State for date range filtering - default to today
   const [dateRange, setDateRange] = useState({
-    start: startOfDay(subDays(new Date(), 7)),
+    start: startOfDay(new Date()),
     end: endOfDay(new Date()),
   });
   
@@ -592,7 +592,7 @@ const UsageDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
         <div className="animate-slide-up animate-delay-200">
           <OverviewCard
-            title={t('metrics.totalCost')}
+            title={`${t('metrics.totalCost')} (${format(dateRange.start, 'MMM d')} - ${format(dateRange.end, 'MMM d')})`}
             value={overviewMetrics.totalCost}
             icon={CurrencyDollarIcon}
             trend={{
