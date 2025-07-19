@@ -1,3 +1,11 @@
+2025-07-20 00:07:31 +08 - CI/CD OPTIMIZATION: Streamlined GitHub Actions workflows for cost efficiency
+- REMOVED: PR quality check workflow (ci.yml) - saves build minutes on every PR
+- REMOVED: Main branch validation workflow (build.yml) - eliminates redundant builds
+- KEPT: Release workflow (release.yml) - maintains production release capability
+- IMPACT: Significant reduction in GitHub Actions usage and associated costs
+- BENEFIT: Faster development cycle without waiting for unnecessary CI builds
+- NOTE: Quality checks can still be run locally with npm test, npm run lint, npm run type-check
+
 2025-07-19 23:50:48 +08 - MAJOR FIX: Cache token pricing adjusted to match real-world data
 - ISSUE: CCTracker showing $568.49 vs expected $242.57 for the same day (2.3x difference)
 - ROOT CAUSE: Cache token pricing was significantly overestimated
