@@ -157,7 +157,7 @@ export const ProjectGridView: React.FC<ProjectGridViewProps> = ({
         sorted.sort((a, b) => a.efficiency - b.efficiency);
         break;
       case 'burnRate':
-        sorted.sort((a, b) => (b.burnRate || 0) - (a.burnRate || 0));
+        sorted.sort((a, b) => (b.burnRate ?? 0) - (a.burnRate ?? 0));
         break;
     }
 
@@ -170,13 +170,13 @@ export const ProjectGridView: React.FC<ProjectGridViewProps> = ({
 
     const interval = setInterval(() => {
       // Trigger data refresh here
-      console.log('Refreshing project data...');
+      // console.log('Refreshing project data...');
     }, 5000);
 
     return () => clearInterval(interval);
   }, [showLiveMode]);
 
-  const getActivityColor = (activity: 'active' | 'recent' | 'idle') => {
+  const _getActivityColor = (activity: 'active' | 'recent' | 'idle') => {
     switch (activity) {
       case 'active': return 'text-green-500';
       case 'recent': return 'text-yellow-500';
@@ -327,7 +327,7 @@ export const ProjectGridView: React.FC<ProjectGridViewProps> = ({
                     {project.percentageOfTotal.toFixed(1)}% of total
                   </div>
                 </div>
-                {project.isActive && project.burnRate && (
+                {project.isActive && project.burnRate !== undefined && (
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-orange-500">
                       <FireIcon className="h-4 w-4 animate-pulse" />
@@ -382,7 +382,7 @@ export const ProjectGridView: React.FC<ProjectGridViewProps> = ({
                     Active in current block
                   </span>
                   <span className="font-medium text-blue-800 dark:text-blue-200">
-                    {formatCurrency(convertFromUSD(project.costInCurrentBlock || 0))}
+                    {formatCurrency(convertFromUSD(project.costInCurrentBlock ?? 0))}
                   </span>
                 </div>
               </div>

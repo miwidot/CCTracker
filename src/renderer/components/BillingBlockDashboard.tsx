@@ -84,7 +84,7 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
   };
 
   const calculateBlockProgress = (): number => {
-    if (!currentBlockStatus || !currentBlockStatus.isActive) return 0;
+    if (!currentBlockStatus?.isActive) return 0;
     
     const elapsed = Date.now() - new Date(currentBlockStatus.startTime).getTime();
     const total = new Date(currentBlockStatus.endTime).getTime() - new Date(currentBlockStatus.startTime).getTime();
@@ -104,9 +104,9 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
     return (
       <div className={`p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${className}`}>
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
         </div>
       </div>
     );
@@ -135,7 +135,7 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
         </h3>
         {currentBlockStatus.isActive ? (
           <span className="flex items-center text-sm text-green-600 dark:text-green-400">
-            <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
             {t('billing.active', 'Active')}
           </span>
         ) : (
@@ -161,7 +161,7 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
               <div
                 className={`h-3 rounded-full transition-all duration-300 ${getProgressBarColor(burnRateStatus.level)}`}
                 style={{ width: `${progress}%` }}
-              ></div>
+               />
             </div>
             <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
               <span>{Math.round(progress)}% complete</span>
@@ -204,7 +204,7 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
                   {t('billing.currentBlockCost', 'Current Block Cost')}
                 </div>
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {formatCurrencyValue(currentBlockStatus.totalCost || 0)}
+                  {formatCurrencyValue(currentBlockStatus.totalCost ?? 0)}
                 </div>
               </div>
               <div className="text-right">
@@ -213,10 +213,10 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
                 </div>
                 <div className="text-lg font-semibold text-gray-900 dark:text-white">
                   {formatTokens(
-                    (currentBlockStatus.totalTokens?.input || 0) +
-                    (currentBlockStatus.totalTokens?.output || 0) +
-                    (currentBlockStatus.totalTokens?.cacheCreation || 0) +
-                    (currentBlockStatus.totalTokens?.cacheRead || 0)
+                    (currentBlockStatus.totalTokens?.input ?? 0) +
+                    (currentBlockStatus.totalTokens?.output ?? 0) +
+                    (currentBlockStatus.totalTokens?.cacheCreation ?? 0) +
+                    (currentBlockStatus.totalTokens?.cacheRead ?? 0)
                   )}
                 </div>
               </div>
@@ -254,7 +254,7 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
                 {t('billing.inputTokens', 'Input')}
               </div>
               <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                {formatTokens(currentBlockStatus.totalTokens.input || 0)}
+                {formatTokens(currentBlockStatus.totalTokens.input ?? 0)}
               </div>
             </div>
             <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -262,7 +262,7 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
                 {t('billing.outputTokens', 'Output')}
               </div>
               <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                {formatTokens(currentBlockStatus.totalTokens.output || 0)}
+                {formatTokens(currentBlockStatus.totalTokens.output ?? 0)}
               </div>
             </div>
             <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -270,7 +270,7 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
                 {t('billing.cacheCreation', 'Cache Write')}
               </div>
               <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                {formatTokens(currentBlockStatus.totalTokens.cacheCreation || 0)}
+                {formatTokens(currentBlockStatus.totalTokens.cacheCreation ?? 0)}
               </div>
             </div>
             <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -278,7 +278,7 @@ export const BillingBlockDashboard: React.FC<BillingBlockDashboardProps> = ({
                 {t('billing.cacheRead', 'Cache Read')}
               </div>
               <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                {formatTokens(currentBlockStatus.totalTokens.cacheRead || 0)}
+                {formatTokens(currentBlockStatus.totalTokens.cacheRead ?? 0)}
               </div>
             </div>
           </div>

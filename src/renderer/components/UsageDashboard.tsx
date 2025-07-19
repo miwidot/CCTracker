@@ -284,7 +284,7 @@ const UsageDashboard: React.FC = () => {
   // const chartCSSVars = getChartCSSVariables();
   
   // State for centralized project costs
-  const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
+  const [_projectCosts, _setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
   
   // State for date range filtering - default to last 7 days
   const [dateRange, setDateRange] = useState({
@@ -310,7 +310,7 @@ const UsageDashboard: React.FC = () => {
   // State for project data
   const [projectAnalytics, setProjectAnalytics] = useState<ProjectAnalytics[]>([]);
   const [currentBillingBlock, setCurrentBillingBlock] = useState<any>(null);
-  const [selectedProject, setSelectedProject] = useState<ProjectAnalytics | null>(null);
+  const [_selectedProject, _setSelectedProject] = useState<ProjectAnalytics | null>(null);
   
   // State for cost chart view type
   // Daily spending analysis state
@@ -421,18 +421,18 @@ const UsageDashboard: React.FC = () => {
   useEffect(() => {
     const calculateProjectCosts = async () => {
       if (filteredData.length === 0) {
-        setProjectCosts({});
+        _setProjectCosts({});
         return;
       }
       
       try {
         const _currenciesProject = await window.electronAPI.getCurrencyRates();
         const costs = await window.electronAPI.calculateProjectCosts(filteredData, settings.currency, _currenciesProject);
-        setProjectCosts(costs);
+        _setProjectCosts(costs);
         
       } catch (error) {
         log.component.error('UsageDashboard', error as Error);
-        setProjectCosts({});
+        _setProjectCosts({});
       }
     };
     
@@ -673,7 +673,7 @@ const UsageDashboard: React.FC = () => {
           projects={projectAnalytics}
           currentBlock={currentBillingBlock}
           onProjectClick={(project) => {
-            setSelectedProject(project);
+            _setSelectedProject(project);
             // TODO: Navigate to project detail view
             console.log('Project clicked:', project);
           }}

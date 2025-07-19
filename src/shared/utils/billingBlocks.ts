@@ -3,7 +3,7 @@
  */
 
 import type { UsageEntry } from '../types';
-import type { BillingBlock, BurnRateLevel, BurnRateStatus, TokenBreakdown } from '../types/billing';
+import type { BurnRateLevel, BurnRateStatus, TokenBreakdown } from '../types/billing';
 
 /**
  * Constants for billing block calculations
@@ -26,7 +26,7 @@ function floorToHour(timestamp: Date): Date {
  * Claude's billing blocks start at UTC hours divisible by 5 (0, 5, 10, 15, 20)
  * IMPORTANT: The first entry time should be floored to the hour first
  */
-export function getBillingBlockStart(timestamp: Date, isFirstEntry: boolean = false): Date {
+export function getBillingBlockStart(timestamp: Date, isFirstEntry = false): Date {
   // If this is the first entry, floor to the hour first
   const baseTime = isFirstEntry ? floorToHour(timestamp) : timestamp;
   
@@ -84,13 +84,13 @@ export function getRemainingTimeMinutes(blockEnd: Date): number {
  */
 export function extractTokenBreakdown(entry: UsageEntry): TokenBreakdown {
   // Map token types to our granular breakdown using the actual UsageEntry structure
-  const inputTokens = entry.input_tokens || 0;
-  const outputTokens = entry.output_tokens || 0;
-  const cacheCreationTokens = entry.cache_creation_tokens || 0;
-  const cacheReadTokens = entry.cache_read_tokens || 0;
+  const inputTokens = entry.input_tokens ?? 0;
+  const outputTokens = entry.output_tokens ?? 0;
+  const cacheCreationTokens = entry.cache_creation_tokens ?? 0;
+  const cacheReadTokens = entry.cache_read_tokens ?? 0;
 
   // Use model pricing to calculate costs
-  const model = entry.model || 'claude-3-5-sonnet-20241022';
+  const model = entry.model ?? 'claude-3-5-sonnet-20241022';
   const pricing = getModelPricing(model);
 
   return {
@@ -138,7 +138,7 @@ function getModelPricing(model: string): { input: number; output: number; cacheW
     }
   };
 
-  return pricingMap[model] || pricingMap['claude-3-5-sonnet-20241022'];
+  return pricingMap[model] ?? pricingMap['claude-3-5-sonnet-20241022'];
 }
 
 /**

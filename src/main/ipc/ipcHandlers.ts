@@ -549,7 +549,7 @@ export function setupIpcHandlers(services: Services) {
   });
 
   // Billing block handlers
-  ipcMain.handle('billing:get-blocks-summary', async (_, entries: unknown[]) => {
+  ipcMain.handle('billing:get-blocks-summary', (_, entries: unknown[]) => {
     try {
       if (!isUsageEntryArray(entries)) {
         throw new Error('Invalid usage entries provided to billing blocks');

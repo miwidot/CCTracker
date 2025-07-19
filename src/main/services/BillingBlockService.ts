@@ -14,13 +14,13 @@ import {
   extractTokenBreakdown,
   calculateBurnRateStatus,
   calculateCacheEfficiency,
-  isInBillingBlock
+  // isInBillingBlock - not used yet
 } from '@shared/utils/billingBlocks';
 import { log } from '@shared/utils/logger';
 
 export class BillingBlockService {
-  private billingBlocks = new Map<string, BillingBlock>();
-  private projectStats = new Map<string, ProjectTokenStats>();
+  private readonly billingBlocks = new Map<string, BillingBlock>();
+  private readonly projectStats = new Map<string, ProjectTokenStats>();
 
   /**
    * Process usage entries and organize them into billing blocks
@@ -60,7 +60,7 @@ export class BillingBlockService {
   /**
    * Add a usage entry to the appropriate billing block
    */
-  private addEntryToBillingBlock(entry: UsageEntry, isFirstEntry: boolean = false): void {
+  private addEntryToBillingBlock(entry: UsageEntry, isFirstEntry = false): void {
     const timestamp = new Date(entry.timestamp);
     const blockStart = getBillingBlockStart(timestamp, isFirstEntry);
     const blockId = generateBillingBlockId(blockStart);
@@ -150,7 +150,7 @@ export class BillingBlockService {
    */
   private updateProjectStats(entry: UsageEntry): void {
     const projectId = entry.project_path || entry.id || 'unknown';
-    const projectName = entry.project_path ? entry.project_path.split('/').pop() || 'Unknown Project' : 'Unknown Project';
+    const projectName = entry.project_path ? entry.project_path.split('/').pop() ?? 'Unknown Project' : 'Unknown Project';
     
     let stats = this.projectStats.get(projectId);
     if (!stats) {
@@ -203,7 +203,7 @@ export class BillingBlockService {
    */
   private generateBillingBlockSummary(): BillingBlockSummary {
     const blocks = Array.from(this.billingBlocks.values());
-    const currentBlock = blocks.find(b => b.isActive) || null;
+    const currentBlock = blocks.find(b => b.isActive) ?? null;
     const recentBlocks = blocks
       .filter(b => !b.isActive)
       .sort((a, b) => b.startTime.getTime() - a.startTime.getTime())
@@ -237,11 +237,11 @@ export class BillingBlockService {
    * Update project contribution percentages for current block
    */
   private updateCurrentBlockContributions(currentBlock: BillingBlock): void {
-    const currentBlockEntries = currentBlock.usageEntries;
-    const projectContributions = new Map<string, number>();
+    // const currentBlockEntries = currentBlock.usageEntries;
+    // const projectContributions = new Map<string, number>();
     
     // Calculate each project's cost contribution to current block
-    for (const [projectId, stats] of this.projectStats) {
+    for (const [_projectId, stats] of this.projectStats) {
       // This is a simplified calculation - in real implementation,
       // we'd need to filter entries by current block timeframe
       const projectTotalCost = stats.tokens.input.cost + 
