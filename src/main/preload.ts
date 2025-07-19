@@ -102,6 +102,14 @@ const api = {
   cleanupOldBackups: (maxBackups?: number) => ipcRenderer.invoke('backup:cleanup', maxBackups),
   enableAutoBackup: (intervalHours?: number) => ipcRenderer.invoke('backup:enable-auto', intervalHours),
   disableAutoBackup: () => ipcRenderer.invoke('backup:disable-auto'),
+
+  // Billing block methods
+  getBillingBlocksSummary: (entries: UsageEntry[]) => ipcRenderer.invoke('billing:get-blocks-summary', entries),
+  getCurrentBlockStatus: () => ipcRenderer.invoke('billing:get-current-block-status'),
+  getProjectTokenStats: () => ipcRenderer.invoke('billing:get-project-token-stats'),
+
+  // General invoke method for flexibility
+  invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', api);

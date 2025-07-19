@@ -250,4 +250,9 @@ export interface IPCChannels {
   // Currency
   'currency:get-rates': () => Promise<CurrencyRates>;
   'currency:convert': (amount: number, from: keyof CurrencyRates, to: keyof CurrencyRates) => Promise<number>;
+
+  // Billing blocks
+  'billing:get-blocks-summary': (entries: UsageEntry[]) => Promise<import('./types/billing').BillingBlockSummary>;
+  'billing:get-current-block-status': () => Promise<any>;
+  'billing:get-project-token-stats': () => Promise<import('./types/billing').ProjectTokenStats[]>;
 }

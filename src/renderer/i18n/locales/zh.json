@@ -26,6 +26,24 @@
     "perModelOverview": "按模型概览",
     "topProjects": "成本排名前5项目"
   },
+  "billing": {
+    "currentBlock": "当前计费区块",
+    "active": "活动中",
+    "inactive": "无活动区块",
+    "blockProgress": "区块进度",
+    "remaining": "剩余",
+    "burnRate": "消耗率",
+    "projectedCost": "预计成本",
+    "forThisBlock": "本区块",
+    "currentBlockCost": "当前区块成本",
+    "totalTokens": "总Token数",
+    "tokenBreakdown": "Token分解",
+    "inputTokens": "输入",
+    "outputTokens": "输出",
+    "cacheCreation": "缓存写入",
+    "cacheRead": "缓存读取",
+    "noData": "无计费数据"
+  },
   "charts": {
     "costOverTime": "成本趋势",
     "tokenUsageByModel": "按模型Token使用量",

@@ -7,6 +7,7 @@ import type { ExportService } from '../services/ExportService';
 import { autoUpdaterService } from '../services/AutoUpdaterService';
 import { fileSystemPermissionService } from '../services/FileSystemPermissionService';
 import { backupService, type BackupOptions, type RestoreOptions } from '../services/BackupService';
+import { billingBlockService } from '../services/BillingBlockService';
 import type { CurrencyRates, UsageEntry } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
@@ -543,6 +544,37 @@ export function setupIpcHandlers(services: Services) {
       return { success: true };
     } catch (error) {
       log.ipc.error('backup:disable-auto', error as Error);
+      throw error;
+    }
+  });
+
+  // Billing block handlers
+  ipcMain.handle('billing:get-blocks-summary', async (_, entries: unknown[]) => {
+    try {
+      if (!isUsageEntryArray(entries)) {
+        throw new Error('Invalid usage entries provided to billing blocks');
+      }
+      return billingBlockService.processBillingBlocks(entries);
+    } catch (error) {
+      log.ipc.error('billing:get-blocks-summary', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('billing:get-current-block-status', () => {
+    try {
+      return billingBlockService.getCurrentBlockStatus();
+    } catch (error) {
+      log.ipc.error('billing:get-current-block-status', error as Error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('billing:get-project-token-stats', () => {
+    try {
+      return billingBlockService.getProjectTokenStats();
+    } catch (error) {
+      log.ipc.error('billing:get-project-token-stats', error as Error);
       throw error;
     }
   });
