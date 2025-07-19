@@ -286,9 +286,9 @@ const UsageDashboard: React.FC = () => {
   // State for centralized project costs
   const [_projectCosts, _setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
   
-  // State for date range filtering - default to last 7 days
+  // State for date range filtering - default to today
   const [dateRange, setDateRange] = useState({
-    start: startOfDay(subDays(new Date(), 7)),
+    start: startOfDay(new Date()),
     end: endOfDay(new Date()),
   });
   
@@ -463,11 +463,9 @@ const UsageDashboard: React.FC = () => {
     // Cost over time (daily aggregation with enhanced data)
     const dailyStats = filteredData.reduce((acc, entry) => {
       const date = format(new Date(entry.timestamp), 'yyyy-MM-dd');
-      if (!acc[date]) {
-        acc[date] = { cost: 0, sessions: new Set(), entries: 0 };
-      }
+      acc[date] ??= { cost: 0, sessions: new Set(), entries: 0 };
       acc[date].cost += convertFromUSD(entry.cost_usd);
-      if (entry.session_id) {
+      if (entry.session_id !== undefined && entry.session_id !== '') {
         acc[date].sessions.add(entry.session_id);
       }
       acc[date].entries += 1;
@@ -618,7 +616,7 @@ const UsageDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
         <div className="animate-slide-up animate-delay-200">
           <OverviewCard
-            title={t('metrics.totalCost')}
+            title={`${t('metrics.totalCost')} (${format(dateRange.start, 'MMM d')} - ${format(dateRange.end, 'MMM d')})`}
             value={overviewMetrics.totalCost}
             icon={CurrencyDollarIcon}
             trend={{
@@ -803,7 +801,7 @@ const UsageDashboard: React.FC = () => {
                   />
                   <Tooltip
                     content={({ active, payload, label }) => {
-                      if (active && payload?.length) {
+                      if (active === true && payload !== undefined && payload.length > 0) {
                         const data = payload[0].payload;
                         return (
                           <div style={{
