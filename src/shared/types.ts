@@ -217,6 +217,28 @@ export interface ProjectComparison {
   }[];
 }
 
+// Realtime monitoring types
+export interface RealtimeStats {
+  activeBlocks: import('./burnRate').SessionBlock[];
+  burnRates: Map<string, import('./burnRate').BurnRate>;
+  totalActiveTokensPerMinute: number;
+  totalActiveCostPerHour: number;
+  lastUpdate: Date;
+}
+
+export interface ParsedUsageEntry {
+  requestId: string;
+  timestamp: Date;
+  model: string;
+  project: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
+  totalTokens: number;
+  costUSD: number;
+}
+
 export interface IPCChannels {
   // Usage data
   'usage:get-stats': () => Promise<UsageEntry[]>;
@@ -237,6 +259,13 @@ export interface IPCChannels {
   'monitor:start': (path: string) => Promise<void>;
   'monitor:stop': () => Promise<void>;
   'monitor:status': () => Promise<boolean>;
+  
+  // Realtime monitoring
+  'realtime:start': () => Promise<void>;
+  'realtime:stop': () => Promise<void>;
+  'realtime:get-stats': () => Promise<RealtimeStats>;
+  'realtime:get-project-stats': (project: string) => Promise<any>;
+  'realtime:update-config': (config: any) => Promise<void>;
   
   // Settings
   'settings:get': () => Promise<AppSettings>;

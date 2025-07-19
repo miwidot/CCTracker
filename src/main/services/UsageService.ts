@@ -24,7 +24,8 @@ import type {
   PredictiveAnalytics,
   ProjectAnalytics,
   ProjectSession,
-  ProjectComparison
+  ProjectComparison,
+  ParsedUsageEntry
 } from '@shared/types';
 
 // Real Claude CLI JSONL format
@@ -302,6 +303,35 @@ export class UsageService {
     } catch (error) {
       log.service.error('UsageService', 'Failed to get usage entries', error as Error);
       throw new Error(`Failed to get usage entries: ${error}`);
+    }
+  }
+
+  /**
+   * Get all parsed usage data for real-time monitoring
+   */
+  async getAllUsageData(): Promise<ParsedUsageEntry[]> {
+    try {
+      const entries = await this.getAllUsageEntries();
+      return entries.map(entry => {
+        const projectPath = entry.project_path || 'unknown';
+        const projectName = path.basename(projectPath);
+        
+        return {
+          requestId: entry.id,
+          timestamp: new Date(entry.timestamp),
+          model: entry.model,
+          project: projectName,
+          inputTokens: entry.input_tokens,
+          outputTokens: entry.output_tokens,
+          cacheCreationTokens: entry.cache_creation_tokens || 0,
+          cacheReadTokens: entry.cache_read_tokens || 0,
+          totalTokens: entry.total_tokens,
+          costUSD: entry.cost_usd
+        };
+      });
+    } catch (error) {
+      log.service.error('UsageService', 'Failed to get parsed usage data', error as Error);
+      throw new Error(`Failed to get parsed usage data: ${error}`);
     }
   }
 

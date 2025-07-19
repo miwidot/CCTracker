@@ -7,16 +7,17 @@ import UsageDashboard from './components/UsageDashboard';
 import { BusinessIntelligenceDashboard } from './components/BusinessIntelligenceDashboard';
 import { SimpleUsageAnalytics } from './components/SimpleUsageAnalytics';
 import ProjectDetailView from './components/ProjectDetailView';
+import { LiveMonitoringDashboard } from './components/LiveMonitoringDashboard';
 import { Onboarding } from './components/Onboarding';
 import { useTranslation } from './hooks/useTranslation';
 import type { AppSettings, ProjectAnalytics } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
-type CurrentPage = 'dashboard' | 'analytics' | 'business-intelligence' | 'project-detail';
+type CurrentPage = 'dashboard' | 'analytics' | 'business-intelligence' | 'project-detail' | 'live-monitoring';
 
 // Type guard function to validate if a page is a valid CurrentPage
 const isValidCurrentPage = (page: string): page is CurrentPage => {
-  return page === 'dashboard' || page === 'analytics' || page === 'business-intelligence' || page === 'project-detail';
+  return page === 'dashboard' || page === 'analytics' || page === 'business-intelligence' || page === 'project-detail' || page === 'live-monitoring';
 };
 
 export const App: React.FC = () => {
@@ -135,6 +136,8 @@ export const App: React.FC = () => {
         return <SimpleUsageAnalytics onProjectSelect={handleProjectSelect} />;
       case 'business-intelligence':
         return <BusinessIntelligenceDashboard />;
+      case 'live-monitoring':
+        return <LiveMonitoringDashboard />;
       case 'project-detail':
         return selectedProject ? (
           <ProjectDetailView 

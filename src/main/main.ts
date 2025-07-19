@@ -9,7 +9,13 @@ import { autoUpdaterService } from './services/AutoUpdaterService';
 import { fileSystemPermissionService } from './services/FileSystemPermissionService';
 import { backupService } from './services/BackupService';
 import { setupIpcHandlers } from './ipc/ipcHandlers';
+import { registerRealtimeHandlers } from './ipc/realtimeHandlers';
 import { log } from '@shared/utils/logger';
+
+// Global reference for IPC handlers
+declare global {
+  var mainWindow: BrowserWindow | null;
+}
 
 class Application {
   private mainWindow: BrowserWindow | null = null;
@@ -48,6 +54,9 @@ class Application {
       backgroundColor: '#ffffff',
       paintWhenInitiallyHidden: true
     });
+
+    // Set global reference for IPC handlers
+    global.mainWindow = this.mainWindow;
 
     const isDev = process.env.NODE_ENV === 'development';
     
@@ -90,6 +99,7 @@ class Application {
 
     this.mainWindow.on('closed', () => {
       this.mainWindow = null;
+      global.mainWindow = null;
     });
   }
 
@@ -146,6 +156,9 @@ class Application {
         currencyService: this.currencyService,
         exportService: this.exportService,
       });
+      
+      // Register realtime monitoring handlers
+      registerRealtimeHandlers();
       
       log.info('Services initialized successfully', 'Application');
     } catch (error) {

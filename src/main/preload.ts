@@ -32,6 +32,18 @@ const api = {
   startMonitoring: (path: string) => ipcRenderer.invoke('monitor:start', path),
   stopMonitoring: () => ipcRenderer.invoke('monitor:stop'),
   getMonitoringStatus: () => ipcRenderer.invoke('monitor:status'),
+  
+  // Realtime monitoring methods
+  startRealtimeMonitoring: () => ipcRenderer.invoke('realtime:start'),
+  stopRealtimeMonitoring: () => ipcRenderer.invoke('realtime:stop'),
+  getRealtimeStats: () => ipcRenderer.invoke('realtime:get-stats'),
+  getProjectRealtimeStats: (project: string) => ipcRenderer.invoke('realtime:get-project-stats', project),
+  updateRealtimeConfig: (config: any) => ipcRenderer.invoke('realtime:update-config', config),
+  onRealtimeStatsUpdate: (callback: (stats: any) => void) => {
+    const subscription = (_event: any, stats: any) => callback(stats);
+    ipcRenderer.on('realtime:stats-update', subscription);
+    return () => ipcRenderer.removeListener('realtime:stats-update', subscription);
+  },
 
   // Settings methods
   getSettings: () => ipcRenderer.invoke('settings:get'),

@@ -1,5 +1,5 @@
 import React from 'react';
-import { XMarkIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon, FireIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface SidebarProps {
@@ -15,7 +15,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate, c
   const menuItems = [
     { icon: ChartBarIcon, label: t('navigation.dashboard'), page: 'dashboard' },
     { icon: CurrencyDollarIcon, label: t('navigation.analytics'), page: 'analytics' },
-    { icon: BoltIcon, label: t('navigation.businessIntelligence'), page: 'business-intelligence', highlight: true },
+    { icon: BoltIcon, label: t('navigation.businessIntelligence'), page: 'business-intelligence' },
+    { icon: FireIcon, label: t('navigation.liveMonitoring'), page: 'live-monitoring', highlight: true },
   ];
 
   const handleNavigation = (page: string) => {

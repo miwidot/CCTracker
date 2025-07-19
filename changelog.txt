@@ -1,3 +1,13 @@
+2025-07-20 00:34:32 +08 - FEATURE: Live Monitoring Dashboard with real-time burn rate calculations
+- NEW: Real-time burn rate calculation showing tokens/minute and cost/hour projections
+- NEW: Session block tracking with 5-hour windows for active usage monitoring
+- NEW: Visual burn rate indicators with color-coded status (green/yellow/red)
+- NEW: Active project tracking with individual session metrics and cost breakdowns
+- NEW: Integrated file monitoring for automatic updates as new usage data arrives
+- TECHNICAL: Implemented session-based calculation matching empirical approach
+- UI: Added FireIcon navigation item with "NEW" badge in sidebar
+- PERFORMANCE: 1-second refresh interval with frame rate limiting (~60fps max)
+
 2025-07-20 00:07:31 +08 - CI/CD OPTIMIZATION: Streamlined GitHub Actions workflows for cost efficiency
 - REMOVED: PR quality check workflow (ci.yml) - saves build minutes on every PR
 - REMOVED: Main branch validation workflow (build.yml) - eliminates redundant builds
