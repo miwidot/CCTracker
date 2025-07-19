@@ -437,11 +437,9 @@ const UsageDashboard: React.FC = () => {
     // Cost over time (daily aggregation with enhanced data)
     const dailyStats = filteredData.reduce((acc, entry) => {
       const date = format(new Date(entry.timestamp), 'yyyy-MM-dd');
-      if (!acc[date]) {
-        acc[date] = { cost: 0, sessions: new Set(), entries: 0 };
-      }
+      acc[date] ??= { cost: 0, sessions: new Set(), entries: 0 };
       acc[date].cost += convertFromUSD(entry.cost_usd);
-      if (entry.session_id) {
+      if (entry.session_id !== undefined && entry.session_id !== '') {
         acc[date].sessions.add(entry.session_id);
       }
       acc[date].entries += 1;
@@ -787,7 +785,7 @@ const UsageDashboard: React.FC = () => {
                   />
                   <Tooltip
                     content={({ active, payload, label }) => {
-                      if (active && payload?.length) {
+                      if (active === true && payload !== undefined && payload.length > 0) {
                         const data = payload[0].payload;
                         return (
                           <div style={{
