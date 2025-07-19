@@ -7,6 +7,7 @@ export class SessionBlockService {
   private readonly blocks: Map<string, SessionBlock> = new Map();
   private readonly sessionGapThreshold: number;
   private readonly sessionBlockDuration: number;
+  private readonly maxBlocks = 1000; // Prevent memory leaks
 
   constructor(
     sessionGapThreshold: number = 5 * 60 * 60 * 1000, // 5 hours in ms
@@ -52,6 +53,19 @@ export class SessionBlockService {
     };
 
     this.blocks.set(newBlock.id, newBlock);
+    
+    // Prevent memory leaks by limiting number of blocks
+    if (this.blocks.size > this.maxBlocks) {
+      const oldestBlocks = Array.from(this.blocks.values())
+        .filter(block => !block.isActive)
+        .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+        .slice(0, this.blocks.size - this.maxBlocks + 100); // Remove extra blocks
+      
+      for (const block of oldestBlocks) {
+        this.blocks.delete(block.id);
+      }
+    }
+    
     return newBlock;
   }
 
@@ -108,7 +122,11 @@ export class SessionBlockService {
   }
 
   public clear(): void {
-    this.blocks.clear();
+    try {
+      this.blocks.clear();
+    } catch (error) {
+      // Ignore errors during cleanup
+    }
   }
 
   public detectGaps(project: string): SessionBlock[] {

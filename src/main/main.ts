@@ -9,7 +9,7 @@ import { autoUpdaterService } from './services/AutoUpdaterService';
 import { fileSystemPermissionService } from './services/FileSystemPermissionService';
 import { backupService } from './services/BackupService';
 import { setupIpcHandlers } from './ipc/ipcHandlers';
-import { registerRealtimeHandlers } from './ipc/realtimeHandlers';
+import { registerRealtimeHandlers, cleanupRealtimeHandlers } from './ipc/realtimeHandlers';
 import { log } from '@shared/utils/logger';
 
 // Global reference for IPC handlers
@@ -224,10 +224,17 @@ class Application {
 
     app.on('before-quit', () => {
       // Fire and forget cleanup - don't block app quit
-      this.fileMonitorService.stopMonitoring().catch((error) => {
-        log.error('Failed to stop monitoring during app quit', error as Error, 'Application');
+      Promise.allSettled([
+        this.fileMonitorService.stopMonitoring(),
+        cleanupRealtimeHandlers()
+      ]).then(() => {
+        log.info('App cleanup completed', 'Application');
+      }).catch((error) => {
+        log.error('Failed to complete cleanup during app quit', error as Error, 'Application');
         // Continue with quit process even if cleanup fails
       });
+      
+      // Don't return the promise to avoid blocking app quit
     });
   }
 }

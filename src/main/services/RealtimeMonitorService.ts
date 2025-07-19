@@ -29,6 +29,7 @@ export class RealtimeMonitorService extends EventEmitter {
   private isRunning = false;
   private readonly lastProcessedEntries: Set<string> = new Set();
   private readonly frameRateLimit = 16; // ~60fps
+  private readonly maxProcessedEntries = 10000; // Prevent memory leaks
 
   constructor(
     fileMonitorService: FileMonitorService,
@@ -41,9 +42,9 @@ export class RealtimeMonitorService extends EventEmitter {
     this.usageService = usageService;
     
     this.config = {
-      refreshInterval: Math.max(1000, Math.min(60000, config.refreshInterval || 1000)),
-      sessionGapThreshold: config.sessionGapThreshold || 5 * 60 * 60 * 1000,
-      sessionBlockDuration: config.sessionBlockDuration || 5 * 60 * 60 * 1000,
+      refreshInterval: Math.max(1000, Math.min(60000, config.refreshInterval ?? 1000)),
+      sessionGapThreshold: config.sessionGapThreshold ?? 5 * 60 * 60 * 1000,
+      sessionBlockDuration: config.sessionBlockDuration ?? 5 * 60 * 60 * 1000,
     };
     
     this.sessionBlockService = new SessionBlockService(
@@ -54,11 +55,17 @@ export class RealtimeMonitorService extends EventEmitter {
     this.setupEventHandlers();
   }
 
+  private readonly fileChangeHandler = () => {
+    void this.handleDataUpdate();
+  };
+
   private setupEventHandlers(): void {
-    // Listen for file changes
-    this.fileMonitorService.on('jsonl-content-change', () => {
-      void this.handleDataUpdate();
-    });
+    // Listen for file changes with bound handler for proper cleanup
+    this.fileMonitorService.on('jsonl-content-change', this.fileChangeHandler);
+  }
+
+  private removeEventHandlers(): void {
+    this.fileMonitorService.removeListener('jsonl-content-change', this.fileChangeHandler);
   }
 
   public async start(): Promise<void> {
@@ -92,10 +99,14 @@ export class RealtimeMonitorService extends EventEmitter {
 
     this.isRunning = false;
     
+    // Clear timer safely
     if (this.refreshTimer) {
       clearInterval(this.refreshTimer);
       this.refreshTimer = null;
     }
+    
+    // Remove event handlers to prevent memory leaks
+    this.removeEventHandlers();
     
     log.info('Realtime monitoring stopped', 'RealtimeMonitorService');
     this.emit('monitoring-stopped');
@@ -137,6 +148,15 @@ export class RealtimeMonitorService extends EventEmitter {
     }
     
     this.lastProcessedEntries.add(entryId);
+    
+    // Prevent memory leaks by limiting Set size
+    if (this.lastProcessedEntries.size > this.maxProcessedEntries) {
+      const entries = Array.from(this.lastProcessedEntries);
+      this.lastProcessedEntries.clear();
+      // Keep only the most recent half
+      entries.slice(entries.length / 2).forEach(id => this.lastProcessedEntries.add(id));
+    }
+    
     this.sessionBlockService.processEntry(entry);
   }
 
@@ -195,7 +215,7 @@ export class RealtimeMonitorService extends EventEmitter {
     
     for (const block of activeBlocks) {
       const burnRate = calculateBurnRate(block);
-      if (burnRate) {
+      if (burnRate !== null) {
         burnRates.set(block.id, burnRate);
         totalTokensPerMinute += burnRate.tokensPerMinute;
         totalCostPerHour += burnRate.costPerHour;
@@ -276,10 +296,22 @@ export class RealtimeMonitorService extends EventEmitter {
     return { ...this.config };
   }
 
-  public async cleanup(): Promise<void> {
-    this.stop();
-    this.removeAllListeners();
-    this.sessionBlockService.clear();
-    this.lastProcessedEntries.clear();
+  public cleanup(): void {
+    try {
+      // Stop monitoring first
+      this.stop();
+      
+      // Remove all event listeners safely
+      this.removeAllListeners();
+      
+      // Clear data structures
+      this.sessionBlockService.clear()
+      
+      this.lastProcessedEntries.clear();
+      
+      log.info('RealtimeMonitorService cleanup completed', 'RealtimeMonitorService');
+    } catch (error) {
+      log.service.error('RealtimeMonitorService', 'Error during cleanup', error as Error);
+    }
   }
 }

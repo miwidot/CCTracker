@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { RealtimeMonitorService } from '../services/RealtimeMonitorService';
+import { RealtimeMonitorService, type RealtimeMonitorConfig } from '../services/RealtimeMonitorService';
 import { fileMonitorService } from '../services/FileMonitorService';
 import { usageService } from '../services/UsageService';
 import { log } from '../../shared/utils/logger';
@@ -17,11 +17,15 @@ export function registerRealtimeHandlers(): void {
       
       await realtimeMonitorService.start();
       
-      // Set up event forwarding to renderer
+      // Set up event forwarding to renderer with error handling
       realtimeMonitorService.on('stats-update', (stats) => {
-        const mainWindow = global.mainWindow;
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('realtime:stats-update', stats);
+        try {
+          const mainWindow = global.mainWindow;
+          if (mainWindow?.webContents && !mainWindow.isDestroyed() && !mainWindow.webContents.isDestroyed()) {
+            mainWindow.webContents.send('realtime:stats-update', stats);
+          }
+        } catch (error) {
+          log.service.error('RealtimeHandlers', 'Failed to send stats update to renderer', error as Error);
         }
       });
       
@@ -33,10 +37,16 @@ export function registerRealtimeHandlers(): void {
   });
 
   // Stop realtime monitoring
-  ipcMain.handle('realtime:stop', () => {
+  ipcMain.handle('realtime:stop', async () => {
     try {
       if (realtimeMonitorService) {
         realtimeMonitorService.stop();
+        // Give time for cleanup
+        await new Promise<void>(resolve => {
+          setTimeout(() => {
+            resolve();
+          }, 100);
+        });
       }
       log.info('Realtime monitoring stopped via IPC', 'RealtimeHandlers');
     } catch (error) {
@@ -107,7 +117,7 @@ export function registerRealtimeHandlers(): void {
   });
 
   // Update configuration
-  ipcMain.handle('realtime:update-config', (_event, config: any) => {
+  ipcMain.handle('realtime:update-config', (_event, config: Partial<RealtimeMonitorConfig>) => {
     try {
       if (!realtimeMonitorService) {
         throw new Error('Realtime monitoring service not initialized');
@@ -122,11 +132,24 @@ export function registerRealtimeHandlers(): void {
   });
 }
 
-// Cleanup function
+// Cleanup function with proper error handling
 export async function cleanupRealtimeHandlers(): Promise<void> {
-  const service = realtimeMonitorService;
-  if (service) {
-    realtimeMonitorService = null;
-    await service.cleanup();
+  try {
+    const service = realtimeMonitorService;
+    if (service) {
+      realtimeMonitorService = null;
+      await service.cleanup();
+    }
+    
+    // Remove all IPC handlers
+    ipcMain.removeHandler('realtime:start');
+    ipcMain.removeHandler('realtime:stop');
+    ipcMain.removeHandler('realtime:get-stats');
+    ipcMain.removeHandler('realtime:get-project-stats');
+    ipcMain.removeHandler('realtime:update-config');
+    
+    log.info('Realtime handlers cleanup completed', 'RealtimeHandlers');
+  } catch (error) {
+    log.service.error('RealtimeHandlers', 'Error during cleanup', error as Error);
   }
 }

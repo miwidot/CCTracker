@@ -58,39 +58,86 @@ export const LiveMonitoringDashboard: React.FC<LiveMonitoringDashboardProps> = (
   }, []);
 
   useEffect(() => {
-    // Initial fetch
-    fetchStats();
+    let isMounted = true;
+    let intervalId: NodeJS.Timeout | null = null;
+    let unsubscribe: (() => void) | null = null;
 
-    // Set up refresh interval
-    const intervalId = setInterval(fetchStats, refreshInterval);
+    const initializeMonitoring = async () => {
+      try {
+        // Initial fetch only if component is still mounted
+        if (isMounted) {
+          await fetchStats();
+        }
 
-    // Start realtime monitoring
-    window.electronAPI.startRealtimeMonitoring().catch(console.error);
+        // Set up refresh interval
+        if (isMounted) {
+          intervalId = setInterval(() => {
+            if (isMounted) {
+              fetchStats();
+            }
+          }, refreshInterval);
+        }
 
-    // Listen for realtime updates
-    const unsubscribe = window.electronAPI.onRealtimeStatsUpdate((newStats: any) => {
-      // Convert serialized dates back to Date objects
-      const parsedStats: RealtimeStats = {
-        ...newStats,
-        burnRates: new Map(Object.entries(newStats.burnRates)),
-        activeBlocks: newStats.activeBlocks.map((block: any) => ({
-          ...block,
-          startTime: new Date(block.startTime),
-          endTime: new Date(block.endTime),
-          entries: block.entries.map((entry: any) => ({
-            ...entry,
-            timestamp: new Date(entry.timestamp),
-          })),
-        })),
-        lastUpdate: new Date(newStats.lastUpdate),
-      };
-      setStats(parsedStats);
-      setLastUpdate(new Date());
-    });
+        // Start realtime monitoring
+        if (isMounted) {
+          await window.electronAPI.startRealtimeMonitoring();
+        }
+
+        // Listen for realtime updates
+        if (isMounted) {
+          unsubscribe = window.electronAPI.onRealtimeStatsUpdate((newStats: any) => {
+            if (!isMounted) return;
+            
+            try {
+              // Convert serialized dates back to Date objects
+              const parsedStats: RealtimeStats = {
+                ...newStats,
+                burnRates: new Map(Object.entries(newStats.burnRates || {})),
+                activeBlocks: (newStats.activeBlocks || []).map((block: any) => ({
+                  ...block,
+                  startTime: new Date(block.startTime),
+                  endTime: new Date(block.endTime),
+                  entries: (block.entries || []).map((entry: any) => ({
+                    ...entry,
+                    timestamp: new Date(entry.timestamp),
+                  })),
+                })),
+                lastUpdate: new Date(newStats.lastUpdate),
+              };
+              setStats(parsedStats);
+              setLastUpdate(new Date());
+            } catch (error) {
+              console.error('Failed to parse realtime stats:', error);
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to initialize monitoring:', error);
+        if (isMounted) {
+          setError(error instanceof Error ? error.message : 'Failed to initialize monitoring');
+        }
+      }
+    };
+
+    initializeMonitoring();
 
     return () => {
-      clearInterval(intervalId);
-      unsubscribe();
+      isMounted = false;
+      
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+      
+      if (unsubscribe) {
+        try {
+          unsubscribe();
+        } catch (error) {
+          console.error('Failed to unsubscribe from realtime updates:', error);
+        }
+      }
+      
+      // Stop monitoring when component unmounts
+      window.electronAPI.stopRealtimeMonitoring().catch(console.error);
     };
   }, [fetchStats, refreshInterval]);
 
