@@ -66,4 +66,4 @@ temp/
 
 # Claude Code files
 .claude/
-CLAUDE.md
+CLAUDE.md.DS_Store
