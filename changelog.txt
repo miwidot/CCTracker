@@ -1,3 +1,11 @@
+2025-07-20 00:15 PST - Implement proper monthly date calculations with month boundary handling
+- Fixed date range calculation to properly handle different month lengths (28/29/30/31 days)
+- Monthly option now uses setUTCMonth() which automatically adjusts for month boundaries
+- Example: Selecting "Monthly" on March 31 correctly shows data from Feb 28/29, not March 3
+- Weekly remains as 7-day period but calculation is clearer (last 6 days + today)
+- All calculations remain UTC-based for timezone consistency
+- Updated component to use type-based range selection instead of numeric days
+
 2025-07-20 16:08:49 +08 - UI UPDATE: Changed date range labels from numeric to descriptive terms
 - SCOPE: All language translation files updated for improved clarity
 - CHANGE TYPE: UI/UX improvement for better user understanding
