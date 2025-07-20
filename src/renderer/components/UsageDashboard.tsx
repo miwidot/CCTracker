@@ -125,16 +125,18 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               } else if (range.days === 0) {
                 // Today option - show only today's data (UTC-based)
                 const now = new Date();
-                const start = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-                const end = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-                onDateRangeChange(start, end);
+                const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                onDateRangeChange(todayUTC, todayUTC);
               } else {
                 // Multi-day ranges (UTC-based)
                 const now = new Date();
-                const startDate = subDays(now, range.days);
-                const start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()));
-                const end = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-                onDateRangeChange(start, end);
+                // Get current UTC date at midnight
+                const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                // Calculate start date by subtracting days from UTC date
+                const startUTC = new Date(todayUTC);
+                startUTC.setUTCDate(todayUTC.getUTCDate() - range.days);
+                
+                onDateRangeChange(startUTC, todayUTC);
               }
             }}
             className="btn interactive-bounce px-3 py-1 text-sm bg-[var(--bg-tertiary)] text-[var(--text-secondary)] rounded-md hover:bg-[var(--color-hover)] theme-transition"
@@ -149,7 +151,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           onChange={(date) => {
             if (date) {
               // Create UTC date to match string-based filtering
-              const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+              const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
               onDateRangeChange(utcDate, endDate);
             }
           }}
@@ -161,7 +163,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           onChange={(date) => {
             if (date) {
               // Create UTC date to match string-based filtering
-              const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+              const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
               onDateRangeChange(startDate, utcDate);
             }
           }}
@@ -303,10 +305,10 @@ const UsageDashboard: React.FC = () => {
   // State for date range filtering - default to today (UTC-based)
   const [dateRange, setDateRange] = useState(() => {
     const now = new Date();
-    const utcDate = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     return {
-      start: utcDate,
-      end: utcDate,
+      start: todayUTC,
+      end: todayUTC,
     };
   });
   
@@ -597,9 +599,9 @@ const UsageDashboard: React.FC = () => {
           onDateRangeChange={(start, end) => {
             if (start === null && end === null) {
               // ALL option - use earliest data date (UTC-based)
-              const allStart = new Date(Date.UTC(earliestDataDate.getFullYear(), earliestDataDate.getMonth(), earliestDataDate.getDate()));
+              const allStart = new Date(Date.UTC(earliestDataDate.getUTCFullYear(), earliestDataDate.getUTCMonth(), earliestDataDate.getUTCDate()));
               const now = new Date();
-              const allEnd = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+              const allEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
               setDateRange({ start: allStart, end: allEnd });
             } else if (start && end) {
               setDateRange({ start, end });
