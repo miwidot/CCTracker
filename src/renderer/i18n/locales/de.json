@@ -201,6 +201,16 @@
     "totalCost": "Gesamtkosten",
     "costBurnRate": "Kostenverbrauchsrate",
     "currentSpendingRate": "Aktuelle Ausgabenrate",
+    "burnRate": {
+      "current": "Aktuelle Rate",
+      "projection": "Monatsprognose",
+      "budget": "Budgetgrenze",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "safe": "Im Rahmen",
+      "warning": "Grenze erreicht",
+      "danger": "Budget überschritten"
+    },
     "modelDiversity": "Modellvielfalt",
     "differentModelsUsed": "Verschiedene verwendete Modelle",
     "dataQuality": "Datenqualität",

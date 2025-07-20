@@ -30,6 +30,8 @@ import { useCurrency } from '../hooks/useCurrency';
 import { cleanModelName, capitalizeWords } from '@shared/utils';
 import type { BusinessIntelligence, ModelEfficiency, UsageAnomaly } from '@shared/types';
 import { log } from '@shared/utils/logger';
+import { BurnRateGauge } from './charts/BurnRateGauge';
+import { PeriodComparisonChart } from './charts/PeriodComparisonChart';
 
 interface BIMetricCardProps {
   title: string;
@@ -420,46 +422,35 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Cost Trends Chart */}
+          {/* Period Comparison Chart */}
           <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
               <ArrowTrendingUpIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
               {t('businessIntelligence.costTrends')}
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={trendsChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                <XAxis 
-                  dataKey="date" 
-                  stroke={chartTheme.axis}
-                  fontSize={12}
-                />
-                <YAxis 
-                  stroke={chartTheme.axis}
-                  fontSize={12}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: chartTheme.tooltipBackground,
-                    border: `1px solid ${chartTheme.tooltipBorder}`,
-                    borderRadius: '8px',
-                    color: chartTheme.text,
-                  }}
-                  formatter={(value, name) => [
-                    name === 'cost' ? formatCurrencyDetailed(Number(value), 4) : `${Number(value).toFixed(0)}K`,
-                    name === 'cost' ? t('businessIntelligence.cost') : t('businessIntelligence.tokens')
-                  ]} 
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="cost" 
-                  stackId="1" 
-                  stroke={chartTheme.primary} 
-                  fill={chartTheme.primary} 
-                  fillOpacity={0.6} 
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <PeriodComparisonChart
+              data={(() => {
+                // Generate comparison data from trends
+                const currentWeekData = biData.trends.weekly.slice(-1)[0];
+                const previousWeekData = biData.trends.weekly.slice(-2)[0];
+                const currentMonthData = biData.trends.monthly.slice(-1)[0];
+                const previousMonthData = biData.trends.monthly.slice(-2)[0];
+                
+                return [
+                  {
+                    period: 'Recent',
+                    currentCost: currentWeekData?.cost || 0,
+                    previousCost: previousWeekData?.cost || 0,
+                    currentTokens: currentWeekData?.tokens || 0,
+                    previousTokens: previousWeekData?.tokens || 0,
+                    currentSessions: currentWeekData?.sessions || 0,
+                    previousSessions: previousWeekData?.sessions || 0,
+                  }
+                ];
+              })()}
+              comparisonType="weekly"
+              isLoading={loading}
+            />
           </div>
 
           {/* Usage Patterns */}
@@ -492,6 +483,21 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
                 <Bar dataKey="usage" fill={chartTheme.success} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Real-Time Burn Rate Gauge */}
+        <div className="mb-8">
+          <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
+              <CurrencyDollarIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
+              {t('businessIntelligence.costBurnRate')}
+            </h3>
+            <BurnRateGauge
+              currentBurnRate={biData.cost_burn_rate}
+              budgetLimit={biData.predictions.predicted_monthly_cost * 1.2} // 20% buffer for budget limit
+              isLoading={loading}
+            />
           </div>
         </div>
 

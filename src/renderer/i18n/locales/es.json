@@ -201,6 +201,16 @@
     "totalCost": "Costo Total",
     "costBurnRate": "Tasa de Quemado de Costos",
     "currentSpendingRate": "Tasa de gasto actual",
+    "burnRate": {
+      "current": "Tasa Actual",
+      "projection": "Proyección Mensual",
+      "budget": "Límite Presupuesto",
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "safe": "En Meta",
+      "warning": "Cerca del Límite",
+      "danger": "Sobre Presupuesto"
+    },
     "modelDiversity": "Diversidad de Modelos",
     "differentModelsUsed": "Diferentes modelos usados",
     "dataQuality": "Calidad de Datos",

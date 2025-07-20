@@ -201,6 +201,16 @@
     "totalCost": "総コスト",
     "costBurnRate": "コスト消費率",
     "currentSpendingRate": "現在の支出率",
+    "burnRate": {
+      "current": "現在のレート",
+      "projection": "月次予測",
+      "budget": "予算上限",
+      "daily": "日次",
+      "weekly": "週次",
+      "safe": "順調",
+      "warning": "上限接近",
+      "danger": "予算超過"
+    },
     "modelDiversity": "モデル多様性",
     "differentModelsUsed": "使用モデル数",
     "dataQuality": "データ品質",

@@ -37,6 +37,7 @@ import { ParetoChart } from './charts/ParetoChart';
 import { MessageTypeChart } from './charts/MessageTypeChart';
 import { TokenUsageChart } from './charts/TokenUsageChart';
 import { AdvancedMetricsCards } from './charts/AdvancedMetricsCards';
+import { SessionEfficiencyScatter } from './charts/SessionEfficiencyScatter';
 import type { UsageEntry, SessionStats } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
@@ -1105,6 +1106,41 @@ const UsageDashboard: React.FC = () => {
                   outputTokens: dayEntries.reduce((sum, e) => sum + e.output_tokens, 0),
                   cacheReadTokens: dayEntries.reduce((sum, e) => sum + (e.cache_read_tokens ?? 0), 0),
                   cacheWriteTokens: dayEntries.reduce((sum, e) => sum + (e.cache_creation_tokens ?? 0), 0),
+                };
+              })}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          {/* Session Efficiency Scatter Plot */}
+          <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)] lg:col-span-2">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+              {t('charts.sessionEfficiency.title')}
+            </h3>
+            <SessionEfficiencyScatter
+              data={filteredSessions.map(session => {
+                const startTime = new Date(session.start_time);
+                const endTime = new Date(session.end_time);
+                const durationMinutes = (endTime.getTime() - startTime.getTime()) / 60000; // Convert to minutes
+                const tokensPerMinute = durationMinutes > 0 ? session.total_tokens / durationMinutes : 0;
+                const costPerToken = session.total_tokens > 0 ? session.total_cost / session.total_tokens : 0;
+                
+                // Calculate efficiency score based on tokens/minute and cost efficiency
+                const efficiency = Math.min(
+                  100,
+                  (tokensPerMinute / 50) * 60 + // 50 tokens/min = 60% of score
+                  ((1 / (costPerToken * 1000000)) * 40) // Lower cost per token = higher efficiency
+                );
+                
+                return {
+                  sessionId: session.session_id,
+                  duration: durationMinutes,
+                  totalTokens: session.total_tokens,
+                  cost: convertFromUSD(session.total_cost),
+                  tokensPerMinute,
+                  costPerToken,
+                  efficiency: Math.max(0, efficiency),
+                  model: cleanModelName(session.model),
                 };
               })}
               isLoading={isLoading}
