@@ -27,31 +27,31 @@ export const MODEL_PRICING: Record<string, { input: number; output: number; cach
     output: 1.25 / 1_000_000,
   },
   
-  // Claude 4 Models (with cache pricing)
+  // Claude 4 Models (verified pricing matching external reference implementation)
   'claude-sonnet-4-20250514': {
     input: 3.0 / 1_000_000,
     output: 15.0 / 1_000_000,
-    cache_write: 3.75 / 1_000_000,
-    cache_read: 0.30 / 1_000_000,
+    cache_write: 3.75 / 1_000_000,  // Verified: 25% more than input ($3 * 1.25 = $3.75)
+    cache_read: 0.30 / 1_000_000,   // Verified: 10% of input ($3 * 0.10 = $0.30)
   },
   'claude-opus-4-20250514': {
     input: 15.0 / 1_000_000,
     output: 75.0 / 1_000_000,
-    cache_write: 18.75 / 1_000_000,
-    cache_read: 1.50 / 1_000_000,
+    cache_write: 18.75 / 1_000_000, // Verified: 25% more than input ($15 * 1.25 = $18.75)
+    cache_read: 1.50 / 1_000_000,   // Verified: 10% of input ($15 * 0.10 = $1.50)
   },
   // Also support the model names as they appear in JSONL
   'claude-opus-4': {
     input: 15.0 / 1_000_000,
     output: 75.0 / 1_000_000,
-    cache_write: 18.75 / 1_000_000,
-    cache_read: 1.50 / 1_000_000,
+    cache_write: 18.75 / 1_000_000, // Verified: 25% more than input
+    cache_read: 1.50 / 1_000_000,   // Verified: 10% of input
   },
   'claude-sonnet-4': {
     input: 3.0 / 1_000_000,
     output: 15.0 / 1_000_000,
-    cache_write: 3.75 / 1_000_000,
-    cache_read: 0.30 / 1_000_000,
+    cache_write: 3.75 / 1_000_000,  // Verified: 25% more than input
+    cache_read: 0.30 / 1_000_000,   // Verified: 10% of input
   },
 };
 

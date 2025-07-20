@@ -123,13 +123,17 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 // ALL option - will be handled by parent component
                 onDateRangeChange(null, null); // Signal to use earliest data
               } else if (range.days === 0) {
-                // Today option - show only today's data
-                const start = startOfDay(new Date());
-                const end = endOfDay(new Date());
+                // Today option - show only today's data (UTC-based)
+                const now = new Date();
+                const start = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+                const end = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
                 onDateRangeChange(start, end);
               } else {
-                const start = startOfDay(subDays(new Date(), range.days));
-                const end = endOfDay(new Date());
+                // Multi-day ranges (UTC-based)
+                const now = new Date();
+                const startDate = subDays(now, range.days);
+                const start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()));
+                const end = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
                 onDateRangeChange(start, end);
               }
             }}
@@ -142,13 +146,25 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       <div className="flex gap-2 items-center">
         <ThemedDatePicker
           selected={startDate}
-          onChange={(date) => date && onDateRangeChange(startOfDay(date), endDate)}
+          onChange={(date) => {
+            if (date) {
+              // Create UTC date to match string-based filtering
+              const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+              onDateRangeChange(utcDate, endDate);
+            }
+          }}
           placeholder={t('dateRange.from')}
         />
         <span className="text-[var(--text-secondary)]">{t('dateRange.to')}</span>
         <ThemedDatePicker
           selected={endDate}
-          onChange={(date) => date && onDateRangeChange(startDate, endOfDay(date))}
+          onChange={(date) => {
+            if (date) {
+              // Create UTC date to match string-based filtering
+              const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+              onDateRangeChange(startDate, utcDate);
+            }
+          }}
           placeholder={t('dateRange.to')}
         />
       </div>
@@ -284,10 +300,14 @@ const UsageDashboard: React.FC = () => {
   // State for centralized project costs
   const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
   
-  // State for date range filtering - default to last 7 days
-  const [dateRange, setDateRange] = useState({
-    start: startOfDay(subDays(new Date(), 7)),
-    end: endOfDay(new Date()),
+  // State for date range filtering - default to today (UTC-based)
+  const [dateRange, setDateRange] = useState(() => {
+    const now = new Date();
+    const utcDate = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    return {
+      start: utcDate,
+      end: utcDate,
+    };
   });
   
   // Force re-render when date range changes
@@ -309,17 +329,17 @@ const UsageDashboard: React.FC = () => {
   // Daily spending analysis state
   const [showComparison, setShowComparison] = useState(true);
 
-  // Filter data based on date range
+  // Filter data based on date range (string-based for consistency with table)
   const filteredData = useMemo(() => {
     const filtered = usageData.filter(entry => {
-      const entryDate = new Date(entry.timestamp);
-      const isInRange = isWithinInterval(entryDate, {
-        start: startOfDay(dateRange.start),
-        end: endOfDay(dateRange.end),
-      });
+      // Use string-based date filtering to match table behavior
+      const entryDateStr = entry.timestamp.split('T')[0]; // Get YYYY-MM-DD part
+      const startDateStr = dateRange.start.toISOString().split('T')[0];
+      const endDateStr = dateRange.end.toISOString().split('T')[0];
       
-      return isInRange;
+      return entryDateStr >= startDateStr && entryDateStr <= endDateStr;
     });
+    
     
     return filtered;
   }, [usageData, dateRange]);
@@ -576,9 +596,10 @@ const UsageDashboard: React.FC = () => {
           endDate={dateRange.end}
           onDateRangeChange={(start, end) => {
             if (start === null && end === null) {
-              // ALL option - use earliest data date
-              const allStart = startOfDay(earliestDataDate);
-              const allEnd = endOfDay(new Date());
+              // ALL option - use earliest data date (UTC-based)
+              const allStart = new Date(Date.UTC(earliestDataDate.getFullYear(), earliestDataDate.getMonth(), earliestDataDate.getDate()));
+              const now = new Date();
+              const allEnd = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
               setDateRange({ start: allStart, end: allEnd });
             } else if (start && end) {
               setDateRange({ start, end });
