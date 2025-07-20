@@ -627,26 +627,90 @@ export class UsageService {
   }
 
   /**
+   * Create unique hash for deduplication (matches community standard approach)
+   */
+  private createUniqueHash(data: ClaudeJSONLEntry): string | null {
+    const messageId = (data.message as any)?.id;
+    const requestId = data.requestId;
+    
+    if (messageId == null || requestId == null) {
+      return null;
+    }
+    
+    // Create a hash using simple concatenation (community standard approach)
+    return `${messageId}:${requestId}`;
+  }
+
+  /**
    * Load all usage data from Claude CLI files
    */
   async loadFromClaudeCLI(): Promise<UsageEntry[]> {
     try {
       const jsonlFiles = await this.discoverClaudeFiles();
       const allEntries: UsageEntry[] = [];
+      const processedHashes = new Set<string>();
+      let duplicatesSkipped = 0;
       
       log.info(`Loading usage data from ${jsonlFiles.length} Claude CLI files...`, 'UsageService');
       
-      for (const filePath of jsonlFiles) {
+      // Sort files chronologically before processing
+      const fileStats = await Promise.all(
+        jsonlFiles.map(async (filePath) => {
+          try {
+            const stats = await fs.stat(filePath);
+            return { filePath, mtime: stats.mtime };
+          } catch {
+            return { filePath, mtime: new Date(0) };
+          }
+        })
+      );
+      const sortedFiles = fileStats
+        .sort((a, b) => a.mtime.getTime() - b.mtime.getTime())
+        .map(f => f.filePath);
+      
+      for (const filePath of sortedFiles) {
         try {
-          const entries = await this.parseJSONLFile(filePath);
-          allEntries.push(...entries);
-          log.debug(`Loaded ${entries.length} entries from ${path.basename(filePath)}`, 'UsageService');
+          const content = await fs.readFile(filePath, 'utf-8');
+          const lines = content.split('\n').filter(line => line.trim());
+          
+          for (const line of lines) {
+            try {
+              const trimmedLine = line.trim();
+              if (!trimmedLine || !trimmedLine.startsWith('{')) {
+                continue;
+              }
+              
+              const data = JSON.parse(trimmedLine);
+              
+              // Apply messageId+requestId deduplication (community standard)
+              if (typeof data === 'object' && data != null && 'uuid' in data && 'sessionId' in data && 'message' in data) {
+                const uniqueHash = this.createUniqueHash(data as ClaudeJSONLEntry);
+                if (uniqueHash != null && processedHashes.has(uniqueHash)) {
+                  duplicatesSkipped++;
+                  continue; // Skip duplicate message
+                }
+                if (uniqueHash != null) {
+                  processedHashes.add(uniqueHash);
+                }
+              }
+              
+              const entry = this.parseJSONLLine(line);
+              if (entry) {
+                allEntries.push(entry);
+              }
+            } catch (parseError) {
+              // Skip malformed lines silently (community standard behavior)
+              continue;
+            }
+          }
+          
+          log.debug(`Loaded entries from ${path.basename(filePath)}`, 'UsageService');
         } catch (_error) {
           log.warn(`Failed to load ${filePath}`, 'UsageService');
         }
       }
 
-      // Deduplicate entries by UUID (Claude CLI provides unique UUIDs)
+      // Final UUID-based deduplication as backup
       const uniqueEntries = new Map<string, UsageEntry>();
       for (const entry of allEntries) {
         uniqueEntries.set(entry.id, entry);
@@ -658,7 +722,7 @@ export class UsageService {
       this.cache.clear();
       finalEntries.forEach(entry => this.cache.set(entry.id, entry));
       
-      log.info(`Successfully loaded ${finalEntries.length} unique usage entries from Claude CLI`, 'UsageService');
+      log.info(`Successfully loaded ${finalEntries.length} unique usage entries from Claude CLI (skipped ${duplicatesSkipped} duplicates)`, 'UsageService');
       return finalEntries;
     } catch (error) {
       log.service.error('UsageService', 'Failed to load from Claude CLI', error as Error);
