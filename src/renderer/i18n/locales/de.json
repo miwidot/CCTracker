@@ -58,9 +58,9 @@
   "dateRange": {
     "title": "Datumsbereich",
     "today": "Heute",
-    "7Days": "7 Tage",
-    "30Days": "30 Tage",
-    "all": "ALLE",
+    "7Days": "Wöchentlich",
+    "30Days": "Monatlich",
+    "all": "Gesamtzeitraum",
     "to": "bis",
     "last7Days": "Letzten 7 Tage",
     "last30Days": "Letzten 30 Tage",

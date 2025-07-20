@@ -106,10 +106,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 }) => {
   const { t } = useTranslation();
   const presetRanges = [
-    { label: t('dateRange.today'), days: 0 },
-    { label: t('dateRange.7Days'), days: 7 },
-    { label: t('dateRange.30Days'), days: 30 },
-    { label: t('dateRange.all'), days: null },
+    { label: t('dateRange.today'), type: 'today' as const },
+    { label: t('dateRange.7Days'), type: 'weekly' as const },
+    { label: t('dateRange.30Days'), type: 'monthly' as const },
+    { label: t('dateRange.all'), type: 'all' as const },
   ];
 
   return (
@@ -119,22 +119,34 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <button
             key={range.label}
             onClick={() => {
-              if (range.days === null) {
-                // ALL option - will be handled by parent component
-                onDateRangeChange(null, null); // Signal to use earliest data
-              } else if (range.days === 0) {
-                // Today option - show only today's data (UTC-based)
-                const now = new Date();
-                const start = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-                const end = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-                onDateRangeChange(start, end);
-              } else {
-                // Multi-day ranges (UTC-based)
-                const now = new Date();
-                const startDate = subDays(now, range.days);
-                const start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()));
-                const end = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-                onDateRangeChange(start, end);
+              const now = new Date();
+              const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+              
+              switch (range.type) {
+                case 'all':
+                  // All Time option - show all data
+                  onDateRangeChange(null, null);
+                  break;
+                  
+                case 'today':
+                  // Today option - show only today's data (UTC-based)
+                  onDateRangeChange(todayUTC, todayUTC);
+                  break;
+                  
+                case 'weekly': {
+                  // Weekly option - last 7 days (UTC-based)
+                  const weekStart = new Date(todayUTC);
+                  weekStart.setUTCDate(todayUTC.getUTCDate() - 6); // 7 days including today
+                  onDateRangeChange(weekStart, todayUTC);
+                  break;
+                }
+                  
+                case 'monthly': {
+                  // Monthly option - show current month from 1st to today
+                  const monthStart = new Date(Date.UTC(todayUTC.getUTCFullYear(), todayUTC.getUTCMonth(), 1));
+                  onDateRangeChange(monthStart, todayUTC);
+                  break;
+                }
               }
             }}
             className="btn interactive-bounce px-3 py-1 text-sm bg-[var(--bg-tertiary)] text-[var(--text-secondary)] rounded-md hover:bg-[var(--color-hover)] theme-transition"
@@ -149,7 +161,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           onChange={(date) => {
             if (date) {
               // Create UTC date to match string-based filtering
-              const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+              const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
               onDateRangeChange(utcDate, endDate);
             }
           }}
@@ -161,7 +173,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           onChange={(date) => {
             if (date) {
               // Create UTC date to match string-based filtering
-              const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+              const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
               onDateRangeChange(startDate, utcDate);
             }
           }}
@@ -303,10 +315,10 @@ const UsageDashboard: React.FC = () => {
   // State for date range filtering - default to today (UTC-based)
   const [dateRange, setDateRange] = useState(() => {
     const now = new Date();
-    const utcDate = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     return {
-      start: utcDate,
-      end: utcDate,
+      start: todayUTC,
+      end: todayUTC,
     };
   });
   
@@ -597,9 +609,9 @@ const UsageDashboard: React.FC = () => {
           onDateRangeChange={(start, end) => {
             if (start === null && end === null) {
               // ALL option - use earliest data date (UTC-based)
-              const allStart = new Date(Date.UTC(earliestDataDate.getFullYear(), earliestDataDate.getMonth(), earliestDataDate.getDate()));
+              const allStart = new Date(Date.UTC(earliestDataDate.getUTCFullYear(), earliestDataDate.getUTCMonth(), earliestDataDate.getUTCDate()));
               const now = new Date();
-              const allEnd = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+              const allEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
               setDateRange({ start: allStart, end: allEnd });
             } else if (start && end) {
               setDateRange({ start, end });

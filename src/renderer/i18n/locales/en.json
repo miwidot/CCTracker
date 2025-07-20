@@ -58,9 +58,9 @@
   "dateRange": {
     "title": "Date Range",
     "today": "Today",
-    "7Days": "7 Days",
-    "30Days": "30 Days",
-    "all": "ALL",
+    "7Days": "Weekly",
+    "30Days": "Monthly",
+    "all": "All Time",
     "to": "to",
     "last7Days": "Last 7 Days",
     "last30Days": "Last 30 Days",

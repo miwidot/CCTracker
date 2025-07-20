@@ -58,9 +58,9 @@
   "dateRange": {
     "title": "Plage de Dates",
     "today": "Aujourd'hui",
-    "7Days": "7 Jours",
-    "30Days": "30 Jours",
-    "all": "TOUT",
+    "7Days": "Hebdomadaire",
+    "30Days": "Mensuel",
+    "all": "Tout le Temps",
     "to": "à",
     "last7Days": "7 Derniers Jours",
     "last30Days": "30 Derniers Jours",

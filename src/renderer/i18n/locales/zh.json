@@ -58,9 +58,9 @@
   "dateRange": {
     "title": "日期范围",
     "today": "今天",
-    "7Days": "7天",
-    "30Days": "30天",
-    "all": "全部",
+    "7Days": "每周",
+    "30Days": "每月",
+    "all": "全部时间",
     "to": "至",
     "last7Days": "最近7天",
     "last30Days": "最近30天",
