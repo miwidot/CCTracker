@@ -112,7 +112,7 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
           </div>
         </div>
         <div className="p-3 bg-[var(--bg-tertiary)] rounded-lg text-center">
-          <div className="text-lg font-bold" style={{ color: chartTheme.success }}>
+          <div className="text-lg font-bold text-[var(--color-success)]">
             {formatCurrency(totalCostSavings)}
           </div>
           <div className="text-xs text-[var(--text-secondary)]">
@@ -128,11 +128,11 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
           </div>
         </div>
         <div className="p-3 bg-[var(--bg-tertiary)] rounded-lg text-center">
-          <div className="text-lg font-bold" style={{ 
-            color: trendDirection === 'improving' ? chartTheme.success : 
-                   trendDirection === 'declining' ? chartTheme.error : 
-                   chartTheme.textSecondary 
-          }}>
+          <div className={`text-lg font-bold ${
+            trendDirection === 'improving' ? 'text-[var(--color-success)]' : 
+            trendDirection === 'declining' ? 'text-[var(--color-error)]' : 
+            'text-[var(--text-secondary)]'
+          }`}>
             {trendDirection === 'stable' ? '→' : trendDirection === 'improving' ? '↗' : '↘'}
             {trendPercentage.toFixed(0)}%
           </div>
@@ -222,7 +222,7 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-secondary)]">{t('charts.cacheHitRateTimeline.cacheReads')}:</span>
-              <span className="font-medium" style={{ color: chartTheme.success }}>
+              <span className="font-medium text-[var(--color-success)]">
                 {totalCacheReads.toLocaleString()}
               </span>
             </div>
@@ -257,12 +257,12 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
             <div>• {t('charts.cacheHitRateTimeline.totalCostImpact')} {formatCurrency(totalCostSavings)} saved</div>
             
             {trendDirection === 'improving' && (
-              <div style={{ color: chartTheme.success }}>
+              <div className="text-[var(--color-success)]">
                 • {t('charts.cacheHitRateTimeline.improvingTrend')} {trendPercentage.toFixed(1)}%
               </div>
             )}
             {trendDirection === 'declining' && (
-              <div style={{ color: chartTheme.warning }}>
+              <div className="text-[var(--color-warning)]">
                 • {t('charts.cacheHitRateTimeline.decliningTrend')}
               </div>
             )}
