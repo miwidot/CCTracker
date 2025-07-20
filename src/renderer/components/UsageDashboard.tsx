@@ -38,6 +38,7 @@ import { MessageTypeChart } from './charts/MessageTypeChart';
 import { TokenUsageChart } from './charts/TokenUsageChart';
 import { AdvancedMetricsCards } from './charts/AdvancedMetricsCards';
 import { SessionEfficiencyScatter } from './charts/SessionEfficiencyScatter';
+import { CacheHitRateTimeline } from './charts/CacheHitRateTimeline';
 import type { UsageEntry, SessionStats } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
@@ -1143,6 +1144,65 @@ const UsageDashboard: React.FC = () => {
                   model: cleanModelName(session.model),
                 };
               })}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          {/* Cache Hit Rate Timeline */}
+          <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)] lg:col-span-2">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+              {t('charts.cacheHitRateTimeline.title')}
+            </h3>
+            <CacheHitRateTimeline
+              data={(() => {
+                // Group data by day to calculate cache metrics
+                const dailyCache = new Map<string, {
+                  cacheReads: number;
+                  cacheCreations: number;
+                  totalCost: number;
+                  sessions: Set<string>;
+                }>();
+
+                filteredData.forEach(entry => {
+                  const date = new Date(entry.timestamp).toISOString().split('T')[0];
+                  const current = dailyCache.get(date) || {
+                    cacheReads: 0,
+                    cacheCreations: 0,
+                    totalCost: 0,
+                    sessions: new Set()
+                  };
+
+                  current.cacheReads += entry.cache_read_tokens || 0;
+                  current.cacheCreations += entry.cache_creation_tokens || 0;
+                  current.totalCost += entry.cost_usd;
+                  if (entry.session_id) current.sessions.add(entry.session_id);
+
+                  dailyCache.set(date, current);
+                });
+
+                return Array.from(dailyCache.entries())
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([date, data]) => {
+                    const totalCacheOps = data.cacheReads + data.cacheCreations;
+                    const hitRate = totalCacheOps > 0 ? (data.cacheReads / totalCacheOps) * 100 : 0;
+                    
+                    // Estimate cost savings: cache reads are ~90% cheaper than cache creates
+                    const costSavings = (data.cacheReads * 0.00001) * 0.9; // Approximate savings
+                    
+                    // Calculate efficiency score
+                    const efficiency = Math.min(100, hitRate + (data.cacheReads / Math.max(data.cacheCreations, 1)) * 20);
+
+                    return {
+                      date,
+                      cacheHitRate: hitRate,
+                      totalCacheReads: data.cacheReads,
+                      totalCacheCreations: data.cacheCreations,
+                      costSavings: convertFromUSD(costSavings),
+                      totalSessions: data.sessions.size,
+                      cacheEfficiency: efficiency
+                    };
+                  });
+              })()}
               isLoading={isLoading}
             />
           </div>
