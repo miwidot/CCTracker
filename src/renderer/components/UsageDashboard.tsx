@@ -1160,6 +1160,8 @@ const UsageDashboard: React.FC = () => {
                   cacheReads: number;
                   cacheCreations: number;
                   totalCost: number;
+                  cacheReadCost: number;
+                  cacheCreateCost: number;
                   sessions: Set<string>;
                 }>();
 
@@ -1169,12 +1171,23 @@ const UsageDashboard: React.FC = () => {
                     cacheReads: 0,
                     cacheCreations: 0,
                     totalCost: 0,
+                    cacheReadCost: 0,
+                    cacheCreateCost: 0,
                     sessions: new Set()
                   };
 
-                  current.cacheReads += entry.cache_read_tokens || 0;
-                  current.cacheCreations += entry.cache_creation_tokens || 0;
+                  const cacheReads = entry.cache_read_tokens || 0;
+                  const cacheCreations = entry.cache_creation_tokens || 0;
+                  
+                  current.cacheReads += cacheReads;
+                  current.cacheCreations += cacheCreations;
                   current.totalCost += entry.cost_usd;
+                  
+                  // Estimate costs: cache reads are typically ~10x cheaper than cache creates
+                  // Using rough pricing: cache create ~$15/1M tokens, cache read ~$1.5/1M tokens
+                  current.cacheCreateCost += (cacheCreations / 1000000) * 15;
+                  current.cacheReadCost += (cacheReads / 1000000) * 1.5;
+                  
                   if (entry.session_id) current.sessions.add(entry.session_id);
 
                   dailyCache.set(date, current);
@@ -1186,8 +1199,10 @@ const UsageDashboard: React.FC = () => {
                     const totalCacheOps = data.cacheReads + data.cacheCreations;
                     const hitRate = totalCacheOps > 0 ? (data.cacheReads / totalCacheOps) * 100 : 0;
                     
-                    // Estimate cost savings: cache reads are ~90% cheaper than cache creates
-                    const costSavings = (data.cacheReads * 0.00001) * 0.9; // Approximate savings
+                    // Calculate actual cost savings: what cache reads would have cost if they were cache creates
+                    const potentialCacheCreateCost = (data.cacheReads / 1000000) * 15; // If all cache reads were cache creates
+                    const actualCacheReadCost = data.cacheReadCost;
+                    const costSavingsUSD = potentialCacheCreateCost - actualCacheReadCost;
                     
                     // Calculate efficiency score
                     const efficiency = Math.min(100, hitRate + (data.cacheReads / Math.max(data.cacheCreations, 1)) * 20);
@@ -1197,7 +1212,7 @@ const UsageDashboard: React.FC = () => {
                       cacheHitRate: hitRate,
                       totalCacheReads: data.cacheReads,
                       totalCacheCreations: data.cacheCreations,
-                      costSavings: convertFromUSD(costSavings),
+                      costSavings: convertFromUSD(costSavingsUSD),
                       totalSessions: data.sessions.size,
                       cacheEfficiency: efficiency
                     };
