@@ -231,7 +231,36 @@
     "growthForecast": "Growth Forecast",
     "dataQuality": "Data Quality",
     "exportSuccess": "Report exported successfully",
-    "exportError": "Failed to export report"
+    "exportError": "Failed to export report",
+    "timeOfDay": {
+      "morning": "Morning",
+      "afternoon": "Afternoon", 
+      "evening": "Evening",
+      "night": "Night"
+    },
+    "timePeriods": {
+      "morning": "6AM-12PM",
+      "afternoon": "12PM-6PM",
+      "evening": "6PM-12AM", 
+      "night": "12AM-6AM"
+    },
+    "insights": {
+      "modelOptimizationDesc": "Your most efficient model is {{model}}. Consider using it for {{percentage}}% more tasks to optimize costs.",
+      "peakHoursAnalysisDesc": "You're most active during {{hours}} on {{day}}s. {{suggestion}}",
+      "peakHoursSuggestionHigh": "Consider scheduling heavy tasks during off-peak hours if possible.",
+      "peakHoursSuggestionLow": "Your usage patterns are well-distributed.",
+      "sessionEfficiencyDescHigh": "Your sessions are comprehensive - consider breaking complex tasks into smaller focused sessions for better cost control.",
+      "sessionEfficiencyDescLow": "Your sessions are well-sized for efficient AI interaction.",
+      "sessionEfficiencyAverage": "Average {{tokens}} tokens per session. {{suggestion}}",
+      "budgetAlertDesc": "Projected overage of {{amount}} this month. Consider switching to more efficient models or reducing session frequency.",
+      "costOptimizationDescMultiple": "Switch {{percentage}}% of tasks from {{expensiveModel}} to {{efficientModel}} to save ~{{savings}}/month.",
+      "costOptimizationDescSingle": "Continue using your current model efficiently.",
+      "growthForecastDesc": "Based on current trends, expect {{amount}} next week ({{trend}}{{percentage}}% vs weekly average).",
+      "dataQualityDesc": "Analysis confidence: {{score}}% ({{dataPoints}} data points, {{time}}ms processing)",
+      "costPerMTokens": "Cost/M Tokens",
+      "modelsUsed": "Models Used",
+      "forecastConfidence": "Forecast Confidence"
+    }
   },
   "projectDetail": {
     "title": "Project Details",
