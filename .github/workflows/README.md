@@ -1,111 +1,189 @@
 # GitHub Actions Workflows
 
-This repository includes a streamlined GitHub Actions workflow for automated releasing of CCTracker.
+This repository includes comprehensive GitHub Actions workflows for automated building, testing, and releasing of CCTracker.
 
-## 🔄 Workflow Overview
+## 🔄 Workflows Overview
 
-### Release Workflow (`release.yml`)
+### 1. Build & Release (`build.yml`)
 **Triggers:**
-- Push tags matching `v*` pattern (e.g., `v1.0.0`, `v1.0.1-beta`)
+- Push to `main` branch (build only)
+- Pull requests to `main` (build only)
+- Scheduled nightly builds (2:00 AM UTC, main branch only)
+- Manual dispatch with configurable options
 
 **Features:**
-- ✅ Multi-platform builds (macOS DMG/ZIP, Linux DEB/TAR.GZ)
-- ✅ Automated GitHub release creation
-- ✅ Code signing support for macOS
-- ✅ Automatic changelog generation
-- ✅ Production-ready artifact generation
+- ✅ Multi-platform builds (macOS x64/ARM64, Linux x64)
+- ✅ Automated testing and quality checks
+- ✅ Nightly releases with automatic cleanup (keeps latest 7)
+- ✅ Manual release triggers with version control
+- ✅ Uses package.json version as base
 
-## 🚀 How to Create a Release
+### 2. Manual Build & Package (`manual-build.yml`)
+**Purpose:** On-demand building with full control over targets and release options
 
-1. **Update version in package.json:**
-   ```bash
-   npm version patch  # or minor/major
-   ```
+**Triggers:**
+- Manual dispatch only
 
-2. **Create and push a tag:**
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
+**Options:**
+- **Build Target:** Choose specific platforms or build all
+- **Version Suffix:** Add custom suffix to version
+- **Create Release:** Optionally create GitHub release
+- **Draft Release:** Create as draft for review
 
-3. **Workflow automatically:**
-   - Builds for all platforms
-   - Creates GitHub release
-   - Uploads artifacts
-   - Generates changelog
+## 🚀 How to Use
+
+### Automatic Builds
+1. **Push to main:** Automatic build without release
+2. **Nightly:** Automatic build and release every night at 2:00 AM UTC
+3. **Pull Request:** Build validation on PRs
+
+### Manual Builds
+1. Go to **Actions** tab in GitHub
+2. Select **Build & Release** or **Manual Build & Package**
+3. Click **Run workflow**
+4. Configure options:
+   - Release type (nightly, manual, patch, minor, major)
+   - Build targets (all, mac-only, linux-only)
+   - Version settings
+   - Release preferences
+
+### Release Types
+
+#### Automatic Nightly (main branch only)
+```
+Version: 1.0.0-nightly.20240615
+Trigger: Schedule (2:00 AM UTC)
+Platforms: macOS (x64, ARM64), Linux (x64)
+Release: Yes (prerelease)
+Cleanup: Keeps latest 7 nightly releases
+```
+
+#### Manual Release
+```
+Version: 1.0.0-manual.202406151430
+Trigger: Manual dispatch
+Platforms: Configurable
+Release: Optional
+```
+
+#### Semantic Release
+```
+Version: 1.0.0 (from package.json)
+Trigger: Manual dispatch with patch/minor/major
+Platforms: Configurable
+Release: Yes (full release)
+```
 
 ## 📦 Build Artifacts
 
-Each release produces:
+Each successful build produces:
 
 ### macOS
-- **DMG installer:** `CCTracker-{version}-mac.dmg`
-- **ZIP archive:** `CCTracker-{version}-mac.zip` (for auto-updater)
+- **DMG files:** `CCTracker-mac-{arch}.dmg`
+- **ZIP archives:** `CCTracker-mac-{arch}.zip`
+- **Architectures:** x64 (Intel), arm64 (Apple Silicon)
 
 ### Linux
-- **DEB package:** `CCTracker_{version}_amd64.deb` (Debian/Ubuntu)
-- **TAR.GZ archive:** `CCTracker-{version}-linux.tar.gz` (Universal)
+- **AppImage:** `CCTracker-linux-x64.AppImage` (portable)
+- **DEB packages:** `CCTracker-linux-x64.deb` (Debian/Ubuntu)
+- **RPM packages:** `CCTracker-linux-x64.rpm` (RedHat/Fedora)
+- **TAR.GZ archives:** `CCTracker-linux-x64.tar.gz`
+- **Architecture:** x64 (Intel/AMD)
 
 ## 🔧 Configuration
 
-### Required Secrets (Optional)
-For macOS code signing and notarization:
-- `APPLE_ID`: Apple Developer ID
-- `APPLE_APP_SPECIFIC_PASSWORD`: App-specific password
-- `APPLE_TEAM_ID`: Developer Team ID
-- `CSC_LINK`: Base64 encoded certificate
-- `CSC_KEY_PASSWORD`: Certificate password
-
 ### Package.json Scripts
-The workflow uses these npm scripts:
+The workflows use these npm scripts from package.json:
 ```json
 {
   "scripts": {
     "build": "npm run build:main && npm run build:renderer",
-    "package:mac:dmg": "electron-builder --mac dmg",
-    "package:mac:zip": "electron-builder --mac zip",
-    "package:linux:deb": "electron-builder --linux deb",
-    "package:linux:tar": "electron-builder --linux tar.gz"
+    "package:mac:x64": "electron-builder --mac --x64",
+    "package:mac:arm64": "electron-builder --mac --arm64", 
+    "package:linux:x64": "electron-builder --linux --x64",
+    "package:linux:arm64": "electron-builder --linux --arm64",
+    "test": "jest",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "type-check": "tsc --noEmit"
   }
 }
 ```
 
+### Environment Variables
+Required for full functionality:
+- `GITHUB_TOKEN`: Automatically provided
+- `APPLE_ID`: For macOS code signing (optional)
+- `APPLE_APP_SPECIFIC_PASSWORD`: For notarization (optional)
+- `APPLE_TEAM_ID`: Apple Developer Team ID (optional)
+
+### Electron Builder Configuration
+The `build` section in package.json defines:
+- Output directories
+- Platform-specific settings
+- Code signing configuration
+- Package formats and targets
+
 ## 🔒 Security & Code Signing
 
 ### macOS
-- **Code signing:** Optional, enabled if certificates are provided
-- **Notarization:** Optional, for Gatekeeper compliance
-- **Hardened runtime:** Enabled for security
+- **Hardened Runtime:** Enabled for security
+- **Entitlements:** Configured for necessary permissions
+- **Notarization:** Disabled by default (can be enabled with Apple credentials)
+- **Gatekeeper:** Assessment disabled for development builds
 
 ### Linux
-- Standard package signing through distribution mechanisms
+- **No code signing required**
+- **AppImage:** Self-contained portable format
+- **Package formats:** Standard DEB/RPM with dependencies
 
-## 📊 Release Process
+## 📊 Workflow Status
 
-1. **Tag Detection:** Workflow triggers on version tags
-2. **Version Extraction:** Gets version from tag (removes 'v' prefix)
-3. **Parallel Builds:** Builds all platforms simultaneously
-4. **Release Creation:** Creates GitHub release with:
-   - Auto-generated changelog
-   - All platform artifacts
-   - Version-specific release notes
+### Quality Checks
+Each build includes:
+- ✅ TypeScript compilation (`tsc --noEmit`)
+- ✅ Unit tests (`npm test`)
+- ✅ Code linting (`npm run lint`)
+- ✅ Dependency installation
+- ✅ Application build process
+
+### Build Matrix
+Parallel builds for efficiency:
+- **macOS:** Intel (x64) + Apple Silicon (arm64)
+- **Linux:** Intel/AMD (x64)
+
+## 🗂️ File Structure
+```
+.github/workflows/
+├── build.yml           # Main build & release workflow
+├── manual-build.yml    # Manual build workflow  
+└── README.md          # This documentation
+
+build/
+└── entitlements.mac.plist  # macOS entitlements
+
+package.json           # Build scripts and electron-builder config
+```
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
-1. **Tag format:** Must start with 'v' (e.g., v1.0.0)
-2. **Version mismatch:** Ensure package.json version matches tag
-3. **Build failures:** Check build logs for dependency issues
-4. **Signing errors:** Verify Apple Developer credentials
+1. **Build fails on dependencies:** Ensure all devDependencies are properly listed
+2. **macOS signing errors:** Check Apple Developer credentials in secrets
+3. **Linux missing libraries:** Workflow installs required system dependencies
+4. **Version conflicts:** Manual builds append timestamps to avoid conflicts
 
-### Version Guidelines
-- **Production:** `v1.0.0`
-- **Beta:** `v1.0.0-beta.1`
-- **RC:** `v1.0.0-rc.1`
+### Debug Information
+Workflows provide detailed logs including:
+- Build configuration
+- Version information  
+- Quality check results
+- Artifact locations
+- Release URLs (when created)
 
 ## 📝 Notes
 
-- **No PR/commit builds:** Only releases on tags to save build minutes
-- **Artifact retention:** Release artifacts are permanent
-- **Changelog:** Generated from commit messages between tags
-- **Platform support:** macOS and Linux (Windows can be added if needed)
+- **Nightly builds:** Only run on main branch to prevent spam
+- **Artifact retention:** 30 days for regular builds, 90 days for manual builds
+- **Release cleanup:** Automatically removes old nightly releases (keeps 7)
+- **Version control:** Uses package.json version as base, appends suffixes for builds
+- **Platform support:** Currently Mac and Linux only (Windows can be added if needed)
