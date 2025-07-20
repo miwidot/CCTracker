@@ -36,15 +36,19 @@ This repository includes a streamlined GitHub Actions workflow for automated rel
 
 ## 📦 Build Artifacts
 
-Each release produces:
+Each successful build produces:
 
 ### macOS
-- **DMG installer:** `CCTracker-{version}-mac.dmg`
-- **ZIP archive:** `CCTracker-{version}-mac.zip` (for auto-updater)
+- **DMG files:** `CCTracker-mac-{arch}.dmg`
+- **ZIP archives:** `CCTracker-mac-{arch}.zip`
+- **Architectures:** x64 (Intel), arm64 (Apple Silicon)
 
 ### Linux
-- **DEB package:** `CCTracker_{version}_amd64.deb` (Debian/Ubuntu)
-- **TAR.GZ archive:** `CCTracker-{version}-linux.tar.gz` (Universal)
+- **AppImage:** `CCTracker-linux-x64.AppImage` (portable)
+- **DEB packages:** `CCTracker-linux-x64.deb` (Debian/Ubuntu)
+- **RPM packages:** `CCTracker-linux-x64.rpm` (RedHat/Fedora)
+- **TAR.GZ archives:** `CCTracker-linux-x64.tar.gz`
+- **Architecture:** x64 (Intel/AMD)
 
 ## 🔧 Configuration
 
@@ -73,12 +77,15 @@ The workflow uses these npm scripts:
 ## 🔒 Security & Code Signing
 
 ### macOS
-- **Code signing:** Optional, enabled if certificates are provided
-- **Notarization:** Optional, for Gatekeeper compliance
-- **Hardened runtime:** Enabled for security
+- **Hardened Runtime:** Enabled for security
+- **Entitlements:** Configured for necessary permissions
+- **Notarization:** Disabled by default (can be enabled with Apple credentials)
+- **Gatekeeper:** Assessment disabled for development builds
 
 ### Linux
-- Standard package signing through distribution mechanisms
+- **No code signing required**
+- **AppImage:** Self-contained portable format
+- **Package formats:** Standard DEB/RPM with dependencies
 
 ## 📊 Release Process
 

@@ -26,24 +26,6 @@
     "perModelOverview": "Resumen por Modelo",
     "topProjects": "Top 5 Proyectos por Costo"
   },
-  "billing": {
-    "currentBlock": "Bloque de Facturación Actual",
-    "active": "Activo",
-    "inactive": "Sin Bloque Activo",
-    "blockProgress": "Progreso del Bloque",
-    "remaining": "restante",
-    "burnRate": "Tasa de Consumo",
-    "projectedCost": "Costo Proyectado",
-    "forThisBlock": "para este bloque",
-    "currentBlockCost": "Costo del Bloque Actual",
-    "totalTokens": "Tokens Totales",
-    "tokenBreakdown": "Desglose de Tokens",
-    "inputTokens": "Entrada",
-    "outputTokens": "Salida",
-    "cacheCreation": "Escritura de Caché",
-    "cacheRead": "Lectura de Caché",
-    "noData": "No hay datos de facturación disponibles"
-  },
   "charts": {
     "costOverTime": "Costo a lo Largo del Tiempo",
     "tokenUsageByModel": "Uso de Tokens por Modelo",
