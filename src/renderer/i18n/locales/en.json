@@ -221,7 +221,17 @@
     "tokensPerHour": "tokens/hour",
     "sessions": "sessions",
     "cost": "Cost",
-    "usage": "Usage"
+    "usage": "Usage",
+    "aiRecommendations": "AI Recommendations",
+    "modelOptimization": "Model Optimization",
+    "peakHoursAnalysis": "Peak Hours Analysis",
+    "sessionEfficiencyTip": "Session Efficiency",
+    "budgetAlert": "Budget Alert",
+    "costOptimization": "Cost Optimization",
+    "growthForecast": "Growth Forecast",
+    "dataQuality": "Data Quality",
+    "exportSuccess": "Report exported successfully",
+    "exportError": "Failed to export report"
   },
   "projectDetail": {
     "title": "Project Details",
