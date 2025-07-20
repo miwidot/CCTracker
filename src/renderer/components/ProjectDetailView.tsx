@@ -277,6 +277,49 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
     return detailedData.dailyStats.filter(stat => stat.date >= cutoffDate);
   }, [detailedData, timeRange]);
 
+  // Calculate filtered metrics based on time range
+  const filteredMetrics = useMemo(() => {
+    if (!detailedData) {
+      return {
+        totalCost: project.total_cost,
+        totalTokens: project.total_tokens,
+        sessionCount: project.session_count,
+        cacheReads: 0,
+        cacheWrites: 0,
+      };
+    }
+
+    if (timeRange === 'all') {
+      return {
+        totalCost: project.total_cost,
+        totalTokens: project.total_tokens,
+        sessionCount: project.session_count,
+        cacheReads: detailedData.cacheStats.totalCacheReads,
+        cacheWrites: detailedData.cacheStats.totalCacheWrites,
+      };
+    }
+
+    // Filter entries based on time range
+    const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+    const cutoffDate = subDays(new Date(), days);
+    
+    const filteredEntries = detailedData.usageEntries.filter(entry => 
+      new Date(entry.timestamp) >= cutoffDate
+    );
+    
+    const filteredSessions = detailedData.sessions.filter(session =>
+      new Date(session.start_time) >= cutoffDate
+    );
+
+    return {
+      totalCost: filteredEntries.reduce((sum, entry) => sum + convertFromUSD(entry.cost_usd), 0),
+      totalTokens: filteredEntries.reduce((sum, entry) => sum + entry.total_tokens, 0),
+      sessionCount: filteredSessions.length,
+      cacheReads: filteredEntries.reduce((sum, entry) => sum + (entry.cache_read_tokens ?? 0), 0),
+      cacheWrites: filteredEntries.reduce((sum, entry) => sum + (entry.cache_creation_tokens ?? 0), 0),
+    };
+  }, [detailedData, timeRange, project, convertFromUSD]);
+
   const projectAge = useMemo(() => {
     if (!detailedData?.dailyStats || detailedData.dailyStats.length === 0) return 0;
     const firstDate = new Date(detailedData.dailyStats[0].date);
@@ -380,13 +423,18 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               <div>
                 <p className="text-sm text-[var(--text-secondary)]">{t('projectDetail.totalCost')}</p>
                 <p className="text-2xl font-bold text-[var(--text-primary)]">
-                  {formatCurrencyDetailed(project.total_cost, 2)}
+                  {formatCurrencyDetailed(filteredMetrics.totalCost, 2)}
                 </p>
               </div>
               <CurrencyDollarIcon className="h-8 w-8 text-[var(--color-primary)]" />
             </div>
             <div className="mt-2 text-xs text-[var(--text-secondary)]">
-              {t('projectDetail.sinceDate', { date: format(new Date(project.last_used), 'MMM dd, yyyy') })}
+              {timeRange === 'all' 
+                ? t('projectDetail.sinceDate', { date: format(new Date(detailedData?.dailyStats?.[0]?.date ?? project.last_used), 'MMM dd, yyyy') })
+                : timeRange === '7d' ? 'Last 7 days'
+                : timeRange === '30d' ? 'Last 30 days' 
+                : 'Last 90 days'
+              }
             </div>
           </div>
 
@@ -395,13 +443,13 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               <div>
                 <p className="text-sm text-[var(--text-secondary)]">{t('projectDetail.totalTokens')}</p>
                 <p className="text-2xl font-bold text-[var(--text-primary)]">
-                  {formatTokens(project.total_tokens)}
+                  {formatTokens(filteredMetrics.totalTokens)}
                 </p>
               </div>
               <CpuChipIcon className="h-8 w-8 text-[var(--color-primary)]" />
             </div>
             <div className="mt-2 text-xs text-[var(--text-secondary)]">
-              {t('projectDetail.acrossSessions', { count: project.session_count })}
+              {t('projectDetail.acrossSessions', { count: filteredMetrics.sessionCount })}
             </div>
           </div>
 
@@ -410,13 +458,16 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ project, onBack }
               <div>
                 <p className="text-sm text-[var(--text-secondary)]">{t('projectDetail.cacheEfficiency')}</p>
                 <p className="text-2xl font-bold text-[var(--text-primary)]">
-                  {detailedData.cacheStats.cacheHitRatio.toFixed(1)}%
+                  {filteredMetrics.cacheReads > 0 ? 
+                    ((filteredMetrics.cacheReads / (filteredMetrics.cacheReads + filteredMetrics.cacheWrites)) * 100).toFixed(1) :
+                    '0.0'
+                  }%
                 </p>
               </div>
               <RocketLaunchIcon className="h-8 w-8 text-[var(--color-primary)]" />
             </div>
             <div className="mt-2 text-xs text-[var(--text-secondary)]">
-              {formatTokens(detailedData.cacheStats.totalCacheReads)} {t('projectDetail.cacheReads')}
+              {formatTokens(filteredMetrics.cacheReads)} {t('projectDetail.cacheReads')}
             </div>
           </div>
 

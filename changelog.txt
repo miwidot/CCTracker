@@ -1,3 +1,27 @@
+2025-07-20 00:50 PST - Fix Project Detail date range buttons functionality
+- Fixed 7D, 30D, 90D, All Time buttons not filtering data properly
+- Overview cards now update based on selected time range
+- Total Cost, Total Tokens, Session Count reflect filtered period
+- Cache efficiency recalculates for selected time range
+- Date label shows appropriate range (e.g., "Last 7 days" instead of "Since Jul 20")
+- Chart already used filtered data, now metrics match
+
+2025-07-20 00:40 PST - Fix Per Model Overview token count display
+- Fixed token count showing as 0 in Per Model Overview section
+- Issue was caused by model name mismatch during filtering
+- Now correctly compares cleaned model names when calculating tokens
+- Model names in overview already show cleaned version (no redundant cleaning)
+
+2025-07-20 00:30 PST - Add advanced analytics charts and visualizations
+- Added Pareto chart for cost distribution with cumulative percentage line
+- Implemented message type distribution pie chart
+- Created token usage distribution area chart showing all token types over time
+- Added advanced metrics cards: Active Projects, Avg Cost/User, Total Messages, Top Model Share
+- All charts support theme switching and internationalization
+- Charts use the existing chart theme system for consistent styling
+- Added smooth animations and loading states for all new components
+- Inspired by professional usage analytics dashboards
+
 2025-07-20 00:15 PST - Implement intuitive date range calculations for Weekly and Monthly
 - Monthly option now shows current month from 1st to today (e.g., July 1-20, not June 20-July 20)
 - This is more intuitive and matches user expectations for "monthly" data
