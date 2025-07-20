@@ -1,3 +1,11 @@
+2025-07-20 00:50 PST - Fix Project Detail date range buttons functionality
+- Fixed 7D, 30D, 90D, All Time buttons not filtering data properly
+- Overview cards now update based on selected time range
+- Total Cost, Total Tokens, Session Count reflect filtered period
+- Cache efficiency recalculates for selected time range
+- Date label shows appropriate range (e.g., "Last 7 days" instead of "Since Jul 20")
+- Chart already used filtered data, now metrics match
+
 2025-07-20 00:40 PST - Fix Per Model Overview token count display
 - Fixed token count showing as 0 in Per Model Overview section
 - Issue was caused by model name mismatch during filtering
