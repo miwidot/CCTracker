@@ -37,6 +37,8 @@ import { ParetoChart } from './charts/ParetoChart';
 import { MessageTypeChart } from './charts/MessageTypeChart';
 import { TokenUsageChart } from './charts/TokenUsageChart';
 import { AdvancedMetricsCards } from './charts/AdvancedMetricsCards';
+import { SessionEfficiencyScatter } from './charts/SessionEfficiencyScatter';
+import { CacheHitRateTimeline } from './charts/CacheHitRateTimeline';
 import type { UsageEntry, SessionStats } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
@@ -1107,6 +1109,115 @@ const UsageDashboard: React.FC = () => {
                   cacheWriteTokens: dayEntries.reduce((sum, e) => sum + (e.cache_creation_tokens ?? 0), 0),
                 };
               })}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          {/* Session Efficiency Scatter Plot */}
+          <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)] lg:col-span-2">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+              {t('charts.sessionEfficiency.title')}
+            </h3>
+            <SessionEfficiencyScatter
+              data={filteredSessions.map(session => {
+                const startTime = new Date(session.start_time);
+                const endTime = new Date(session.end_time);
+                const durationMinutes = (endTime.getTime() - startTime.getTime()) / 60000; // Convert to minutes
+                const tokensPerMinute = durationMinutes > 0 ? session.total_tokens / durationMinutes : 0;
+                const costPerToken = session.total_tokens > 0 ? session.total_cost / session.total_tokens : 0;
+                
+                // Calculate efficiency score based on tokens/minute and cost efficiency
+                const efficiency = Math.min(
+                  100,
+                  (tokensPerMinute / 50) * 60 + // 50 tokens/min = 60% of score
+                  ((1 / (costPerToken * 1000000)) * 40) // Lower cost per token = higher efficiency
+                );
+                
+                return {
+                  sessionId: session.session_id,
+                  duration: durationMinutes,
+                  totalTokens: session.total_tokens,
+                  cost: convertFromUSD(session.total_cost),
+                  tokensPerMinute,
+                  costPerToken,
+                  efficiency: Math.max(0, efficiency),
+                  model: cleanModelName(session.model),
+                };
+              })}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          {/* Cache Hit Rate Timeline */}
+          <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)] lg:col-span-2">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+              {t('charts.cacheHitRateTimeline.title')}
+            </h3>
+            <CacheHitRateTimeline
+              data={(() => {
+                // Group data by day to calculate cache metrics
+                const dailyCache = new Map<string, {
+                  cacheReads: number;
+                  cacheCreations: number;
+                  totalCost: number;
+                  cacheReadCost: number;
+                  cacheCreateCost: number;
+                  sessions: Set<string>;
+                }>();
+
+                filteredData.forEach(entry => {
+                  const date = new Date(entry.timestamp).toISOString().split('T')[0];
+                  const current = dailyCache.get(date) || {
+                    cacheReads: 0,
+                    cacheCreations: 0,
+                    totalCost: 0,
+                    cacheReadCost: 0,
+                    cacheCreateCost: 0,
+                    sessions: new Set()
+                  };
+
+                  const cacheReads = entry.cache_read_tokens || 0;
+                  const cacheCreations = entry.cache_creation_tokens || 0;
+                  
+                  current.cacheReads += cacheReads;
+                  current.cacheCreations += cacheCreations;
+                  current.totalCost += entry.cost_usd;
+                  
+                  // Estimate costs: cache reads are typically ~10x cheaper than cache creates
+                  // Using rough pricing: cache create ~$15/1M tokens, cache read ~$1.5/1M tokens
+                  current.cacheCreateCost += (cacheCreations / 1000000) * 15;
+                  current.cacheReadCost += (cacheReads / 1000000) * 1.5;
+                  
+                  if (entry.session_id) current.sessions.add(entry.session_id);
+
+                  dailyCache.set(date, current);
+                });
+
+                return Array.from(dailyCache.entries())
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([date, data]) => {
+                    const totalCacheOps = data.cacheReads + data.cacheCreations;
+                    const hitRate = totalCacheOps > 0 ? (data.cacheReads / totalCacheOps) * 100 : 0;
+                    
+                    // Calculate actual cost savings: what cache reads would have cost if they were cache creates
+                    const potentialCacheCreateCost = (data.cacheReads / 1000000) * 15; // If all cache reads were cache creates
+                    const actualCacheReadCost = data.cacheReadCost;
+                    const costSavingsUSD = potentialCacheCreateCost - actualCacheReadCost;
+                    
+                    // Calculate efficiency score
+                    const efficiency = Math.min(100, hitRate + (data.cacheReads / Math.max(data.cacheCreations, 1)) * 20);
+
+                    return {
+                      date,
+                      cacheHitRate: hitRate,
+                      totalCacheReads: data.cacheReads,
+                      totalCacheCreations: data.cacheCreations,
+                      costSavings: convertFromUSD(costSavingsUSD),
+                      totalSessions: data.sessions.size,
+                      cacheEfficiency: efficiency
+                    };
+                  });
+              })()}
               isLoading={isLoading}
             />
           </div>

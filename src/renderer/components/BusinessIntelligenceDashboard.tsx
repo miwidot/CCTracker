@@ -26,9 +26,12 @@ import {
 } from 'recharts';
 import { useTranslation } from '../hooks/useTranslation';
 import { useChartTheme } from '../hooks/useChartTheme';
+import { useCurrency } from '../hooks/useCurrency';
 import { cleanModelName, capitalizeWords } from '@shared/utils';
 import type { BusinessIntelligence, ModelEfficiency, UsageAnomaly } from '@shared/types';
 import { log } from '@shared/utils/logger';
+import { BurnRateGauge } from './charts/BurnRateGauge';
+import { PeriodComparisonChart } from './charts/PeriodComparisonChart';
 
 interface BIMetricCardProps {
   title: string;
@@ -88,6 +91,7 @@ interface ModelEfficiencyTableProps {
 
 const ModelEfficiencyTable: React.FC<ModelEfficiencyTableProps> = ({ models }) => {
   const { t } = useTranslation();
+  const { formatCurrencyDetailed } = useCurrency();
   return (
   <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)]">
     <div className="p-6 border-b border-[var(--border-color)]">
@@ -125,10 +129,10 @@ const ModelEfficiencyTable: React.FC<ModelEfficiencyTableProps> = ({ models }) =
                 {model.model}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
-                ${(model.costPerToken * 1000000).toFixed(2)}/M
+                {formatCurrencyDetailed(model.costPerToken * 1000000, 2)}/M
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
-                ${model.totalCost.toFixed(4)}
+                {formatCurrencyDetailed(model.totalCost, 4)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                 {model.usageCount.toLocaleString()}
@@ -203,6 +207,7 @@ const AnomalyAlerts: React.FC<AnomalyAlertsProps> = ({ anomalies }) => {
 export const BusinessIntelligenceDashboard: React.FC = () => {
   const { t } = useTranslation();
   const chartTheme = useChartTheme();
+  const { formatCurrency, formatCurrencyDetailed } = useCurrency();
   // Chart CSS variables available if needed
   // const chartCSSVars = getChartCSSVariables();
   const [biData, setBiData] = useState<BusinessIntelligence | null>(null);
@@ -291,10 +296,10 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
   }));
 
   const usagePatternData = [
-    { time: 'Morning', usage: biData.usage_patterns.morning, period: '6AM-12PM' },
-    { time: 'Afternoon', usage: biData.usage_patterns.afternoon, period: '12PM-6PM' },
-    { time: 'Evening', usage: biData.usage_patterns.evening, period: '6PM-12AM' },
-    { time: 'Night', usage: biData.usage_patterns.night, period: '12AM-6AM' },
+    { time: t('businessIntelligence.timeOfDay.morning'), usage: biData.usage_patterns.morning, period: t('businessIntelligence.timePeriods.morning') },
+    { time: t('businessIntelligence.timeOfDay.afternoon'), usage: biData.usage_patterns.afternoon, period: t('businessIntelligence.timePeriods.afternoon') },
+    { time: t('businessIntelligence.timeOfDay.evening'), usage: biData.usage_patterns.evening, period: t('businessIntelligence.timePeriods.evening') },
+    { time: t('businessIntelligence.timeOfDay.night'), usage: biData.usage_patterns.night, period: t('businessIntelligence.timePeriods.night') },
   ];
 
   return (
@@ -355,13 +360,13 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <BIMetricCard
             title={t('businessIntelligence.totalCost')}
-            value={`$${biData.total_cost.toFixed(4)}`}
+            value={formatCurrencyDetailed(biData.total_cost, 4)}
             icon={CurrencyDollarIcon}
             color="green"
           />
           <BIMetricCard
             title={t('businessIntelligence.costBurnRate')}
-            value={`$${biData.cost_burn_rate.toFixed(4)}/hr`}
+            value={`${formatCurrencyDetailed(biData.cost_burn_rate, 4)}/hr`}
             icon={ClockIcon}
             subtitle={t('businessIntelligence.currentSpendingRate')}
             color="blue"
@@ -385,7 +390,7 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <BIMetricCard
             title={t('businessIntelligence.predictedMonthlyCost')}
-            value={`$${biData.predictions.predicted_monthly_cost.toFixed(2)}`}
+            value={formatCurrency(biData.predictions.predicted_monthly_cost)}
             icon={SparklesIcon}
             subtitle={`${biData.predictions.confidence_level.toFixed(1)}% ${t('businessIntelligence.confidence')}`}
             trend={{
@@ -399,7 +404,7 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
           />
           <BIMetricCard
             title={t('businessIntelligence.nextWeekForecast')}
-            value={`$${biData.predictions.next_week_forecast.cost.toFixed(2)}`}
+            value={formatCurrency(biData.predictions.next_week_forecast.cost)}
             icon={CalendarDaysIcon}
             subtitle={`${(biData.predictions.next_week_forecast.tokens / 1000).toFixed(0)}K tokens`}
             color="blue"
@@ -409,7 +414,7 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
             value={biData.predictions.budget_risk.level.toUpperCase()}
             icon={ExclamationTriangleIcon}
             subtitle={biData.predictions.budget_risk.projected_overage > 0 ? 
-              `$${biData.predictions.budget_risk.projected_overage.toFixed(2)} ${t('businessIntelligence.overage')}` : t('businessIntelligence.onTrack')}
+              `${formatCurrency(biData.predictions.budget_risk.projected_overage)} ${t('businessIntelligence.overage')}` : t('businessIntelligence.onTrack')}
             color={biData.predictions.budget_risk.level === 'high' ? 'red' : 
                    biData.predictions.budget_risk.level === 'medium' ? 'yellow' : 'green'}
           />
@@ -417,46 +422,35 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Cost Trends Chart */}
+          {/* Period Comparison Chart */}
           <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
               <ArrowTrendingUpIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
               {t('businessIntelligence.costTrends')}
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={trendsChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                <XAxis 
-                  dataKey="date" 
-                  stroke={chartTheme.axis}
-                  fontSize={12}
-                />
-                <YAxis 
-                  stroke={chartTheme.axis}
-                  fontSize={12}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: chartTheme.tooltipBackground,
-                    border: `1px solid ${chartTheme.tooltipBorder}`,
-                    borderRadius: '8px',
-                    color: chartTheme.text,
-                  }}
-                  formatter={(value, name) => [
-                    name === 'cost' ? `$${Number(value).toFixed(4)}` : `${Number(value).toFixed(0)}K`,
-                    name === 'cost' ? t('businessIntelligence.cost') : t('businessIntelligence.tokens')
-                  ]} 
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="cost" 
-                  stackId="1" 
-                  stroke={chartTheme.primary} 
-                  fill={chartTheme.primary} 
-                  fillOpacity={0.6} 
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <PeriodComparisonChart
+              data={(() => {
+                // Generate comparison data from trends
+                const currentWeekData = biData.trends.weekly.slice(-1)[0];
+                const previousWeekData = biData.trends.weekly.slice(-2)[0];
+                const currentMonthData = biData.trends.monthly.slice(-1)[0];
+                const previousMonthData = biData.trends.monthly.slice(-2)[0];
+                
+                return [
+                  {
+                    period: 'Recent',
+                    currentCost: currentWeekData?.cost || 0,
+                    previousCost: previousWeekData?.cost || 0,
+                    currentTokens: currentWeekData?.tokens || 0,
+                    previousTokens: previousWeekData?.tokens || 0,
+                    currentSessions: currentWeekData?.sessions || 0,
+                    previousSessions: previousWeekData?.sessions || 0,
+                  }
+                ];
+              })()}
+              comparisonType="weekly"
+              isLoading={loading}
+            />
           </div>
 
           {/* Usage Patterns */}
@@ -492,36 +486,152 @@ export const BusinessIntelligenceDashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Real-Time Burn Rate Gauge */}
+        <div className="mb-8">
+          <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
+              <CurrencyDollarIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
+              {t('businessIntelligence.costBurnRate')}
+            </h3>
+            <BurnRateGauge
+              currentBurnRate={biData.cost_burn_rate}
+              budgetLimit={biData.predictions.predicted_monthly_cost * 1.2} // 20% buffer for budget limit
+              isLoading={loading}
+            />
+          </div>
+        </div>
+
         {/* Model Efficiency and Anomalies */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <ModelEfficiencyTable models={biData.model_efficiency} />
           <AnomalyAlerts anomalies={biData.anomalies} />
         </div>
 
-        {/* Usage Insights */}
+        {/* AI-Generated Insights & Recommendations */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Usage Patterns & Insights */}
+          <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
+              <BoltIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
+              {t('businessIntelligence.usagePatterns')}
+            </h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg border-l-4 border-[var(--text-accent)]">
+                <h4 className="font-medium text-[var(--text-primary)] mb-2">🎯 {t('businessIntelligence.modelOptimization')}</h4>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {t('businessIntelligence.insights.modelOptimizationDesc', {
+                    model: biData.most_efficient_model,
+                    percentage: Math.round((1 - (biData.model_efficiency.find(m => m.model === biData.most_efficient_model)?.efficiency_score || 0) / 100) * 30)
+                  })}
+                </p>
+              </div>
+              
+              <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg border-l-4 border-[var(--color-success)]">
+                <h4 className="font-medium text-[var(--text-primary)] mb-2">⏰ {t('businessIntelligence.peakHoursAnalysis')}</h4>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {t('businessIntelligence.insights.peakHoursAnalysisDesc', {
+                    hours: biData.peak_usage_hours.join(', '),
+                    day: biData.busiest_day_of_week,
+                    suggestion: biData.cost_burn_rate > 0.01 
+                      ? t('businessIntelligence.insights.peakHoursSuggestionHigh')
+                      : t('businessIntelligence.insights.peakHoursSuggestionLow')
+                  })}
+                </p>
+              </div>
+
+              <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg border-l-4 border-[var(--color-warning)]">
+                <h4 className="font-medium text-[var(--text-primary)] mb-2">📊 {t('businessIntelligence.sessionEfficiencyTip')}</h4>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {t('businessIntelligence.insights.sessionEfficiencyAverage', {
+                    tokens: biData.session_efficiency.toFixed(0),
+                    suggestion: biData.session_efficiency > 5000 
+                      ? t('businessIntelligence.insights.sessionEfficiencyDescHigh')
+                      : t('businessIntelligence.insights.sessionEfficiencyDescLow')
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Recommendations */}
+          <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
+              <SparklesIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
+              {t('businessIntelligence.aiRecommendations')}
+            </h3>
+            <div className="space-y-4">
+              {biData.predictions.budget_risk.level === 'high' && (
+                <div className="p-4 bg-[var(--bg-error)] rounded-lg border-l-4 border-[var(--color-error)]">
+                  <h4 className="font-medium text-[var(--text-error)] mb-2">🚨 {t('businessIntelligence.budgetAlert')}</h4>
+                  <p className="text-sm text-[var(--text-error)]">
+                    {t('businessIntelligence.insights.budgetAlertDesc', {
+                      amount: formatCurrency(biData.predictions.budget_risk.projected_overage)
+                    })}
+                  </p>
+                </div>
+              )}
+              
+              <div className="p-4 bg-[var(--bg-info)] rounded-lg border-l-4 border-[var(--text-accent)]">
+                <h4 className="font-medium text-[var(--text-primary)] mb-2">💡 {t('businessIntelligence.costOptimization')}</h4>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {biData.model_efficiency.length > 1 
+                    ? t('businessIntelligence.insights.costOptimizationDescMultiple', {
+                        percentage: Math.round(((biData.model_efficiency[biData.model_efficiency.length - 1]?.costPerToken || 0) / (biData.model_efficiency[0]?.costPerToken || 1) - 1) * 100),
+                        expensiveModel: biData.model_efficiency[biData.model_efficiency.length - 1]?.model || 'expensive models',
+                        efficientModel: biData.most_efficient_model,
+                        savings: formatCurrency((biData.total_cost * 0.15))
+                      })
+                    : t('businessIntelligence.insights.costOptimizationDescSingle')}
+                </p>
+              </div>
+
+              <div className="p-4 bg-[var(--bg-success)] rounded-lg border-l-4 border-[var(--color-success)]">
+                <h4 className="font-medium text-[var(--text-primary)] mb-2">📈 {t('businessIntelligence.growthForecast')}</h4>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {t('businessIntelligence.insights.growthForecastDesc', {
+                    amount: formatCurrency(biData.predictions.next_week_forecast.cost),
+                    trend: biData.predictions.cost_trend === 'increasing' ? '+' : biData.predictions.cost_trend === 'decreasing' ? '-' : '±',
+                    percentage: Math.abs(((biData.predictions.next_week_forecast.cost / (biData.total_cost / 4)) - 1) * 100).toFixed(0)
+                  })}
+                </p>
+              </div>
+
+              <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg border-l-4 border-[var(--border-color)]">
+                <h4 className="font-medium text-[var(--text-primary)] mb-2">🎲 {t('businessIntelligence.dataQuality')}</h4>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {t('businessIntelligence.insights.dataQualityDesc', {
+                    score: biData.data_quality_score.toFixed(0),
+                    dataPoints: biData.data_points_analyzed.toLocaleString(),
+                    time: biData.calculation_time_ms.toFixed(0)
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Performance Metrics Summary */}
         <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center text-[var(--text-primary)]">
-            <BoltIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
-            {t('businessIntelligence.insightsRecommendations')}
+            <ChartBarIcon className="h-5 w-5 mr-2 text-[var(--text-accent)]" />
+            {t('businessIntelligence.performanceMetrics')}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-medium text-[var(--text-primary)] mb-3">{t('businessIntelligence.usagePatterns')}</h4>
-              <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
-                <li>• {t('businessIntelligence.mostEfficientModel')}: <strong>{biData.most_efficient_model}</strong></li>
-                <li>• {t('businessIntelligence.peakUsageHours')}: <strong>{biData.peak_usage_hours.join(', ')}</strong></li>
-                <li>• {t('businessIntelligence.busiestDay')}: <strong>{biData.busiest_day_of_week}</strong></li>
-                <li>• {t('businessIntelligence.sessionEfficiency')}: <strong>{biData.session_efficiency.toFixed(0)} {t('businessIntelligence.tokens')}/session</strong></li>
-              </ul>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg">
+              <div className="text-2xl font-bold text-[var(--text-accent)]">{biData.tokens_per_hour.toFixed(0)}</div>
+              <div className="text-sm text-[var(--text-secondary)]">{t('businessIntelligence.tokensPerHour')}</div>
             </div>
-            <div>
-              <h4 className="font-medium text-[var(--text-primary)] mb-3">{t('businessIntelligence.performanceMetrics')}</h4>
-              <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
-                <li>• {t('businessIntelligence.processingSpeed')}: <strong>{biData.tokens_per_hour.toFixed(0)} {t('businessIntelligence.tokensPerHour')}</strong></li>
-                <li>• {t('businessIntelligence.dataAnalyzed')}: <strong>{biData.data_points_analyzed.toLocaleString()} {t('businessIntelligence.entries')}</strong></li>
-                <li>• {t('businessIntelligence.analysisTime')}: <strong>{biData.calculation_time_ms.toFixed(0)}ms</strong></li>
-                <li>• {t('businessIntelligence.costEfficiency')}: <strong>${(biData.cost_per_token * 1000000).toFixed(2)}/M {t('businessIntelligence.tokens')}</strong></li>
-              </ul>
+            <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg">
+              <div className="text-2xl font-bold text-[var(--text-accent)]">{formatCurrencyDetailed(biData.cost_per_token * 1000000, 2)}</div>
+              <div className="text-sm text-[var(--text-secondary)]">{t('businessIntelligence.insights.costPerMTokens')}</div>
+            </div>
+            <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg">
+              <div className="text-2xl font-bold text-[var(--text-accent)]">{biData.model_diversity}</div>
+              <div className="text-sm text-[var(--text-secondary)]">{t('businessIntelligence.insights.modelsUsed')}</div>
+            </div>
+            <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg">
+              <div className="text-2xl font-bold text-[var(--text-accent)]">{biData.predictions.confidence_level.toFixed(0)}%</div>
+              <div className="text-sm text-[var(--text-secondary)]">{t('businessIntelligence.insights.forecastConfidence')}</div>
             </div>
           </div>
         </div>
