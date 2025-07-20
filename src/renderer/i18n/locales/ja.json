@@ -26,24 +26,6 @@
     "perModelOverview": "モデル別概要",
     "topProjects": "コスト上位5プロジェクト"
   },
-  "billing": {
-    "currentBlock": "現在の課金ブロック",
-    "active": "アクティブ",
-    "inactive": "アクティブなブロックなし",
-    "blockProgress": "ブロック進行状況",
-    "remaining": "残り",
-    "burnRate": "消費レート",
-    "projectedCost": "予測コスト",
-    "forThisBlock": "このブロック",
-    "currentBlockCost": "現在のブロックコスト",
-    "totalTokens": "総トークン数",
-    "tokenBreakdown": "トークン内訳",
-    "inputTokens": "入力",
-    "outputTokens": "出力",
-    "cacheCreation": "キャッシュ書き込み",
-    "cacheRead": "キャッシュ読み込み",
-    "noData": "課金データがありません"
-  },
   "charts": {
     "costOverTime": "時系列コスト",
     "tokenUsageByModel": "モデル別トークン使用量",

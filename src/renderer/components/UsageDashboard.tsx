@@ -33,9 +33,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useTranslation } from '../hooks/useTranslation';
 import { useChartTheme } from '../hooks/useChartTheme';
 import { ThemedDatePicker } from './ThemedDatePicker';
-import { BillingBlockDashboard } from './BillingBlockDashboard';
-import { ProjectGridView } from './ProjectGridView';
-import type { UsageEntry, SessionStats, ProjectAnalytics } from '@shared/types';
+import type { UsageEntry, SessionStats } from '@shared/types';
 import { log } from '@shared/utils/logger';
 
 // Sub-components
@@ -284,7 +282,7 @@ const UsageDashboard: React.FC = () => {
   // const chartCSSVars = getChartCSSVariables();
   
   // State for centralized project costs
-  const [_projectCosts, _setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
+  const [projectCosts, setProjectCosts] = useState<Record<string, { costUSD: number; costConverted: number; formatted: string }>>({});
   
   // State for date range filtering - default to last 7 days
   const [dateRange, setDateRange] = useState({
@@ -306,11 +304,6 @@ const UsageDashboard: React.FC = () => {
   
   // State for real-time updates
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
-  // State for project data
-  const [projectAnalytics, setProjectAnalytics] = useState<ProjectAnalytics[]>([]);
-  const [currentBillingBlock, setCurrentBillingBlock] = useState<any>(null);
-  const [_selectedProject, _setSelectedProject] = useState<ProjectAnalytics | null>(null);
   
   // State for cost chart view type
   // Daily spending analysis state
@@ -421,42 +414,23 @@ const UsageDashboard: React.FC = () => {
   useEffect(() => {
     const calculateProjectCosts = async () => {
       if (filteredData.length === 0) {
-        _setProjectCosts({});
+        setProjectCosts({});
         return;
       }
       
       try {
         const _currenciesProject = await window.electronAPI.getCurrencyRates();
         const costs = await window.electronAPI.calculateProjectCosts(filteredData, settings.currency, _currenciesProject);
-        _setProjectCosts(costs);
+        setProjectCosts(costs);
         
       } catch (error) {
         log.component.error('UsageDashboard', error as Error);
-        _setProjectCosts({});
+        setProjectCosts({});
       }
     };
     
     void calculateProjectCosts();
   }, [filteredData, settings.currency]); // Removed formatCurrencyDetailed to prevent infinite loop
-  
-  // Load project analytics and billing block data
-  useEffect(() => {
-    const loadProjectData = async () => {
-      try {
-        // Load project breakdown
-        const projects = await window.electronAPI.getProjectBreakdown();
-        setProjectAnalytics(projects);
-        
-        // Load current billing block status
-        const blockStatus = await window.electronAPI.getCurrentBlockStatus();
-        setCurrentBillingBlock(blockStatus);
-      } catch (error) {
-        log.component.error('UsageDashboard - Project Data', error as Error);
-      }
-    };
-    
-    void loadProjectData();
-  }, [filteredData]);
 
   // Prepare chart data
   const chartData = useMemo(() => {
@@ -656,30 +630,6 @@ const UsageDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Billing Block Dashboard */}
-      <div className="animate-slide-up animate-delay-600">
-        <BillingBlockDashboard 
-          entries={filteredData}
-          className="w-full"
-        />
-      </div>
-
-      {/* Project Grid View */}
-      <div className="animate-slide-up animate-delay-700">
-        <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">
-          {t('projects.title', 'Projects')}
-        </h2>
-        <ProjectGridView
-          projects={projectAnalytics}
-          currentBlock={currentBillingBlock}
-          onProjectClick={(project) => {
-            _setSelectedProject(project);
-            // TODO: Navigate to project detail view
-            console.log('Project clicked:', project);
-          }}
-        />
-      </div>
-
       {/* Token Breakdown and Model Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Token Breakdown */}
@@ -760,6 +710,40 @@ const UsageDashboard: React.FC = () => {
           )}
         </div>
 
+        {/* Top 5 Projects */}
+        <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-[var(--shadow-sm)] border border-[var(--border-color)]">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+            {t('metrics.topProjects')}
+          </h3>
+          {isLoading ? (
+            <div className="space-y-3">
+              {['project-sk-1', 'project-sk-2', 'project-sk-3', 'project-sk-4', 'project-sk-5'].map((key) => (
+                <div key={key} className="h-8 bg-[var(--bg-skeleton)] rounded animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {Object.entries(projectCosts)
+                .sort(([, a], [, b]) => b.costConverted - a.costConverted)
+                .slice(0, 5)
+                .map(([project, data], index) => (
+                  <div key={project} className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <span className="text-xs bg-[var(--bg-info)] text-[var(--text-accent)] rounded-full w-5 h-5 flex items-center justify-center mr-2">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm text-[var(--text-primary)] truncate">
+                        {project.split('/').pop() ?? project}
+                      </span>
+                    </div>
+                    <span className="text-xs text-[var(--text-secondary)]">
+                      {data.formatted}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Charts */}
