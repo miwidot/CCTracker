@@ -184,7 +184,7 @@ export const SessionEfficiencyScatter: React.FC<SessionEfficiencyScatterProps> =
           />
           
           <Scatter 
-            name="Sessions" 
+            name={t('charts.sessionEfficiency.chartName')} 
             data={scatterData} 
             fill={chartTheme.primary}
           />

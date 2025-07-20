@@ -60,7 +60,8 @@
       "averageDuration": "Average session duration",
       "averageRate": "Average processing rate",
       "bestQuadrant": "Optimal zone",
-      "bestQuadrantDesc": "High tokens/min with reasonable duration"
+      "bestQuadrantDesc": "High tokens/min with reasonable duration",
+      "chartName": "Sessions"
     },
     "cacheHitRateTimeline": {
       "title": "Cache Hit Rate Timeline",
@@ -81,7 +82,17 @@
       "bestPeriod": "Best period:",
       "totalCostImpact": "Total cost impact:",
       "improvingTrend": "Cache efficiency improving by",
-      "decliningTrend": "Cache efficiency declining - review recent usage patterns"
+      "decliningTrend": "Cache efficiency declining - review recent usage patterns",
+      "cacheHitRateLabel": "Cache Hit Rate (%)",
+      "costSavingsLabel": "Cost Savings",
+      "chartCacheHitRate": "Cache Hit Rate",
+      "chartCostSavings": "Cost Savings",
+      "chartSessions": "Sessions",
+      "tooltipCacheHitRate": "Cache Hit Rate:",
+      "tooltipCacheReads": "Cache Reads:",
+      "tooltipCacheCreates": "Cache Creates:",
+      "tooltipCostSavings": "Cost Savings:",
+      "tooltipSessions": "Sessions:"
     },
     "cost": "Cost",
     "percentage": "Percentage",
@@ -252,7 +263,8 @@
       "weekly": "Weekly",
       "safe": "On Track",
       "warning": "Approaching Limit",
-      "danger": "Over Budget"
+      "danger": "Over Budget",
+      "usage": "Usage"
     },
     "periodComparison": {
       "week": "Week",

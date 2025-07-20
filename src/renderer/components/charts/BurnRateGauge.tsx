@@ -118,7 +118,7 @@ export const BurnRateGauge: React.FC<BurnRateGaugeProps> = ({
               borderRadius: '8px',
               color: chartTheme.text,
             }}
-            formatter={(value: number) => [`${value.toFixed(1)}%`, 'Usage']}
+            formatter={(value: number) => [`${value.toFixed(1)}%`, t('businessIntelligence.burnRate.usage')]}
           />
         </PieChart>
       </ResponsiveContainer>

@@ -80,11 +80,11 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
       >
         <div className="font-medium mb-2">{new Date(label).toLocaleDateString()}</div>
         <div className="space-y-1 text-sm">
-          <div>Cache Hit Rate: {data.cacheHitRate.toFixed(1)}%</div>
-          <div>Cache Reads: {data.totalCacheReads.toLocaleString()}</div>
-          <div>Cache Creates: {data.totalCacheCreations.toLocaleString()}</div>
-          <div>Cost Savings: {formatCurrency(data.costSavings)}</div>
-          <div>Sessions: {data.totalSessions}</div>
+          <div>{t('charts.cacheHitRateTimeline.tooltipCacheHitRate')} {data.cacheHitRate.toFixed(1)}%</div>
+          <div>{t('charts.cacheHitRateTimeline.tooltipCacheReads')} {data.totalCacheReads.toLocaleString()}</div>
+          <div>{t('charts.cacheHitRateTimeline.tooltipCacheCreates')} {data.totalCacheCreations.toLocaleString()}</div>
+          <div>{t('charts.cacheHitRateTimeline.tooltipCostSavings')} {formatCurrency(data.costSavings)}</div>
+          <div>{t('charts.cacheHitRateTimeline.tooltipSessions')} {data.totalSessions}</div>
         </div>
       </div>
     );
@@ -161,7 +161,7 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
             fontSize={12}
             domain={[0, 100]}
             label={{ 
-              value: 'Cache Hit Rate (%)', 
+              value: t('charts.cacheHitRateTimeline.cacheHitRateLabel'), 
               angle: -90, 
               position: 'insideLeft',
               style: { textAnchor: 'middle' }
@@ -174,7 +174,7 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
             fontSize={12}
             tickFormatter={(value) => `$${value.toFixed(2)}`}
             label={{ 
-              value: 'Cost Savings', 
+              value: t('charts.cacheHitRateTimeline.costSavingsLabel'), 
               angle: 90, 
               position: 'insideRight',
               style: { textAnchor: 'middle' }
@@ -188,7 +188,7 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
             dataKey="costSavings" 
             fill={chartTheme.getDataColor(6)}
             opacity={0.6}
-            name="Cost Savings"
+            name={t('charts.cacheHitRateTimeline.chartCostSavings')}
           />
           
           {/* Cache hit rate as line */}
@@ -200,7 +200,7 @@ export const CacheHitRateTimeline: React.FC<CacheHitRateTimelineProps> = ({
             strokeWidth={3}
             dot={{ r: 4, fill: chartTheme.primary }}
             activeDot={{ r: 6, stroke: chartTheme.primary, strokeWidth: 2 }}
-            name="Cache Hit Rate"
+            name={t('charts.cacheHitRateTimeline.chartCacheHitRate')}
           />
         </ComposedChart>
       </ResponsiveContainer>
