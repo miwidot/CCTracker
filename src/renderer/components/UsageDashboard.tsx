@@ -730,13 +730,13 @@ const UsageDashboard: React.FC = () => {
             <div className="space-y-3 stagger-children">
               {chartData.costByModel.slice(0, 3).map((modelData, index) => {
                 const modelTokens = filteredData
-                  .filter(entry => entry.model === modelData.name)
+                  .filter(entry => cleanModelName(entry.model) === modelData.name)
                   .reduce((sum, entry) => sum + entry.total_tokens, 0);
                 return (
                   <div key={modelData.name} className="p-3 bg-[var(--bg-tertiary)] rounded card interactive theme-transition animate-slide-up" style={{animationDelay: `${index * 100}ms`}}>
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-[var(--text-primary)] truncate theme-transition">
-                        {cleanModelName(modelData.name)}
+                        {modelData.name}
                       </span>
                       <span className="text-xs text-[var(--text-secondary)] theme-transition">
                         {formatCurrencyDetailed(modelData.value, 4)}

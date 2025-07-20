@@ -1,3 +1,9 @@
+2025-07-20 00:40 PST - Fix Per Model Overview token count display
+- Fixed token count showing as 0 in Per Model Overview section
+- Issue was caused by model name mismatch during filtering
+- Now correctly compares cleaned model names when calculating tokens
+- Model names in overview already show cleaned version (no redundant cleaning)
+
 2025-07-20 00:30 PST - Add advanced analytics charts and visualizations
 - Added Pareto chart for cost distribution with cumulative percentage line
 - Implemented message type distribution pie chart
