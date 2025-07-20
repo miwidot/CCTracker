@@ -142,12 +142,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 }
                   
                 case 'monthly': {
-                  // Monthly option - properly handle month boundaries
-                  const monthStart = new Date(todayUTC);
-                  // Go back one month, accounting for different month lengths
-                  monthStart.setUTCMonth(todayUTC.getUTCMonth() - 1);
-                  // If the day doesn't exist in the previous month (e.g., March 31 -> Feb 31),
-                  // it automatically adjusts to the last valid day (e.g., Feb 28/29)
+                  // Monthly option - show current month from 1st to today
+                  const monthStart = new Date(Date.UTC(todayUTC.getUTCFullYear(), todayUTC.getUTCMonth(), 1));
                   onDateRangeChange(monthStart, todayUTC);
                   break;
                 }
