@@ -27,31 +27,31 @@ export const MODEL_PRICING: Record<string, { input: number; output: number; cach
     output: 1.25 / 1_000_000,
   },
   
-  // Claude 4 Models (with cache pricing - adjusted based on real-world data analysis)
+  // Claude 4 Models (with cache pricing)
   'claude-sonnet-4-20250514': {
     input: 3.0 / 1_000_000,
     output: 15.0 / 1_000_000,
-    cache_write: 1.7 / 1_000_000,   // Adjusted based on empirical data (was 4.0)
-    cache_read: 0.14 / 1_000_000,   // Adjusted based on empirical data (was 0.32)
+    cache_write: 3.75 / 1_000_000,
+    cache_read: 0.30 / 1_000_000,
   },
   'claude-opus-4-20250514': {
     input: 15.0 / 1_000_000,
     output: 75.0 / 1_000_000,
-    cache_write: 8.5 / 1_000_000,   // Adjusted based on empirical data (1.7 * 5 ratio)
-    cache_read: 0.7 / 1_000_000,    // Adjusted based on empirical data (0.14 * 5 ratio)
+    cache_write: 18.75 / 1_000_000,
+    cache_read: 1.50 / 1_000_000,
   },
   // Also support the model names as they appear in JSONL
   'claude-opus-4': {
     input: 15.0 / 1_000_000,
     output: 75.0 / 1_000_000,
-    cache_write: 8.5 / 1_000_000,   // Adjusted based on empirical data
-    cache_read: 0.7 / 1_000_000,    // Adjusted based on empirical data
+    cache_write: 18.75 / 1_000_000,
+    cache_read: 1.50 / 1_000_000,
   },
   'claude-sonnet-4': {
     input: 3.0 / 1_000_000,
     output: 15.0 / 1_000_000,
-    cache_write: 1.7 / 1_000_000,   // Adjusted based on empirical data
-    cache_read: 0.14 / 1_000_000,   // Adjusted based on empirical data
+    cache_write: 3.75 / 1_000_000,
+    cache_read: 0.30 / 1_000_000,
   },
 };
 
