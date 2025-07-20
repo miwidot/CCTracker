@@ -1,3 +1,40 @@
+2025-07-20 16:08:49 +08 - UI UPDATE: Changed date range labels from numeric to descriptive terms
+- SCOPE: All language translation files updated for improved clarity
+- CHANGE TYPE: UI/UX improvement for better user understanding
+
+DATE RANGE LABEL UPDATES:
+• "7 Days" → "Weekly" (English)
+• "7 Tage" → "Wöchentlich" (German)
+• "7 Días" → "Semanal" (Spanish) - Also fixed "TODO" placeholder to "Todo el Tiempo"
+• "7 Jours" → "Hebdomadaire" (French)
+• "7日間" → "週間" (Japanese)
+• "7天" → "每周" (Chinese)
+
+• "30 Days" → "Monthly" (English)
+• "30 Tage" → "Monatlich" (German)
+• "30 Días" → "Mensual" (Spanish)
+• "30 Jours" → "Mensuel" (French)
+• "30日間" → "月間" (Japanese)
+• "30天" → "每月" (Chinese)
+
+• "ALL" → "All Time" (English)
+• "ALLE" → "Gesamtzeitraum" (German)
+• "TODO" → "Todo el Tiempo" (Spanish) - Fixed placeholder issue
+• "TOUT" → "Tout le Temps" (French)
+• "全期間" → "全期間" (Japanese - kept same as already appropriate)
+• "全部" → "全部时间" (Chinese)
+
+AFFECTED FILES:
+- src/renderer/i18n/locales/en.json
+- src/renderer/i18n/locales/de.json
+- src/renderer/i18n/locales/es.json
+- src/renderer/i18n/locales/fr.json
+- src/renderer/i18n/locales/ja.json
+- src/renderer/i18n/locales/zh.json
+
+IMPACT: These translations are used in UsageDashboard.tsx and ProjectDetailView.tsx
+No code changes required - only translation file updates.
+
 2025-06-29 23:45:12 +08 - VERSION 1.0.1 RELEASE PREPARATION: Complete feature branch ready for merge
 - SUMMARY: Major UX improvements, critical bug fixes, and comprehensive internationalization
 - SCOPE: Session duration fixes, translation completeness, chart UX improvements, version consistency
