@@ -24,12 +24,26 @@
     "cacheRead": "缓存读取",
     "tokenBreakdown": "Token分解",
     "perModelOverview": "按模型概览",
-    "topProjects": "成本排名前5项目"
+    "topProjects": "成本排名前5项目",
+    "activeProjects": "活跃项目",
+    "avgCostPerUser": "平均每用户成本",
+    "totalMessages": "总消息数",
+    "topModelShare": "首选模型占比",
+    "inLastMonth": "在上个月",
+    "meanValue": "平均值",
+    "allTypes": "所有类型"
   },
   "charts": {
     "costOverTime": "成本趋势",
     "tokenUsageByModel": "按模型Token使用量",
-    "costDistribution": "按模型成本分布",
+    "costDistribution": "成本分布（帕累托图）",
+    "messageTypeDistribution": "消息类型分布",
+    "tokenUsageDistribution": "Token使用量分布",
+    "topProjectsByCost": "成本最高项目",
+    "cost": "成本",
+    "percentage": "百分比",
+    "cumulative": "累计",
+    "messages": "消息",
     "noData": "所选时间段无可用数据",
     "noCostData": "所选时间段无成本数据",
     "noTokenData": "所选时间段无Token数据",
@@ -160,7 +174,8 @@
     "costPerToken": "成本/Token",
     "errorLoading": "分析加载错误",
     "errorMessage": "加载项目分析数据失败",
-    "retry": "重试"
+    "retry": "重试",
+    "advancedAnalytics": "高级分析"
   },
   "businessIntelligence": {
     "title": "商业智能",

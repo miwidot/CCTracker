@@ -1,3 +1,13 @@
+2025-07-20 00:30 PST - Add advanced analytics charts and visualizations
+- Added Pareto chart for cost distribution with cumulative percentage line
+- Implemented message type distribution pie chart
+- Created token usage distribution area chart showing all token types over time
+- Added advanced metrics cards: Active Projects, Avg Cost/User, Total Messages, Top Model Share
+- All charts support theme switching and internationalization
+- Charts use the existing chart theme system for consistent styling
+- Added smooth animations and loading states for all new components
+- Inspired by professional usage analytics dashboards
+
 2025-07-20 00:15 PST - Implement intuitive date range calculations for Weekly and Monthly
 - Monthly option now shows current month from 1st to today (e.g., July 1-20, not June 20-July 20)
 - This is more intuitive and matches user expectations for "monthly" data

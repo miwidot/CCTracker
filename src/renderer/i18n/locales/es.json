@@ -24,12 +24,26 @@
     "cacheRead": "Lectura de Caché",
     "tokenBreakdown": "Desglose de Tokens",
     "perModelOverview": "Resumen por Modelo",
-    "topProjects": "Top 5 Proyectos por Costo"
+    "topProjects": "Top 5 Proyectos por Costo",
+    "activeProjects": "Proyectos Activos",
+    "avgCostPerUser": "Costo Promedio/Usuario",
+    "totalMessages": "Mensajes Totales",
+    "topModelShare": "Participación del Modelo Principal",
+    "inLastMonth": "en el último mes",
+    "meanValue": "valor promedio",
+    "allTypes": "todos los tipos"
   },
   "charts": {
     "costOverTime": "Costo a lo Largo del Tiempo",
     "tokenUsageByModel": "Uso de Tokens por Modelo",
-    "costDistribution": "Distribución de Costos por Modelo",
+    "costDistribution": "Distribución de Costos (Gráfico de Pareto)",
+    "messageTypeDistribution": "Distribución de Tipos de Mensajes",
+    "tokenUsageDistribution": "Distribución de Uso de Tokens",
+    "topProjectsByCost": "Principales Proyectos por Costo",
+    "cost": "Costo",
+    "percentage": "Porcentaje",
+    "cumulative": "Acumulativo",
+    "messages": "Mensajes",
     "noData": "No hay datos disponibles para el período seleccionado",
     "noCostData": "No hay datos de costo disponibles para el período seleccionado",
     "noTokenData": "No hay datos de tokens disponibles para el período seleccionado",
@@ -160,7 +174,8 @@
     "costPerToken": "Costo/Token",
     "errorLoading": "Error Cargando Análisis",
     "errorMessage": "Error al cargar datos de análisis de proyecto",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "advancedAnalytics": "Análisis Avanzado"
   },
   "businessIntelligence": {
     "title": "Inteligencia de Negocios",

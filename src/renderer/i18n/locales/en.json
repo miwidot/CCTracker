@@ -24,12 +24,26 @@
     "cacheRead": "Cache Read",
     "tokenBreakdown": "Token Breakdown",
     "perModelOverview": "Per Model Overview",
-    "topProjects": "Top 5 Projects by Cost"
+    "topProjects": "Top 5 Projects by Cost",
+    "activeProjects": "Active Projects",
+    "avgCostPerUser": "Avg Cost/User",
+    "totalMessages": "Total Messages",
+    "topModelShare": "Top Model Share",
+    "inLastMonth": "in last month",
+    "meanValue": "mean value",
+    "allTypes": "all types"
   },
   "charts": {
     "costOverTime": "Cost Over Time",
     "tokenUsageByModel": "Token Usage by Model",
-    "costDistribution": "Cost Distribution by Model",
+    "costDistribution": "Cost Distribution (Pareto Chart)",
+    "messageTypeDistribution": "Message Type Distribution",
+    "tokenUsageDistribution": "Token Usage Distribution",
+    "topProjectsByCost": "Top Projects by Cost",
+    "cost": "Cost",
+    "percentage": "Percentage",
+    "cumulative": "Cumulative",
+    "messages": "Messages",
     "noData": "No data available for the selected period",
     "noCostData": "No cost data available for selected period",
     "noTokenData": "No token data available for selected period",
@@ -160,7 +174,8 @@
     "costPerToken": "Cost/Token",
     "errorLoading": "Error Loading Analytics",
     "errorMessage": "Failed to load project analytics data",
-    "retry": "Retry"
+    "retry": "Retry",
+    "advancedAnalytics": "Advanced Analytics"
   },
   "businessIntelligence": {
     "title": "Business Intelligence",

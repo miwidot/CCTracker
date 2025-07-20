@@ -24,12 +24,26 @@
     "cacheRead": "Cache-Lesevorgang",
     "tokenBreakdown": "Token-Aufschlüsselung",
     "perModelOverview": "Übersicht nach Modell",
-    "topProjects": "Top 5 Projekte nach Kosten"
+    "topProjects": "Top 5 Projekte nach Kosten",
+    "activeProjects": "Aktive Projekte",
+    "avgCostPerUser": "Ø Kosten/Nutzer",
+    "totalMessages": "Gesamte Nachrichten",
+    "topModelShare": "Top-Modell-Anteil",
+    "inLastMonth": "im letzten Monat",
+    "meanValue": "Mittelwert",
+    "allTypes": "alle Typen"
   },
   "charts": {
     "costOverTime": "Kosten über Zeit",
     "tokenUsageByModel": "Token-Nutzung nach Modell",
-    "costDistribution": "Kostenverteilung nach Modell",
+    "costDistribution": "Kostenverteilung (Pareto-Diagramm)",
+    "messageTypeDistribution": "Nachrichtentypverteilung",
+    "tokenUsageDistribution": "Token-Nutzungsverteilung",
+    "topProjectsByCost": "Top-Projekte nach Kosten",
+    "cost": "Kosten",
+    "percentage": "Prozentsatz",
+    "cumulative": "Kumulativ",
+    "messages": "Nachrichten",
     "noData": "Keine Daten für den ausgewählten Zeitraum verfügbar",
     "noCostData": "Keine Kostendaten für den ausgewählten Zeitraum verfügbar",
     "noTokenData": "Keine Token-Daten für den ausgewählten Zeitraum verfügbar",
@@ -160,7 +174,8 @@
     "costPerToken": "Kosten/Token",
     "errorLoading": "Fehler beim Laden der Analyse",
     "errorMessage": "Fehler beim Laden der Projektanalysedaten",
-    "retry": "Wiederholen"
+    "retry": "Wiederholen",
+    "advancedAnalytics": "Erweiterte Analysen"
   },
   "businessIntelligence": {
     "title": "Business Intelligence",

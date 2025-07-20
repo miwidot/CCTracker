@@ -24,12 +24,26 @@
     "cacheRead": "キャッシュ読み込み",
     "tokenBreakdown": "トークン内訳",
     "perModelOverview": "モデル別概要",
-    "topProjects": "コスト上位5プロジェクト"
+    "topProjects": "コスト上位5プロジェクト",
+    "activeProjects": "アクティブプロジェクト",
+    "avgCostPerUser": "ユーザー平均コスト",
+    "totalMessages": "総メッセージ数",
+    "topModelShare": "上位モデルシェア",
+    "inLastMonth": "先月中",
+    "meanValue": "平均値",
+    "allTypes": "全タイプ"
   },
   "charts": {
     "costOverTime": "時系列コスト",
     "tokenUsageByModel": "モデル別トークン使用量",
-    "costDistribution": "モデル別コスト分布",
+    "costDistribution": "コスト分布（パレート図）",
+    "messageTypeDistribution": "メッセージタイプ分布",
+    "tokenUsageDistribution": "トークン使用量分布",
+    "topProjectsByCost": "コスト上位プロジェクト",
+    "cost": "コスト",
+    "percentage": "割合",
+    "cumulative": "累積",
+    "messages": "メッセージ",
     "noData": "選択した期間のデータがありません",
     "noCostData": "選択した期間のコストデータがありません",
     "noTokenData": "選択した期間のトークンデータがありません",
@@ -160,7 +174,8 @@
     "costPerToken": "トークン単価",
     "errorLoading": "分析読み込みエラー",
     "errorMessage": "プロジェクト分析データの読み込みに失敗しました",
-    "retry": "再試行"
+    "retry": "再試行",
+    "advancedAnalytics": "高度な分析"
   },
   "businessIntelligence": {
     "title": "ビジネスインテリジェンス",
